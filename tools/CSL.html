@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Coincidence Site Lattice and Grain Boundary Construction | Teaching Tools</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    canvas#canvas { cursor: crosshair; max-width: 100%; height: auto; }
+    table.data td, table.data th { text-align: center; }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Coincidence Site Lattice and Grain Boundary Construction</h1>
+  <p class="subtitle">Rotate one crystal lattice relative to another, find the atom positions they share (the coincidence site lattice, CSL), and cut a grain boundary through a coincidence point.</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>Rotation &theta;:</strong> type the misorientation angle in degrees and press Enter. The lattices turn smoothly to the new angle (shown in the top left of the picture). Press the <strong>space bar</strong> to pause or resume the motion.</li>
+        <li><strong>Show second lattice:</strong> the first (red) lattice is turned by +&theta;/2 and the second (cyan) lattice by &minus;&theta;/2, so that their relative rotation is &theta;.</li>
+        <li><strong>Show CSL:</strong> circles the points where the two lattices coincide. If there are many, the misorientation is a special one.</li>
+        <li><strong>Enable grain boundary:</strong> click on any circled coincidence point to place the boundary there. Then set the boundary angle &phi; with the slider or the number box. Red atoms are kept on one side of the line and cyan atoms on the other, giving a bicrystal. Un-tick <em>Show GB line</em> to hide the line.</li>
+        <li><strong>Angles to try:</strong> 70.53&deg; (&Sigma;3, the twin), 38.94&deg; (&Sigma;9) and 50.48&deg; (&Sigma;11).</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="tool">
+    <div class="panel wide plain">
+      <div class="ctl-grid">
+        <div class="ctl"><label for="angleInput">Rotation &theta; (&deg;)</label><input type="number" id="angleInput" value="0" step="0.1"></div>
+        <div class="ctl"><label class="toggle-group"><input type="checkbox" id="showSecond"> Show second lattice</label>
+          <label class="toggle-group"><input type="checkbox" id="showCSL"> Show CSL</label></div>
+        <div class="ctl"><label class="toggle-group"><input type="checkbox" id="gbMode"> Enable grain boundary</label>
+          <label class="toggle-group"><input type="checkbox" id="showGBLine" checked> Show GB line</label></div>
+        <div class="ctl"><label for="gbAngle">GB angle &phi; (&deg;)</label><input type="range" id="gbAngle" min="0" max="180" step="0.01" value="0"><input type="number" id="gbAngleInput" min="0" max="180" step="0.01" value="0"></div>
+      </div>
+    </div>
+    <div class="panel wide"><canvas id="canvas" width="900" height="600"></canvas></div>
+  </div>
+
+  <details class="note">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <p>Two crystals of the same structure that differ by a rotation \(\theta\) about a common axis do not usually share any lattice points other than the axis. For special angles, however, a fraction of the lattice points of one crystal coincide with those of the other, and these points form a periodic superlattice, the <em>coincidence site lattice</em> (CSL). The reciprocal of the fraction of lattice points that coincide is \(\Sigma\):</p>
+      <div class="eq">\( \Sigma = \dfrac{\text{volume of CSL unit cell}}{\text{volume of lattice unit cell}} \)</div>
+      <p>The lattice here is the FCC structure viewed along a \(\langle 110\rangle\) axis, so that the picture is of the atom columns of a tilt boundary. In this system the special boundaries are \(\Sigma 3\) (\(\theta = 70.53^\circ\) and \(109.47^\circ\)), \(\Sigma 9\) (\(38.94^\circ\), \(141.06^\circ\)) and \(\Sigma 11\) (\(50.48^\circ\), \(129.52^\circ\)). Counting the coincident points in the picture at these angles gives about 1 in 3, 1 in 9 and 1 in 11 of the lattice points.</p>
+      <p>The CSL is only a geometrical construction, but it is useful because a grain boundary that is a plane of high density in the CSL has a good fit between the two grains, a low boundary energy and a small excess volume. The coherent twin \(\Sigma 3\) boundary, for instance, has an energy of the order of one tenth of that of a general boundary. Boundary properties such as energy, mobility, diffusivity, segregation and resistance to intergranular corrosion and cracking therefore depend on the misorientation and on the plane of the boundary (the angle &phi; here), and low-\(\Sigma\) boundaries can be favoured by processing, a principle known as grain boundary engineering.</p>
+      <p>Two coincidence points are drawn as the same if they are within 0.035 of a lattice spacing, so the picture is an approximation for angles close to, but not exactly at, a special angle. The CSL is exact only at the special angles, and near a special angle the boundary is described by the CSL plus an array of dislocations (the secondary dislocations).</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt>Misorientation, &theta;</dt><dd>The angle of rotation that brings one crystal lattice into the orientation of the other.</dd>
+        <dt>Coincidence site lattice (CSL)</dt><dd>The set of lattice points shared by two interpenetrating, rotated lattices.</dd>
+        <dt>&Sigma;</dt><dd>Reciprocal density of coincidence sites, the number of lattice points per coincidence point.</dd>
+        <dt>Grain boundary</dt><dd>The interface between two crystals of different orientation.</dd>
+        <dt>Boundary plane, &phi;</dt><dd>The orientation of the plane of the boundary in the picture.</dd>
+        <dt>Tilt boundary</dt><dd>A boundary whose rotation axis lies in the plane of the boundary.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /* Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved. */
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const scale = 80, radius = 8;
+    const tol = radius * 0.35, tol2 = tol * tol;
+
+    let thetaCurrent = 0, thetaTarget = 0, isPaused = false, selectedPoint = null;
+    let dirty = true;
+
+    // lattice: rectangle 1 x sqrt(2) with a four-atom motif (FCC seen along <110>)
+    const a1 = [1, 0], a2 = [0, Math.sqrt(2)];
+    const motif = [[0, 0], [0.5, 0.25], [0, 0.5], [0.5, 0.75]].map(([u, v]) => [u * a1[0] + v * a2[0], u * a1[1] + v * a2[1]]);
+    const theta0 = Math.atan(1 / Math.sqrt(2)) * 180 / Math.PI;
+
+    function rotate(x, y, a) {
+      const r = a * Math.PI / 180;
+      return { x: x * Math.cos(r) - y * Math.sin(r), y: x * Math.sin(r) + y * Math.cos(r) };
+    }
+    function generate(angle) {
+      const pts = [];
+      for (let i = -15; i <= 15; i++) for (let j = -15; j <= 15; j++) motif.forEach(m => {
+        const p = rotate(i * a1[0] + j * a2[0] + m[0], i * a1[1] + j * a2[1] + m[1], angle);
+        pts.push({ x: p.x * scale, y: p.y * scale });
+      });
+      return pts;
+    }
+    function getCSL(L1, L2) {
+      const pts = [];
+      L1.forEach(a => { for (const b of L2) { const dx = a.x - b.x, dy = a.y - b.y; if (dx * dx + dy * dy < tol2) { pts.push(a); break; } } });
+      return pts;
+    }
+    function sideOfLine(p, p0, phi) {
+      const r = phi * Math.PI / 180;
+      return (p.x - p0.x) * Math.sin(r) - (p.y - p0.y) * Math.cos(r);
+    }
+
+    function drawPoints(pts, fill, filter) {
+      ctx.fillStyle = fill; ctx.strokeStyle = "rgba(255,255,255,0.6)"; ctx.lineWidth = 1;
+      pts.forEach(p => {
+        if (filter && !filter(p)) return;
+        const cx = canvas.width / 2 + p.x, cy = canvas.height / 2 + p.y;
+        ctx.beginPath(); ctx.arc(cx, cy, radius, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+      });
+    }
+    function drawCSL(csl) {
+      csl.forEach(p => {
+        const cx = canvas.width / 2 + p.x, cy = canvas.height / 2 + p.y;
+        ctx.beginPath(); ctx.arc(cx, cy, radius + 6, 0, 2 * Math.PI);
+        ctx.fillStyle = "rgba(234,179,8,0.35)"; ctx.fill();
+        ctx.beginPath(); ctx.arc(cx, cy, radius + 6, 0, 2 * Math.PI);
+        ctx.strokeStyle = "#eab308"; ctx.lineWidth = 2; ctx.stroke();
+      });
+    }
+    function drawGBLine(p0, phi) {
+      const r = phi * Math.PI / 180, dx = Math.cos(r), dy = Math.sin(r);
+      ctx.strokeStyle = "#f1f5f9"; ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(canvas.width / 2 + p0.x - 1000 * dx, canvas.height / 2 + p0.y - 1000 * dy);
+      ctx.lineTo(canvas.width / 2 + p0.x + 1000 * dx, canvas.height / 2 + p0.y + 1000 * dy);
+      ctx.stroke();
+    }
+    function label(text, x, y, w, size) {
+      ctx.fillStyle = "#161b22"; ctx.fillRect(x, y, w, 40);
+      ctx.strokeStyle = "#30363d"; ctx.lineWidth = 1; ctx.strokeRect(x, y, w, 40);
+      ctx.fillStyle = "#e0e0e0"; ctx.font = size + "px sans-serif"; ctx.textAlign = "left";
+      ctx.fillText(text, x + 10, y + 26);
+    }
+
+    let cache = { theta: null, L1: null, L2: null, CSL: null };
+    function lattices() {
+      if (cache.theta !== thetaCurrent) {
+        const L1 = generate(theta0 + thetaCurrent / 2), L2 = generate(theta0 - thetaCurrent / 2);
+        cache = { theta: thetaCurrent, L1, L2, CSL: getCSL(L1, L2) };
+      }
+      return cache;
+    }
+
+    function render() {
+      ctx.fillStyle = "#000"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const showSecond = document.getElementById("showSecond").checked;
+      const showCSLBox = document.getElementById("showCSL").checked;
+      const gbMode = document.getElementById("gbMode").checked;
+      const showLine = document.getElementById("showGBLine").checked;
+      const phi = parseFloat(document.getElementById("gbAngle").value);
+      const { L1, L2, CSL } = lattices();
+
+      let fR = null, fB = null;
+      if (gbMode && selectedPoint) {
+        fR = p => sideOfLine(p, selectedPoint, phi) >= 0;
+        fB = p => sideOfLine(p, selectedPoint, phi) <= 0;
+      }
+      drawPoints(L1, "rgba(248,113,113,0.65)", fR);
+      if (showSecond) drawPoints(L2, "rgba(34,211,238,0.6)", fB);
+      if (showCSLBox) drawCSL(CSL);
+      if (gbMode) {
+        if (!selectedPoint) label("Click a CSL point to define the GB", 250, 10, 400, 18);
+        else if (showLine) drawGBLine(selectedPoint, phi);
+      }
+      label("θ = " + thetaCurrent.toFixed(2) + "°", 10, 10, 150, 20);
+    }
+
+    canvas.addEventListener("click", e => {
+      if (!document.getElementById("gbMode").checked) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) * canvas.width / rect.width - canvas.width / 2;
+      const y = (e.clientY - rect.top) * canvas.height / rect.height - canvas.height / 2;
+      let best = null, min = 1e9;
+      lattices().CSL.forEach(p => { const d = (p.x - x) ** 2 + (p.y - y) ** 2; if (d < min) { min = d; best = p; } });
+      if (min < 400) { selectedPoint = best; dirty = true; }
+    });
+
+    function animate() {
+      if (!isPaused && thetaCurrent !== thetaTarget) {
+        const diff = thetaTarget - thetaCurrent;
+        thetaCurrent = Math.abs(diff) < 0.3 ? thetaTarget : thetaCurrent + Math.sign(diff) * 0.3;
+        dirty = true;
+      }
+      if (dirty) { dirty = false; render(); }
+      requestAnimationFrame(animate);
+    }
+
+    const slider = document.getElementById("gbAngle"), numBox = document.getElementById("gbAngleInput");
+    slider.addEventListener("input", () => { numBox.value = parseFloat(slider.value).toFixed(2); dirty = true; });
+    numBox.addEventListener("input", () => { const v = parseFloat(numBox.value); if (!isNaN(v)) { slider.value = v; dirty = true; } });
+    document.getElementById("angleInput").addEventListener("change", e => { const v = parseFloat(e.target.value); if (!isNaN(v)) { thetaTarget = v; dirty = true; } });
+    ["showSecond", "showCSL", "gbMode", "showGBLine"].forEach(id => document.getElementById(id).addEventListener("change", () => { dirty = true; }));
+    window.addEventListener("keydown", e => {
+      if (e.code === "Space" && !/INPUT|SELECT|TEXTAREA/.test((e.target.tagName || ""))) { isPaused = !isPaused; e.preventDefault(); }
+    });
+    animate();
+  </script>
+</body>
+</html>

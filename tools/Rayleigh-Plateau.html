@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Rayleigh-Plateau Instability: Cylinder Breaking into Spheres | Teaching Tools</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    canvas.fixed { cursor: default; }
+    .case-grid { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; width: 100%; }
+    .case-grid canvas { flex: 0 1 auto; }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Rayleigh-Plateau Instability: Cylinder Breaking into Spheres</h1>
+  <p class="subtitle">Does a long cylinder lower its surface area by breaking into equal spheres of the same total volume? It depends on how slender the cylinder is, and on how many spheres form.</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>Break up cylinder:</strong> tick the box to show the spheres. Un-tick it to see only the dashed outline of the cylinder.</li>
+        <li><strong>N slider:</strong> each of the three cases has its own slider for the number of equal spheres, <i>N</i> = 1 to 8. The total volume is always that of the cylinder.</li>
+        <li><strong>Plot on the right:</strong> the total area of the spheres divided by the area of the cylinder, against <i>N</i>, on a logarithmic scale. The thick horizontal line is a ratio of 1. Below it, breaking up lowers the surface area (and so the surface energy); above it, it raises it. The red dot marks the current <i>N</i>.</li>
+        <li>The three cases differ only in how slender the cylinder is: <i>L</i>/<i>R</i> = 8, 16 and 24. The spheres are drawn to scale and spaced evenly along the length of the cylinder; where they overlap in the picture, the volume could not really be arranged in a single line, but the areas are unaffected.</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="tool">
+    <div class="panel wide" style="padding: 12px 20px;">
+      <div class="ctl"><label class="toggle-group"><input type="checkbox" id="breakToggle"> Break up the cylinder into equal-sized spheres</label></div>
+    </div>
+
+    <div class="panel wide">
+      <h3>Case 1: short cylinder, <i>L</i>/<i>R</i> = 8</h3>
+      <div class="ctl" style="width:100%;box-sizing:border-box;margin-bottom:12px"><label for="nSlider1">Number of spheres, N</label><input type="range" id="nSlider1" min="1" max="8" value="1" step="1"><span id="nValue1" class="val">1</span></div>
+      <div class="case-grid"><canvas id="animationCanvas1" class="fixed" width="600" height="260"></canvas><canvas id="areaChart1" class="fixed" width="500" height="320"></canvas></div>
+    </div>
+    <div class="panel wide">
+      <h3>Case 2: moderate cylinder, <i>L</i>/<i>R</i> = 16</h3>
+      <div class="ctl" style="width:100%;box-sizing:border-box;margin-bottom:12px"><label for="nSlider2">Number of spheres, N</label><input type="range" id="nSlider2" min="1" max="8" value="1" step="1"><span id="nValue2" class="val">1</span></div>
+      <div class="case-grid"><canvas id="animationCanvas2" class="fixed" width="600" height="260"></canvas><canvas id="areaChart2" class="fixed" width="500" height="320"></canvas></div>
+    </div>
+    <div class="panel wide">
+      <h3>Case 3: long cylinder, <i>L</i>/<i>R</i> = 24</h3>
+      <div class="ctl" style="width:100%;box-sizing:border-box;margin-bottom:12px"><label for="nSlider3">Number of spheres, N</label><input type="range" id="nSlider3" min="1" max="8" value="1" step="1"><span id="nValue3" class="val">1</span></div>
+      <div class="case-grid"><canvas id="animationCanvas3" class="fixed" width="600" height="260"></canvas><canvas id="areaChart3" class="fixed" width="500" height="320"></canvas></div>
+    </div>
+  </div>
+
+  <details class="note">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <p>Surface energy is proportional to surface area, so a body of fixed volume lowers its energy by lowering its area. Take a cylinder of radius \(R\) and length \(L\), and divide the same volume into \(N\) equal spheres of radius \(r\):</p>
+      <div class="eq">\( \pi R^2 L = N\,\tfrac43\pi r^3 \;\;\Rightarrow\;\; r = \left(\dfrac{3R^2L}{4N}\right)^{1/3} \)</div>
+      <p>The ratio of the area of the spheres to that of the curved surface of the cylinder is</p>
+      <div class="eq">\( \dfrac{A_\text{spheres}}{A_\text{cyl}} = \dfrac{4\pi N r^2}{2\pi R L} = \dfrac{2Nr^2}{RL} = 1.65\,N^{1/3}\left(\dfrac{R}{L}\right)^{1/3} \)</div>
+      <p>so the area of the spheres grows with the number of spheres as \(N^{1/3}\), and the more slender the cylinder (large \(L/R\)), the more it gains by breaking into a few big spheres. For a single sphere the ratio is below 1 when \(L/R > 4.5\) or so, that is, when the cylinder is longer than its diameter times about 2.25. (End caps of the cylinder are ignored.)</p>
+      <p>The more careful result, due to Plateau and Rayleigh, is that a long liquid cylinder is unstable to a sinusoidal ripple along its axis if the wavelength exceeds the circumference, \(\lambda > 2\pi R\). Ripples of a certain wavelength grow fastest, and the cylinder pinches off into drops separated by about \(9R\). The same instability breaks up a stream of water from a tap, and it is why thin metal wires, nanowires and rod-like precipitates break into rows of particles when heated, by surface diffusion, even though they are solid.</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt><i>R</i>, <i>L</i></dt><dd>Radius and length of the cylinder. <i>L</i>/<i>R</i> is its aspect ratio.</dd>
+        <dt><i>N</i></dt><dd>Number of equal spheres into which the cylinder is divided.</dd>
+        <dt>Surface energy</dt><dd>Energy per unit area of surface, so total surface energy is proportional to area at fixed material.</dd>
+        <dt>Plateau&ndash;Rayleigh instability</dt><dd>The instability of a long cylinder (jet, wire) to ripples with a wavelength greater than the circumference.</dd>
+        <dt>Area ratio</dt><dd>Surface area of the spheres divided by the surface area of the cylinder; below 1 means the break-up lowers the energy.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /* Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved. */
+    const C = TOOL.c;
+    const toggle = document.getElementById("breakToggle");
+    const L = 600;                       // common cylinder length
+    const CASES = [ { R: 75 }, { R: 37.5 }, { R: 25 } ];   // L/R = 8, 16, 24
+
+    function sphereRadius(N, R, L) { return Math.pow((3 * Math.PI * R * R * L) / (4 * Math.PI * N), 1 / 3); }
+    function cylinderArea(R, L) { return 2 * Math.PI * R * L; }
+    function spheresArea(N, R, L) { const r = sphereRadius(N, R, L); return N * 4 * Math.PI * r * r; }
+
+    function drawAnimation(canvas, N, R, L, showSpheres) {
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const left = 30, right = canvas.width - 30, drawLength = right - left;
+      const centerY = canvas.height / 2;
+      const rBig = sphereRadius(1, R, L);                 // the largest sphere sets the vertical scale
+      const s = Math.min(drawLength / L, (canvas.height - 50) / (2 * Math.max(R, rBig)));
+      const Rd = R * s;
+      const xLeft = left + (drawLength - L * s) / 2;
+
+      ctx.strokeStyle = C.axis; ctx.setLineDash([6, 6]); ctx.lineWidth = 1;
+      ctx.strokeRect(xLeft, centerY - Rd, L * s, 2 * Rd);
+      ctx.setLineDash([]);
+      ctx.fillStyle = C.text; ctx.font = "13px sans-serif"; ctx.textAlign = "center";
+      ctx.fillText("Cylinder  (L/R = " + (L / R).toFixed(0) + ")", canvas.width / 2, 18);
+
+      if (!showSpheres) return;
+      const r = sphereRadius(N, R, L) * s;
+      for (let i = 0; i < N; i++) {
+        const x = xLeft + (i + 0.5) * (L * s) / N;
+        ctx.beginPath(); ctx.arc(x, centerY, r, 0, 2 * Math.PI);
+        ctx.fillStyle = "rgba(96,165,250,0.55)"; ctx.fill();
+        ctx.strokeStyle = C.blue; ctx.lineWidth = 1.5; ctx.stroke();
+      }
+    }
+
+    function drawChart(canvas, N, R, L) {
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const w = canvas.width, h = canvas.height, margin = 60;
+      const plotW = w - margin - 20, plotH = h - margin - 20;
+      const A_cyl = cylinderArea(R, L);
+      const ticks = [[0.5, "1/2"], [Math.SQRT1_2, "√2/2"], [1, "1"], [Math.SQRT2, "√2"], [2, "2"]];
+      const minLog = Math.log10(0.5), maxLog = Math.log10(2);
+      const yOf = ratio => (h - margin) - ((Math.log10(ratio) - minLog) / (maxLog - minLog)) * plotH;
+      ctx.font = "12px sans-serif";
+
+      for (const [ratio, label] of ticks) {
+        const y = yOf(ratio);
+        ctx.strokeStyle = ratio === 1 ? C.text : C.grid; ctx.lineWidth = ratio === 1 ? 2 : 1;
+        ctx.beginPath(); ctx.moveTo(margin, y); ctx.lineTo(w - 20, y); ctx.stroke();
+        ctx.lineWidth = 1; ctx.strokeStyle = C.axis;
+        ctx.beginPath(); ctx.moveTo(margin - 6, y); ctx.lineTo(margin, y); ctx.stroke();
+        ctx.fillStyle = C.text; ctx.textAlign = "right"; ctx.fillText(label, margin - 9, y + 4);
+      }
+      ctx.strokeStyle = C.grid;
+      for (let i = 1; i <= 8; i++) {
+        const x = margin + (i / 8) * plotW;
+        ctx.beginPath(); ctx.moveTo(x, 20); ctx.lineTo(x, h - margin); ctx.stroke();
+      }
+      ctx.strokeStyle = C.axis;
+      ctx.beginPath(); ctx.moveTo(margin, 20); ctx.lineTo(margin, h - margin); ctx.lineTo(w - 20, h - margin); ctx.stroke();
+
+      ctx.strokeStyle = C.blue; ctx.lineWidth = 2; ctx.beginPath();
+      for (let i = 1; i <= 8; i++) {
+        const x = margin + (i / 8) * plotW, y = yOf(spheresArea(i, R, L) / A_cyl);
+        if (i === 1) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke(); ctx.lineWidth = 1;
+
+      ctx.fillStyle = C.red; ctx.beginPath();
+      ctx.arc(margin + (N / 8) * plotW, yOf(spheresArea(N, R, L) / A_cyl), 5, 0, 2 * Math.PI); ctx.fill();
+
+      ctx.fillStyle = C.text; ctx.strokeStyle = C.axis; ctx.textAlign = "center";
+      for (let i = 1; i <= 8; i++) {
+        const xt = margin + (i / 8) * plotW;
+        ctx.beginPath(); ctx.moveTo(xt, h - margin); ctx.lineTo(xt, h - margin + 6); ctx.stroke();
+        ctx.fillText(i, xt, h - margin + 20);
+      }
+      ctx.fillText("N, number of spheres", margin + plotW / 2, h - 12);
+      ctx.textAlign = "left";
+      ctx.fillText("A(spheres) / A(cylinder), log scale", 8, 14);
+    }
+
+    const sliders = [1, 2, 3].map(i => document.getElementById("nSlider" + i));
+    const labels = [1, 2, 3].map(i => document.getElementById("nValue" + i));
+    const anim = [1, 2, 3].map(i => document.getElementById("animationCanvas" + i));
+    const chart = [1, 2, 3].map(i => document.getElementById("areaChart" + i));
+
+    function update() {
+      const show = toggle.checked;
+      CASES.forEach((cs, i) => {
+        const N = parseInt(sliders[i].value, 10);
+        labels[i].textContent = N;
+        drawAnimation(anim[i], N, cs.R, L, show);
+        drawChart(chart[i], N, cs.R, L);
+      });
+    }
+    sliders.forEach(s => s.addEventListener("input", update));
+    toggle.addEventListener("change", update);
+    update();
+  </script>
+</body>
+</html>

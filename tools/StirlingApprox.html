@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Stirling Approximation and Entropy of Mixing | Teaching Tools</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .panel.off { visibility: hidden; }
+    .eqbox { width: 100%; margin-top: 12px; font-size: 0.9rem; line-height: 1.7; color: var(--ink-soft); }
+    .eqbox .sub { font-size: 0.75em; vertical-align: -0.35em; }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Stirling Approximation and Entropy of Mixing</h1>
+  <p class="subtitle">How good is Stirling's approximation for ln(<i>x</i>!), and what does it give for the configurational entropy of mixing atoms and vacancies?</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>Left plot (parity plot):</strong> each point compares Stirling's approximation with the exact value of ln(<i>x</i>!) for <i>x</i> = 1 to 100. Points on the dashed line are exact. Hover over a point to read <i>x</i> and the percentage error.</li>
+        <li><strong>Scale button:</strong> switches the axes between log&ndash;log and linear. The log&ndash;log view shows the small values (small <i>x</i>), where the approximation is poor; the linear view shows that it is excellent for large <i>x</i>. (Points with a negative approximate value cannot be shown on a log axis.)</li>
+        <li><strong>Show entropy plot:</strong> tick the box to show the configurational entropy of a mixture of <i>N</i> sites against the vacancy fraction, calculated exactly and with Stirling's approximation.</li>
+        <li><strong><i>N</i> menu:</strong> choose the number of sites. See how the two curves converge as <i>N</i> increases.</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="tool">
+    <div class="panel wide" style="padding: 12px 20px;">
+      <div class="ctl-grid">
+        <div class="ctl"><button type="button" id="scaleToggle">Switch to linear scale</button></div>
+        <div class="ctl"><label class="toggle-group"><input type="checkbox" id="showRight" checked> Show entropy plot and formulas</label></div>
+        <div class="ctl"><label for="Nselect">Number of sites, N</label>
+          <select id="Nselect">
+            <option value="10">N = 10</option>
+            <option value="20" selected>N = 20</option>
+            <option value="50">N = 50</option>
+            <option value="100">N = 100</option>
+            <option value="200">N = 200</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="panel"><h3>Stirling approximation against ln(x!)</h3><div class="plotbox" style="height:400px"><canvas id="parityChart"></canvas></div></div>
+      <div class="panel" id="rightPanel"><h3>Entropy of mixing</h3><div class="plotbox" style="height:400px"><canvas id="entropyChart"></canvas></div>
+        <div class="eqbox">
+          <div><b>Exact:</b> S = k&middot;ln(&omega;) = k&middot;ln(<i>N</i>! / <i>N</i><span class="sub">A</span>! <i>N</i><span class="sub">B</span>!)</div>
+          <div><b>Stirling:</b> S = &minus;k&middot;<i>N</i>&middot;(<i>X</i><span class="sub">A</span> ln <i>X</i><span class="sub">A</span> + <i>X</i><span class="sub">B</span> ln <i>X</i><span class="sub">B</span>)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <details class="note">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <p>The entropy of a state is given by Boltzmann's relation, \(S = k\ln\omega\), where \(\omega\) is the number of microscopic arrangements. If \(N_A\) atoms of one kind and \(N_B\) of another (or \(N_B\) vacancies) are distributed over \(N = N_A + N_B\) lattice sites, the number of distinguishable arrangements is</p>
+      <div class="eq">\( \omega = \dfrac{N!}{N_A!\,N_B!} \)</div>
+      <p>For macroscopic \(N\) (of the order of \(10^{23}\)) the factorials cannot be evaluated directly. Stirling's approximation replaces them:</p>
+      <div class="eq">\( \ln x! \approx x\ln x - x \)</div>
+      <p>Substituting, the terms linear in \(x\) cancel because \(N = N_A + N_B\), and with the site fractions \(X_A = N_A/N\) and \(X_B = N_B/N\):</p>
+      <div class="eq">\( S = -kN\,\big(X_A\ln X_A + X_B\ln X_B\big) \)</div>
+      <p>This is the ideal configurational entropy of mixing, the starting point for the thermodynamics of solutions and of point defects. The entropy is largest for \(X_A = X_B = 1/2\) and is zero for a pure material. Its infinite slope at \(X\to 0\) is the reason that a crystal always contains some vacancies at equilibrium.</p>
+      <p>The approximation has a relative error of about \(\ln(2\pi x)/(2x\ln x)\), which is large for small \(x\) and falls steadily. For \(x\) of a few hundred the error is already below 1%, and for the numbers of atoms in real materials it is negligible. The plots show the error directly.</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt>Factorial, <i>x</i>!</dt><dd>The product 1&times;2&times;&hellip;&times;<i>x</i>.</dd>
+        <dt>&omega;</dt><dd>Number of distinguishable arrangements (microstates) of the system.</dd>
+        <dt>Configurational entropy</dt><dd>The entropy that arises from the number of ways of arranging the atoms (or vacancies) over the sites.</dd>
+        <dt><i>X</i><sub>A</sub>, <i>X</i><sub>B</sub></dt><dd>Fractions of sites occupied by A atoms and by B atoms (or vacancies). On the plot the horizontal axis is the vacancy fraction.</dd>
+        <dt>Parity plot</dt><dd>A plot of an approximate value against the exact value. Perfect agreement lies on the line <i>y</i> = <i>x</i>.</dd>
+        <dt><i>k</i></dt><dd>Boltzmann constant. Entropy is plotted in units of <i>k</i>.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /* Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved. */
+    const c = TOOL.c;
+
+    function lnFactorial(n) { let s = 0; for (let i = 1; i <= n; i++) s += Math.log(i); return s; }
+    function stirling(n) { return n * Math.log(n) - n; }
+
+    // ---- Left: parity plot ----
+    const parityData = [], parityLine = [];
+    for (let x = 1; x <= 100; x++) {
+      const exact = lnFactorial(x), approx = stirling(x);
+      parityData.push({ x: exact, y: approx, xVal: x, err: (approx - exact) / exact * 100 });
+      parityLine.push({ x: exact, y: exact });
+    }
+
+    let isLogScale = true;
+    const parityChart = new Chart(document.getElementById('parityChart'), {
+      type: 'scatter',
+      data: { datasets: [
+        { label: 'Parity line y = x', data: parityLine, type: 'line', borderColor: c.muted, backgroundColor: c.muted, borderDash: [6, 6], borderWidth: 2, pointRadius: 0 },
+        { label: 'Stirling vs ln(x!)', data: parityData, borderColor: c.blue, backgroundColor: c.blue, pointRadius: 4 }
+      ] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { tooltip: { callbacks: { label: ctx => {
+          const d = ctx.raw;
+          return d.xVal === undefined ? 'y = x' : 'x = ' + d.xVal + ',  error = ' + d.err.toFixed(1) + '%';
+        } } } },
+        scales: {
+          x: { type: 'logarithmic', title: { display: true, text: 'ln(x!)', font: { size: 14 } } },
+          y: { type: 'logarithmic', title: { display: true, text: 'Stirling approximation', font: { size: 14 } } }
+        }
+      }
+    });
+
+    document.getElementById('scaleToggle').addEventListener('click', () => {
+      isLogScale = !isLogScale;
+      parityChart.options.scales.x.type = isLogScale ? 'logarithmic' : 'linear';
+      parityChart.options.scales.y.type = isLogScale ? 'logarithmic' : 'linear';
+      document.getElementById('scaleToggle').textContent = isLogScale ? 'Switch to linear scale' : 'Switch to log–log scale';
+      parityChart.update();
+    });
+
+    // ---- Right: entropy of mixing ----
+    let entropyChart;
+    function updateEntropyPlot(N) {
+      const exact = [], stir = [];
+      for (let NA = 1; NA < N; NA++) {
+        const NB = N - NA, XA = NA / N, XB = NB / N;
+        exact.push({ x: XB, y: lnFactorial(N) - lnFactorial(NA) - lnFactorial(NB) });
+        stir.push({ x: XB, y: -N * (XA * Math.log(XA) + XB * Math.log(XB)) });
+      }
+      if (entropyChart) entropyChart.destroy();
+      entropyChart = new Chart(document.getElementById('entropyChart'), {
+        type: 'line',
+        data: { datasets: [
+          { label: 'Exact', data: exact, borderColor: c.blue, backgroundColor: c.blue, borderWidth: 2, pointRadius: 3 },
+          { label: 'Stirling approximation', data: stir, borderColor: c.orange, backgroundColor: c.orange, borderDash: [6, 4], borderWidth: 2, pointRadius: 0 }
+        ] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          scales: {
+            x: { type: 'linear', min: 0, max: 1, title: { display: true, text: 'Vacancy fraction, Xv', font: { size: 14 } } },
+            y: { title: { display: true, text: 'Entropy (in units of k)', font: { size: 14 } } }
+          }
+        }
+      });
+    }
+    updateEntropyPlot(20);
+
+    document.getElementById('showRight').addEventListener('change', e => {
+      document.getElementById('rightPanel').classList.toggle('off', !e.target.checked);
+    });
+    document.getElementById('Nselect').addEventListener('change', e => updateEntropyPlot(parseInt(e.target.value, 10)));
+  </script>
+</body>
+</html>

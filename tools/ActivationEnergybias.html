@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Vacancy Hopping under a Driving Force: Biased Diffusion | Teaching Tools</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .with-slider { display: flex; gap: 16px; align-items: center; width: 100%; }
+    .with-slider .plotbox { flex: 1; min-width: 0; height: 400px; }
+    .vslider { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.85rem; color: #ccc; }
+    .vslider input[type=range] { writing-mode: vertical-lr; direction: rtl; width: 10px; height: 340px; }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Vacancy Hopping under a Driving Force: Biased Diffusion</h1>
+  <p class="subtitle">A vacancy (or mobile ion) hops between lattice sites over an energy barrier. A driving force, such as an electric field in an ionic conductor, tilts the landscape: hops with the force become easier, hops against it harder, and the vacancy drifts.</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>Driving force slider (vertical):</strong> drag it up to raise the force <i>F</i> from 0 to 1. <i>F</i> = <i>qEa</i>/(&pi;<i>E</i><sub>m</sub>) is the work done by the force in one hop, scaled by the barrier (see the physics note). In an ionic conductor it is proportional to the electric field.</li>
+        <li><strong>Top plot:</strong> the energy of the vacancy along its path. Grey is the lattice potential with a barrier <i>E</i><sub>m</sub> per hop, the dashed line is the work term &minus;<i>qEx</i> of the force, and the blue curve is their sum, the landscape the vacancy actually sees. Position is in radians: 2&pi; is one jump distance <i>a</i>.</li>
+        <li><strong>Bottom plot:</strong> the barrier for a hop with the force (green) and against it (red), against <i>F</i>. Solid lines use the true minima and maxima of the tilted landscape; dashed lines assume they do not move, giving the usual linear lowering <i>E</i><sub>m</sub> &#8723; <i>qEa</i>/2. Dots mark the present force.</li>
+        <li><strong><i>E</i><sub>m</sub>/<i>k</i><sub>B</sub><i>T</i> slider:</strong> sets the temperature in units of the barrier. The panel below the plots gives the ratio of forward to backward hop rates and the net drift velocity.</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="tool">
+    <div class="panel wide">
+      <h3>Energy of a vacancy along its path, with a driving force</h3>
+      <div class="with-slider">
+        <div class="plotbox"><canvas id="energyChart"></canvas></div>
+        <div class="vslider">
+          <div>1</div>
+          <input type="range" id="biasSlider" min="0" max="1" step="0.01" value="0" aria-label="Driving force F">
+          <div>0</div>
+          <div><b>Force F</b></div>
+          <div class="val" id="biasValue" style="color:#fff;font-weight:700">0.00</div>
+        </div>
+      </div>
+    </div>
+    <div class="panel wide">
+      <h3>Migration barrier for hops with and against the force</h3>
+      <div class="plotbox" style="height:400px"><canvas id="barrierChart"></canvas></div>
+    </div>
+    <div class="panel wide plain">
+      <h3>Rates and drift velocity</h3>
+      <div class="ctl" style="margin-bottom:10px"><label for="emkt"><i>E</i><sub>m</sub>/<i>k</i><sub>B</sub><i>T</i></label><input type="range" id="emkt" min="2" max="40" step="0.5" value="15"><span id="emktVal" class="val">15.0</span></div>
+      <div class="metrics">
+        <div class="metric"><span>Forward barrier, &Delta;E<sub>f</sub> / <i>E</i><sub>m</sub></span><b id="mFwd">1.000</b></div>
+        <div class="metric"><span>Backward barrier, &Delta;E<sub>b</sub> / <i>E</i><sub>m</sub></span><b id="mBwd">1.000</b></div>
+        <div class="metric"><span>Rate ratio, forward / backward</span><b id="mRatio">1.00</b></div>
+        <div class="metric"><span>Net drift velocity, <i>v</i>/(<i>a&Gamma;</i><sub>0</sub>), exact barriers</span><b id="mV">0</b></div>
+        <div class="metric"><span>Same, linear approximation</span><b id="mVlin">0</b></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="note">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <p>In a crystal a vacancy moves when a neighbouring atom or ion jumps into it. Each jump is a thermally activated hop over a barrier, the migration energy \(E_m\), between equivalent sites a distance \(a\) apart. With no driving force, hops in the two directions are equally likely, so there is random diffusion but no net motion. The rate of hops in each direction is</p>
+      <div class="eq">\( \Gamma = \Gamma_0\,e^{-\Delta E/k_BT} \)</div>
+      <p>A driving force, for example the force \(qE\) of an electric field on a charged vacancy or ion in an ionic conductor, or the force from a stress or chemical-potential gradient, does work \(-qEx\) as the vacancy moves. Writing the lattice energy as \(\tfrac{E_m}{2}(1-\cos\theta)\) with \(\theta = 2\pi x/a\), the energy in units of \(E_m/2\) is</p>
+      <div class="eq">\( E(\theta) = 1-\cos\theta - F\theta, \qquad F = \dfrac{qEa}{\pi E_m} \)</div>
+      <p>The landscape is tilted. Its minima and maxima satisfy \(\sin\theta = F\); they exist only for \(F<1\) and move to \(\theta_m=\arcsin F\) and \(\theta_M = \pi - \arcsin F\). The barriers, in units of \(E_m/2\), are</p>
+      <div class="eq">\( \Delta H_\text{fwd} = 2\sqrt{1-F^2} - F\,(\pi - 2\arcsin F), \qquad \Delta H_\text{bwd} = \Delta H_\text{fwd} + 2\pi F \)</div>
+      <p>The two barriers always differ by the work done by the force in one hop, \(qEa\), so the ratio of the rates is exactly \(e^{qEa/k_BT}\), as detailed balance requires. If the minimum and maximum are assumed not to move, the barriers are \(E_m \mp qEa/2\). This is accurate when \(qEa \ll E_m\), which is the case for the fields used in practice.</p>
+      <p>The net drift velocity is the difference of the two rates times the jump distance:</p>
+      <div class="eq">\( v = a\,\Gamma_0\left[e^{-\Delta E_f/k_BT} - e^{-\Delta E_b/k_BT}\right] \approx 2a\Gamma_0\,e^{-E_m/k_BT}\sinh\!\left(\dfrac{qEa}{2k_BT}\right) \)</div>
+      <p>For a weak force, \(qEa \ll k_BT\), this is linear in \(E\), so \(v \propto qEa^2\Gamma_0 e^{-E_m/k_BT}/k_BT\). The mobility is \(v/E\); with the diffusivity \(D = \tfrac12 a^2\Gamma\) (one dimension) it gives the Nernst&ndash;Einstein relation \(\mu = qD/k_BT\) and the ionic conductivity. Because of the factor \(e^{-E_m/k_BT}\), conduction rises exponentially with temperature, with activation energy \(E_m\) (plus the vacancy formation energy in an intrinsic conductor). At a strong force the response is no longer linear in \(E\); this is the high-field regime. The same picture describes electromigration and drift of atoms in a stress gradient.</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt>Vacancy</dt><dd>An empty lattice site. It moves when a neighbouring atom or ion jumps into it.</dd>
+        <dt>Migration energy, <i>E</i><sub>m</sub></dt><dd>The barrier for one hop with no driving force.</dd>
+        <dt>Driving force, <i>qE</i></dt><dd>For example the force of an electric field on a charged species. <i>F</i> is the work in one hop, <i>qEa</i>, divided by &pi;<i>E</i><sub>m</sub>.</dd>
+        <dt>Forward, backward hop</dt><dd>A hop in the direction of the force, and one against it.</dd>
+        <dt>&Gamma;<sub>0</sub></dt><dd>Attempt frequency of a hop.</dd>
+        <dt>Drift velocity, <i>v</i></dt><dd>The average velocity of the vacancy caused by the force.</dd>
+        <dt>Nernst&ndash;Einstein relation</dt><dd>The link between mobility and diffusivity, &mu; = <i>qD</i>/<i>k</i><sub>B</sub><i>T</i>.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /* Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved. */
+    const c = TOOL.c;
+    const points = 1600;
+    const xMin = -2 * Math.PI, xMax = 2 * Math.PI;
+    const slider = document.getElementById('biasSlider');
+    const biasLabel = document.getElementById('biasValue');
+    let energyChart, barrierChart;
+
+    function periodic(x) { return 1 - Math.cos(x); }
+    function energy(x, F) { return periodic(x) - F * x; }
+    function dEdx(x, F) { return Math.sin(x) - F; }
+
+    function refineRoot(a, b, F) {
+      for (let i = 0; i < 40; i++) {
+        const m = 0.5 * (a + b);
+        if (dEdx(a, F) * dEdx(m, F) <= 0) b = m; else a = m;
+      }
+      return 0.5 * (a + b);
+    }
+
+    function findExtrema(F) {
+      const roots = [], dx = 0.01;
+      for (let x = xMin; x < xMax; x += dx) {
+        if (dEdx(x, F) * dEdx(x + dx, F) <= 0) roots.push(refineRoot(x, x + dx, F));
+      }
+      const minima = [], maxima = [];
+      roots.forEach(r => { if (Math.cos(r) > 0) minima.push(r); else maxima.push(r); });
+      return { minima, maxima };
+    }
+
+    function calculateExactBarriers(F) {
+      const { minima, maxima } = findExtrema(F);
+      if (minima.length === 0 || maxima.length === 0) return { forward: 0, backward: 0 };
+      const min = minima.reduce((a, b) => Math.abs(a) < Math.abs(b) ? a : b);
+      const rightMax = maxima.filter(m => m > min).reduce((a, b) => Math.abs(b - min) < Math.abs(a - min) ? b : a);
+      const leftMax = maxima.filter(m => m < min).reduce((a, b) => Math.abs(b - min) < Math.abs(a - min) ? b : a);
+      const bR = energy(rightMax, F) - energy(min, F);
+      const bL = energy(leftMax, F) - energy(min, F);
+      return { forward: Math.min(bL, bR), backward: Math.max(bL, bR) };
+    }
+
+    function calculateApproxBarriers(F) {
+      const trough = energy(0, F);
+      const bR = energy(Math.PI, F) - trough;
+      const bL = energy(-Math.PI, F) - trough;
+      return { forward: Math.min(bL, bR), backward: Math.max(bL, bR) };
+    }
+
+    function generateLandscape(F) {
+      const base = [], biased = [], biasLine = [];
+      for (let i = 0; i <= points; i++) {
+        const x = xMin + (i / points) * (xMax - xMin);
+        base.push({ x, y: periodic(x) });
+        biased.push({ x, y: energy(x, F) });
+        biasLine.push({ x, y: -F * x });
+      }
+      return { base, biased, biasLine };
+    }
+
+    function generateBarrierCurves() {
+      const exactF = [], exactB = [], approxF = [], approxB = [];
+      for (let F = 0; F <= 1.0001; F += 0.01) {
+        const ex = calculateExactBarriers(F), ap = calculateApproxBarriers(F);
+        exactF.push({ x: F, y: ex.forward }); exactB.push({ x: F, y: ex.backward });
+        approxF.push({ x: F, y: ap.forward }); approxB.push({ x: F, y: ap.backward });
+      }
+      return { exactF, exactB, approxF, approxB };
+    }
+
+    function init() {
+      const F = 0;
+      const landscape = generateLandscape(F);
+      const curves = generateBarrierCurves();
+      const current = calculateExactBarriers(F);
+
+      energyChart = new Chart(document.getElementById('energyChart'), {
+        type: 'line',
+        data: { datasets: [
+          { label: 'Lattice potential', data: landscape.base, borderColor: c.muted, borderWidth: 2, pointRadius: 0 },
+          { label: 'Work of the force, −Fx', data: landscape.biasLine, borderColor: c.white, borderDash: [6, 6], borderWidth: 2, pointRadius: 0 },
+          { label: 'Tilted landscape', data: landscape.biased, borderColor: c.blue, borderWidth: 3, pointRadius: 0 }
+        ] },
+        options: {
+          responsive: true, maintainAspectRatio: false, animation: false, parsing: false,
+          scales: {
+            x: { type: 'linear', min: xMin, max: xMax, title: { display: true, text: 'Position along the path (2π = one jump distance a)' } },
+            y: { min: -5, max: 5, title: { display: true, text: 'Energy of the vacancy (units of Em/2)' } }
+          }
+        }
+      });
+
+      barrierChart = new Chart(document.getElementById('barrierChart'), {
+        type: 'line',
+        data: { datasets: [
+          { label: 'With the force (exact)', data: curves.exactF, borderColor: c.green, borderWidth: 3, pointRadius: 0 },
+          { label: 'Against the force (exact)', data: curves.exactB, borderColor: c.red, borderWidth: 3, pointRadius: 0 },
+          { label: 'With the force (Em − qEa/2)', data: curves.approxF, borderColor: c.green, borderDash: [5, 5], borderWidth: 2, pointRadius: 0 },
+          { label: 'Against the force (Em + qEa/2)', data: curves.approxB, borderColor: c.red, borderDash: [5, 5], borderWidth: 2, pointRadius: 0 },
+          { label: '', data: [{ x: F, y: 0 }, { x: F, y: 6 }], borderColor: c.white, borderDash: [6, 6], borderWidth: 2, pointRadius: 0 },
+          { label: '', data: [{ x: F, y: current.forward }], borderColor: c.green, backgroundColor: c.green, pointRadius: 6, showLine: false },
+          { label: '', data: [{ x: F, y: current.backward }], borderColor: c.red, backgroundColor: c.red, pointRadius: 6, showLine: false }
+        ] },
+        options: {
+          responsive: true, maintainAspectRatio: false, animation: false, parsing: false,
+          plugins: { legend: { labels: { filter: item => item.text && item.text.length > 0 } } },
+          scales: {
+            x: { type: 'linear', min: 0, max: 1, title: { display: true, text: 'Driving force, F = qEa / (π Em)' } },
+            y: { min: 0, max: 6, title: { display: true, text: 'Migration barrier (units of Em/2)' } }
+          }
+        }
+      });
+    }
+
+    function update() {
+      const F = parseFloat(slider.value);
+      biasLabel.textContent = F.toFixed(2);
+      const landscape = generateLandscape(F);
+      const current = calculateExactBarriers(F);
+      energyChart.data.datasets[1].data = landscape.biasLine;
+      energyChart.data.datasets[2].data = landscape.biased;
+      energyChart.update();
+      barrierChart.data.datasets[4].data = [{ x: F, y: 0 }, { x: F, y: 6 }];
+      barrierChart.data.datasets[5].data = [{ x: F, y: current.forward }];
+      barrierChart.data.datasets[6].data = [{ x: F, y: current.backward }];
+      barrierChart.update();
+    }
+
+    const emkt = document.getElementById('emkt');
+    function rates() {
+      const F = parseFloat(slider.value), r = parseFloat(emkt.value);
+      document.getElementById('emktVal').textContent = r.toFixed(1);
+      const ex = calculateExactBarriers(F);
+      const f = ex.forward / 2, b = ex.backward / 2;
+      document.getElementById('mFwd').textContent = f.toFixed(3);
+      document.getElementById('mBwd').textContent = b.toFixed(3);
+      document.getElementById('mRatio').textContent = Math.exp(Math.PI * F * r).toPrecision(3);
+      document.getElementById('mV').textContent = (Math.exp(-f * r) - Math.exp(-b * r)).toExponential(2);
+      const fl = 1 - Math.PI * F / 2, bl = 1 + Math.PI * F / 2;
+      document.getElementById('mVlin').textContent = (Math.exp(-fl * r) - Math.exp(-bl * r)).toExponential(2);
+    }
+    slider.addEventListener('input', () => { update(); rates(); });
+    emkt.addEventListener('input', rates);
+    init(); rates();
+  </script>
+</body>
+</html>

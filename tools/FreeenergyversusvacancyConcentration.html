@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Free Energy versus Vacancy Concentration | Teaching Tools</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .cwrap { position: relative; width: 100%; max-width: 760px; }
+    canvas#plot-canvas { cursor: default; width: 100%; height: auto; display: block; }
+    .legend-box { position: absolute; top: 14px; right: 14px; background: rgba(22,27,34,0.9); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; font-size: 0.82rem; color: #e0e0e0; }
+    .legend-box div { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin: 2px 0; }
+    .legend-box i { display: inline-block; width: 22px; height: 0; border-top: 3px solid; }
+    .panel.plain { align-items: center; }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Free Energy versus Vacancy Concentration</h1>
+  <p class="subtitle">The enthalpy of vacancies rises linearly with their concentration, the configurational entropy term falls steeply, and the free energy has a minimum at the equilibrium vacancy concentration.</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>T slider:</strong> sets the temperature from 300 to 1000&nbsp;K.</li>
+        <li><strong>&Delta;H<sub>v</sub> slider:</strong> sets the enthalpy of formation of a vacancy, in eV per vacancy, from 0 to 1.</li>
+        <li><strong>Curves:</strong> red is the enthalpy &Delta;H(<i>X</i><sub>v</sub>), green is the entropy term &minus;T&Delta;S, and blue is the free energy &Delta;G, their sum. The blue marker is the minimum of &Delta;G, labelled with the equilibrium vacancy fraction.</li>
+        <li><strong>Log scale box:</strong> plots <i>X</i><sub>v</sub> on a logarithmic axis, from 10<sup>&minus;6</sup> to 10<sup>&minus;3</sup>, which shows the shape of the curves at very low concentrations.</li>
+        <li>If the minimum is not within the range of the plot, no marker is shown.</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="tool">
+    <div class="panel wide" style="padding: 12px 20px;">
+      <div class="ctl-grid">
+        <div class="ctl"><label for="t-slider">T (K)</label><input type="range" id="t-slider" min="300" max="1000" step="10" value="750"><span id="value-display-t" class="val">750</span></div>
+        <div class="ctl"><label for="dhv-slider">&Delta;H<sub>v</sub> (eV)</label><input type="range" id="dhv-slider" min="0" max="1" step="0.01" value="0.5"><span id="value-display-dhv" class="val">0.50</span></div>
+        <div class="ctl"><label class="toggle-group"><input type="checkbox" id="log-x-axis"> <i>X</i><sub>v</sub> axis in log scale</label></div>
+      </div>
+    </div>
+    <div class="panel wide plain">
+      <div class="cwrap">
+        <canvas id="plot-canvas" width="760" height="440"></canvas>
+        <div class="legend-box">
+          <div>&Delta;H(<i>X</i><sub>v</sub>) <i style="border-color:#f87171"></i></div>
+          <div>&minus;T&Delta;S(T, <i>X</i><sub>v</sub>) <i style="border-color:#34d399"></i></div>
+          <div>&Delta;G(T, <i>X</i><sub>v</sub>) <i style="border-color:#60a5fa"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <details class="note">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <p>Each vacancy costs an enthalpy \(\Delta H_v\), because bonds are broken. For a vacancy fraction \(X_v\) the enthalpy per atom is therefore</p>
+      <div class="eq">\( \Delta H = X_v\,\Delta H_v \)</div>
+      <p>The vacancies can be spread over the lattice sites in many ways. The ideal configurational entropy per atom is</p>
+      <div class="eq">\( \Delta S = -k_B\big[X_v\ln X_v + (1-X_v)\ln(1-X_v)\big] \;\;\Rightarrow\;\; -T\Delta S = k_BT\big[X_v\ln X_v + (1-X_v)\ln(1-X_v)\big] \)</div>
+      <p>Only the configurational entropy is included here, not the vibrational entropy of the atoms near the vacancy. The free energy of the crystal relative to the perfect crystal is \(\Delta G = \Delta H - T\Delta S\). Setting \(d\Delta G/dX_v=0\):</p>
+      <div class="eq">\( \Delta H_v + k_BT\ln\dfrac{X_v}{1-X_v} = 0 \;\;\Rightarrow\;\; X_v^{eq} = \dfrac{1}{1+e^{\Delta H_v/k_BT}} \approx e^{-\Delta H_v/k_BT} \)</div>
+      <p>The \(X\ln X\) term has an infinite slope at \(X_v = 0\), so a few vacancies always lower the free energy, however large \(\Delta H_v\) is. The minimum moves to higher \(X_v\) and gets deeper as the temperature rises, and moves to lower \(X_v\) as \(\Delta H_v\) increases. Because \(\Delta H_v\) appears in an exponent, a change of a few tenths of an eV changes the equilibrium concentration at a given temperature by several orders of magnitude. (Formation enthalpies of metals are typically 0.5 to 2 eV.)</p>
+      <p>The energies are in eV per atom, and \(k_B = 8.617\times10^{-5}\) eV/K.</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt><i>X</i><sub>v</sub></dt><dd>Fraction of lattice sites that are vacant.</dd>
+        <dt>&Delta;H<sub>v</sub></dt><dd>Enthalpy of formation of one vacancy (eV).</dd>
+        <dt>&Delta;H, &Delta;S, &Delta;G</dt><dd>The enthalpy, entropy and Gibbs free energy of the crystal with vacancies, relative to the perfect crystal, per atom.</dd>
+        <dt>Configurational entropy</dt><dd>Entropy from the number of ways of arranging the vacancies on the lattice.</dd>
+        <dt><i>k</i><sub>B</sub></dt><dd>Boltzmann constant.</dd>
+        <dt>Equilibrium vacancy fraction</dt><dd>The value of <i>X</i><sub>v</sub> that minimises &Delta;G.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /* Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved. */
+    const C = TOOL.c;
+    const canvas = document.getElementById('plot-canvas');
+    const ctx = canvas.getContext('2d');
+    const tSlider = document.getElementById('t-slider');
+    const dhvSlider = document.getElementById('dhv-slider');
+    const vT = document.getElementById('value-display-t');
+    const vD = document.getElementById('value-display-dhv');
+    const logBox = document.getElementById('log-x-axis');
+
+    const kB = 8.617e-5;                       // eV/K
+    const minXLin = 0, maxXLin = 1e-3, minXLog = 1e-6, maxXLog = 1e-3;
+    const minY = -5e-5, maxY = 2e-5;
+    const m = { l: 80, r: 20, t: 20, b: 55 };
+    const pw = canvas.width - m.l - m.r, ph = canvas.height - m.t - m.b;
+    let isLog = false;
+
+    const dH = (X, dHv) => dHv * X;
+    const mTdS = (T, X) => (X <= 0 || X >= 1) ? 0 : kB * T * (X * Math.log(X) + (1 - X) * Math.log(1 - X));
+    const dG = (X, T, dHv) => dH(X, dHv) + mTdS(T, X);
+    const mapX = X => m.l + (isLog ? (Math.log10(X) - Math.log10(minXLog)) / (Math.log10(maxXLog) - Math.log10(minXLog))
+                                   : (X - minXLin) / (maxXLin - minXLin)) * pw;
+    const mapY = G => m.t + ph - (G - minY) / (maxY - minY) * ph;
+    const xAt = i => isLog ? Math.pow(10, Math.log10(minXLog) + (Math.log10(maxXLog) - Math.log10(minXLog)) * i / 500)
+                           : minXLin + (maxXLin - minXLin) * i / 500;
+
+    function drawAxes() {
+      ctx.font = '12px sans-serif'; ctx.lineWidth = 1;
+      const xt = [];
+      if (isLog) for (let e = -6; e <= -3; e++) xt.push(Math.pow(10, e)); else for (let i = 0; i <= 5; i++) xt.push(maxXLin * i / 5);
+      xt.forEach(v => {
+        const x = mapX(v);
+        ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(x, m.t); ctx.lineTo(x, m.t + ph); ctx.stroke();
+        ctx.strokeStyle = C.axis; ctx.beginPath(); ctx.moveTo(x, m.t + ph); ctx.lineTo(x, m.t + ph + 5); ctx.stroke();
+        ctx.fillStyle = C.text; ctx.textAlign = 'center'; ctx.fillText(v.toExponential(0), x, m.t + ph + 20);
+      });
+      for (let i = 0; i <= 7; i++) {
+        const g = minY + (maxY - minY) * i / 7, y = mapY(g);
+        ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(m.l, y); ctx.lineTo(m.l + pw, y); ctx.stroke();
+        ctx.strokeStyle = C.axis; ctx.beginPath(); ctx.moveTo(m.l - 5, y); ctx.lineTo(m.l, y); ctx.stroke();
+        ctx.fillStyle = C.text; ctx.textAlign = 'right'; ctx.fillText(g.toExponential(1), m.l - 9, y + 4);
+      }
+      ctx.strokeStyle = C.text; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(m.l, mapY(0)); ctx.lineTo(m.l + pw, mapY(0)); ctx.stroke();
+      ctx.strokeStyle = C.axis; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(m.l, m.t); ctx.lineTo(m.l, m.t + ph); ctx.lineTo(m.l + pw, m.t + ph); ctx.stroke();
+      ctx.fillStyle = C.text; ctx.textAlign = 'center'; ctx.font = '14px sans-serif';
+      ctx.fillText('Vacancy fraction, Xv  (' + (isLog ? 'log' : 'linear') + ' scale)', m.l + pw / 2, canvas.height - 12);
+      ctx.save(); ctx.translate(18, m.t + ph / 2); ctx.rotate(-Math.PI / 2); ctx.fillText('Energy  (eV/atom)', 0, 0); ctx.restore();
+    }
+
+    function curve(fn, color, width) {
+      ctx.save(); ctx.beginPath(); ctx.rect(m.l, m.t, pw, ph); ctx.clip();
+      ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = width;
+      for (let i = 0; i <= 500; i++) { const X = xAt(i), x = mapX(X), y = mapY(fn(X)); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }
+      ctx.stroke(); ctx.restore();
+    }
+
+    function plotFunctions(T, dHv) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = C.bg; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      drawAxes();
+      curve(X => dH(X, dHv), C.red, 2);
+      curve(X => mTdS(T, X), C.green, 2);
+      curve(X => dG(X, T, dHv), C.blue, 3.5);
+
+      const Xeq = 1 / (1 + Math.exp(dHv / (kB * T)));    // exact minimum of dG
+      const lo = isLog ? minXLog : minXLin, hi = isLog ? maxXLog : maxXLin;
+      if (Xeq > lo && Xeq < hi) {
+        const x = mapX(Xeq), y = mapY(dG(Xeq, T, dHv));
+        ctx.beginPath(); ctx.arc(x, y, 6, 0, 2 * Math.PI); ctx.fillStyle = C.blue; ctx.fill();
+        ctx.strokeStyle = C.white; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.fillStyle = C.text; ctx.font = '13px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('Xv(eq) = ' + Xeq.toExponential(1), x, y + 24);
+      }
+    }
+
+    function redraw() { plotFunctions(parseInt(tSlider.value, 10), parseFloat(dhvSlider.value)); }
+    tSlider.addEventListener('input', () => { vT.textContent = tSlider.value; redraw(); });
+    dhvSlider.addEventListener('input', () => { vD.textContent = parseFloat(dhvSlider.value).toFixed(2); redraw(); });
+    logBox.addEventListener('change', () => { isLog = logBox.checked; redraw(); });
+    vT.textContent = tSlider.value; vD.textContent = parseFloat(dhvSlider.value).toFixed(2);
+    redraw();
+  </script>
+</body>
+</html>

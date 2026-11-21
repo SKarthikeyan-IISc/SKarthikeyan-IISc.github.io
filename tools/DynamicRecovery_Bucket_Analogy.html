@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Dynamic Recovery: Dislocation Density as Water in a Leaking Bucket | Teaching Tools</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .bucketwrap { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+    #bucket { width: 300px; max-width: 100%; height: 390px; background: #000; border: 1px solid var(--line); border-radius: 6px; }
+    .btnrow { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btnrow button { min-width: 90px; padding: 8px 16px; }
+    .status { font-size: 0.88rem; color: var(--muted); min-height: 1.3em; }
+    .status.warn { color: var(--amber, #eab308); }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Dynamic Recovery: Dislocation Density as Water in a Leaking Bucket</h1>
+  <p class="subtitle">A bucket filled by a tap at a fixed rate, with a small hole in its bottom, as an analogy for how the dislocation density evolves when dislocations are produced at a steady rate and removed by dynamic recovery.</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>Set the inlet and the outlet.</strong> <em>Inflow</em> is the rate at which the tap fills the bucket (the production rate of dislocations). <em>Hole diameter</em> sets the size of the leak at the bottom (the recovery). The bucket diameter and the starting water level are also adjustable. Any change to a setting stops the run and resets it.</li>
+        <li>Setting the inflow to zero switches the tap off. The bucket then only drains, which is the analogue of static recovery (see the physics note).</li>
+        <li><strong>Press Start.</strong> The simulation then runs by itself: the water level in the bucket is the dislocation density. Pause and Start again to continue, or press Reset to go back to the starting level.</li>
+        <li><strong>Playback speed</strong> scales simulated time against real time. It is set automatically so that a run lasts about 12 s, and you can change it. The clock under the bucket always shows simulated time.</li>
+        <li><strong>Top plot:</strong> water level against time. The solid line is the simulation; the dashed white line is the exact solution of the equation, and the dashed green line is the steady level the bucket must reach. A red dashed line marks the rim of the bucket, which appears only if the bucket would overflow.</li>
+        <li><strong>Bottom plot:</strong> the inflow (production) and the outflow (recovery) rates. The level stops changing when the two are equal.</li>
+        <li>Try a smaller hole at the same inflow: the steady level rises, and so does the time to reach it. A very small hole makes the bucket overflow, the analogue of a material with so little recovery that the density keeps rising (stage II hardening).</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="tool">
+    <div class="row">
+      <div class="panel">
+        <h3>The bucket</h3>
+        <div class="bucketwrap">
+          <canvas id="bucket" width="300" height="390" role="img" aria-label="A bucket being filled by a tap and leaking through a hole in its bottom"></canvas>
+          <div class="btnrow">
+            <button type="button" id="runBtn">Start</button>
+            <button type="button" id="resetBtn" class="secondary">Reset</button>
+          </div>
+          <div class="status" id="status"></div>
+        </div>
+      </div>
+
+      <div class="panel plain">
+        <h3>Inlet and outlet</h3>
+        <div class="ctl-stack">
+          <div class="ctl-title">Inlet (production)</div>
+          <div class="ctl"><label for="qin">Inflow</label><input type="range" id="qin" min="0" max="3" step="0.05" value="1"><span class="val" id="qinV">1.00</span><span>L/min</span></div>
+          <div class="ctl-title">Outlet (recovery)</div>
+          <div class="ctl"><label for="dh">Hole diameter</label><input type="range" id="dh" min="1" max="10" step="0.5" value="4"><span class="val" id="dhV">4.0</span><span>mm</span></div>
+          <div class="ctl-title">Bucket</div>
+          <div class="ctl"><label for="dia">Bucket diameter</label><input type="range" id="dia" min="20" max="40" step="1" value="30"><span class="val" id="diaV">30</span><span>cm</span></div>
+          <div class="ctl"><label for="h0">Starting level</label><input type="range" id="h0" min="0" max="50" step="1" value="0"><span class="val" id="h0V">0</span><span>cm</span></div>
+          <div class="ctl-title">Playback</div>
+          <div class="ctl"><label for="spd">Speed</label><input type="range" id="spd" min="0" max="3.7" step="0.05" value="2"><span class="val" id="spdV">100</span><span>&times;</span></div>
+        </div>
+        <div class="metrics" style="margin-top:14px">
+          <div class="metric"><span>Simulated time</span><b id="mT">0 s</b></div>
+          <div class="metric"><span>Water level, <i>h</i></span><b id="mH">0.0 cm</b></div>
+          <div class="metric"><span>Inflow</span><b id="mIn">1.00 L/min</b></div>
+          <div class="metric"><span>Outflow</span><b id="mOut">0.00 L/min</b></div>
+          <div class="metric"><span>Steady level, <i>h</i>*</span><b id="mStar">&ndash;</b></div>
+          <div class="metric"><span>Time constant, &tau;</span><b id="mTau">&ndash;</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel wide">
+      <h3>Water level (dislocation density) against time</h3>
+      <div class="plotbox" style="height:380px"><canvas id="levelChart"></canvas></div>
+    </div>
+    <div class="panel wide">
+      <h3>Inflow (production) and outflow (recovery) against time</h3>
+      <div class="plotbox" style="height:320px"><canvas id="rateChart"></canvas></div>
+    </div>
+  </div>
+
+  <details class="note">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <p>During plastic flow, dislocations are stored in the crystal and so the dislocation density \(\rho\) rises, which is strain hardening. At the same time dynamic recovery, the annihilation of dislocations by cross-slip and climb, removes them at a rate that grows with \(\rho\). The density therefore tends to a saturation value, at which production and removal balance, and the flow stress saturates with it. A bucket that is filled at a fixed rate and drains through a small hole in its bottom behaves in the same way. The mapping is:</p>
+      <table class="data">
+        <thead><tr><th>Bucket</th><th>Crystal</th></tr></thead>
+        <tbody>
+          <tr><td>Water level \(h\)</td><td>Dislocation density \(\rho\)</td></tr>
+          <tr><td>Inflow from the tap, \(Q_\text{in}\)</td><td>Production (storage) rate of dislocations</td></tr>
+          <tr><td>Outflow through the hole, \(Q_\text{out}\)</td><td>Dynamic recovery (annihilation) rate</td></tr>
+          <tr><td>Steady level \(h^*\)</td><td>Saturation density, hence saturation stress</td></tr>
+          <tr><td>Time \(t\)</td><td>Strain (at a constant strain rate)</td></tr>
+        </tbody>
+      </table>
+      <p><strong>What the two controls stand for.</strong> Changing the inflow is like changing the dislocation production rate. Changing the size of the hole is like changing the recovery kinetics. Recovery by cross-slip and climb is thermally activated, so a larger hole corresponds to a higher temperature, and a smaller hole to a lower one. At a higher temperature the density therefore saturates at a lower value, and the flow stress with it. Setting the inflow to its minimum, zero, is analogous to static recovery: nothing is being produced, as when a deformed crystal is held at temperature without further straining, and the stored density falls by recovery alone. The bucket then simply drains.</p>
+      <p>The equations used by the simulation are as follows.</p>
+      <p><strong>1. Conservation of volume.</strong> Water is incompressible, so the volume in the bucket, \(A_b h\), changes by what comes in minus what goes out. With \(A_b = \pi D^2/4\) the area of the bucket,</p>
+      <div class="eq">\( A_b\,\dfrac{dh}{dt} = Q_\text{in} - Q_\text{out} \)</div>
+      <p><strong>2. Outflow through the hole: Torricelli's law.</strong> Bernoulli's equation between the free surface and the jet leaving the hole gives a jet speed \(v=\sqrt{2gh}\) (the surface speed is negligible because the hole is much smaller than the bucket, \(d \ll D\)). The jet contracts just outside a sharp-edged hole, which is allowed for by a discharge coefficient \(C_d \approx 0.61\):</p>
+      <div class="eq">\( Q_\text{out} = C_d\,a\,\sqrt{2gh}, \qquad a = \dfrac{\pi d^2}{4} \)</div>
+      <p>The outflow is thus proportional to \(\sqrt{h}\), and not to \(h\). The law holds when the level changes slowly, so that the flow is quasi-steady, and when viscosity and surface tension can be ignored, as for a hole of a few mm or more in water.</p>
+      <p><strong>3. Equation of the level.</strong> Substituting 2 in 1,</p>
+      <div class="eq">\( \dfrac{dh}{dt} = q - k\sqrt{h}, \qquad q = \dfrac{Q_\text{in}}{A_b}, \quad k = \dfrac{C_d\,a\,\sqrt{2g}}{A_b} \)</div>
+      <p>The simulation integrates this with a fourth-order Runge&ndash;Kutta method. If the water reaches the rim, \(h\) is held at the rim height and the excess spills over.</p>
+      <p><strong>4. Steady level.</strong> The level stops changing when \(Q_\text{out} = Q_\text{in}\):</p>
+      <div class="eq">\( h^* = \dfrac{1}{2g}\left(\dfrac{Q_\text{in}}{C_d\,a}\right)^{2} \)</div>
+      <p>The steady level rises as the square of the inflow and falls as the fourth power of the hole diameter, since \(a \propto d^2\).</p>
+      <p><strong>5. Exact solution.</strong> Put \(u=\sqrt{h}\), so that \(u^*=\sqrt{h^*}=q/k\) and \(2u\,du/dt = q - ku\). Integrating from the starting level \(u_0=\sqrt{h_0}\) gives \(t\) as a function of the level (the dashed line in the plot):</p>
+      <div class="eq">\( t = \dfrac{2}{k}\left[\,(u_0 - u) + u^*\ln\dfrac{u^*-u_0}{u^*-u}\,\right] \)</div>
+      <p><strong>6. Approach to the steady level.</strong> For a small departure \(\delta h\) from \(h^*\), the equation becomes \(d(\delta h)/dt = -(k/2\sqrt{h^*})\,\delta h\), so the level approaches \(h^*\) exponentially, with the time constant</p>
+      <div class="eq">\( \tau = \dfrac{2\sqrt{h^*}}{k} = \dfrac{2A_b h^*}{Q_\text{in}} \)</div>
+      <p>This is twice the time that the tap would need to fill the steady volume. The level is within 1% of \(h^*\) after about \(5\tau\), and this is how long the plot runs. A higher inflow or a larger bucket makes \(\tau\) longer; hardening and recovery likewise set the strain over which the density saturates.</p>
+      <p><strong>No inflow (static recovery).</strong> With \(Q_\text{in}=0\) the equation reduces to \(dh/dt = -k\sqrt{h}\), whose solution is \(\sqrt{h} = \sqrt{h_0} - kt/2\). The level falls to zero at \(t = 2\sqrt{h_0}/k\), and not exponentially, because of the \(\sqrt{h}\) law of the hole. A recovery term proportional to \(\rho\) would instead make the density decay exponentially and never reach zero.</p>
+      <p><strong>A caution about the analogy.</strong> The recovery term in the usual model of dynamic recovery (Kocks&ndash;Mecking, \(d\rho/d\varepsilon = k_1\sqrt{\rho} - k_2\rho\)) is proportional to \(\rho\), whereas a hole gives an outflow proportional to \(\sqrt{h}\). The picture is right in kind: a constant source, and a loss that grows with the stored amount until the two balance. A leak with outflow proportional to \(h\) (laminar flow through a long, fine tube) would match the linear term exactly, and would give a pure exponential approach \(h = h^*(1-e^{-t/\tau})\). With the hole, the approach to saturation is exponential only close to \(h^*\).</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt>Dislocation density, &rho;</dt><dd>Total length of dislocation line per unit volume of crystal.</dd>
+        <dt>Dynamic recovery</dt><dd>Annihilation and rearrangement of dislocations during deformation, by cross-slip and climb, which limits the build-up of density.</dd>
+        <dt>Production (storage) rate</dt><dd>The rate at which new dislocation line is stored per unit time or strain. Here, the inflow.</dd>
+        <dt>Static recovery</dt><dd>Recovery of a deformed crystal while it is held at temperature with no further straining, so that no new dislocations are produced. Here, the bucket with the tap turned off.</dd>
+        <dt>Saturation</dt><dd>The state in which production and recovery are equal, so that the density and the flow stress stop changing. Here, the steady level <i>h</i>*.</dd>
+        <dt>Torricelli's law</dt><dd>The speed of a jet from a small hole, <i>v</i> = &radic;(2<i>gh</i>), set by the height of liquid above it.</dd>
+        <dt>Discharge coefficient, <i>C</i><sub>d</sub></dt><dd>The ratio of the real flow through a hole to the ideal flow, which is less than one because the jet contracts. About 0.61 for a sharp-edged hole.</dd>
+        <dt>Time constant, &tau;</dt><dd>The time scale of the final approach to the steady level. The gap to <i>h</i>* shrinks by a factor of e in every &tau;.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /* Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved. */
+    const c = TOOL.c;
+    const G = 981;          // cm/s^2
+    const CD = 0.61;        // discharge coefficient, sharp-edged hole
+    const H = 50;           // height of the bucket, cm
+    const $ = id => document.getElementById(id);
+    const el = { qin: $('qin'), dh: $('dh'), dia: $('dia'), h0: $('h0'), spd: $('spd') };
+
+    let P = {};              // derived parameters (cm, s)
+    let state = 'idle';      // idle | running | paused | finished
+    let t = 0, h = 0, tEnd = 60, tu = 1, tuLabel = 's', lastTs = null;
+    let tAxis = [], hData = [], qData = [], overflowing = false;
+    let levelChart, rateChart;
+
+    function readParams() {
+      const Qin = parseFloat(el.qin.value) * 1000 / 60;            // cm^3/s
+      const d = parseFloat(el.dh.value) / 10;                      // cm
+      const D = parseFloat(el.dia.value);
+      const A = Math.PI * D * D / 4;
+      const a = Math.PI * d * d / 4;
+      const k = CD * a * Math.sqrt(2 * G) / A;
+      const q = Qin / A;
+      const us = q / k, hs = us * us;
+      const h0 = Math.min(parseFloat(el.h0.value), H);
+      const u0 = Math.sqrt(h0);
+      const over = hs > H;
+      P = { Qin, d, D, A, a, k, q, us, hs, h0, u0, over, QinL: parseFloat(el.qin.value) };
+      P.tau = Qin > 0 ? 2 * A * hs / Qin : NaN;
+      // exact solution: t(u) = (2/k)[(u0-u) + u* ln((u*-u0)/(u*-u))]
+      const tOf = us === 0 ? (u => (2 / k) * (u0 - u))
+                           : (u => (2 / k) * ((u0 - u) + us * Math.log((us - u0) / (us - u))));
+      let sMax;
+      if (Math.abs(us - u0) < 1e-9) { sMax = 0; tEnd = 60; }
+      else if (us === 0) { sMax = -1; tEnd = 2 * u0 / k; }       // no inflow: the bucket drains completely
+      else if (over) {
+        const uH = Math.sqrt(H);
+        if (u0 >= uH) { sMax = 0; tEnd = 60; P.tOver = 0; }
+        else { P.tOver = tOf(uH); sMax = Math.log((us - u0) / (us - uH)); tEnd = 1.3 * P.tOver; }
+      } else {
+        sMax = 5.5;
+        const uEnd = us - (us - u0) * Math.exp(-sMax);
+        tEnd = tOf(uEnd);
+      }
+      P.exact = [];
+      if (sMax === -1) {
+        for (let i = 0; i <= 300; i++) P.exact.push({ s: 0, u: u0 * (1 - i / 300) });
+      } else if (sMax > 0) {
+        const N = 300;
+        for (let i = 0; i <= N; i++) {
+          const s = sMax * i / N;
+          const u = us - (us - u0) * Math.exp(-s);
+          P.exact.push({ s, u });
+        }
+      }
+      P.tOf = tOf;
+      tu = tEnd > 300 ? 60 : 1;
+      tuLabel = tu === 60 ? 'min' : 's';
+    }
+
+    function rhs(hh) { return P.q - P.k * Math.sqrt(Math.max(hh, 0)); }
+    function rk4(hh, dt) {
+      const k1 = rhs(hh), k2 = rhs(hh + 0.5 * dt * k1), k3 = rhs(hh + 0.5 * dt * k2), k4 = rhs(hh + dt * k3);
+      return hh + dt * (k1 + 2 * k2 + 2 * k3 + k4) / 6;
+    }
+    function qoutL(hh) { return P.k * Math.sqrt(Math.max(hh, 0)) * P.A * 60 / 1000; }   // L/min
+
+    function fmtTime(x) {
+      if (x < 120) return x.toFixed(x < 10 ? 2 : 1) + ' s';
+      return (x / 60).toFixed(1) + ' min';
+    }
+
+    function exactSeries() {
+      const out = [];
+      if (!P.exact.length) return [{ x: 0, y: P.h0 }, { x: tEnd / tu, y: P.h0 }];
+      P.exact.forEach(p => { out.push({ x: P.tOf(p.u) / tu, y: p.u * p.u }); });
+      // the first point sits at t=0 by construction
+      out[0] = { x: 0, y: P.h0 };
+      return out;
+    }
+
+    function setAxes() {
+      const xmax = tEnd / tu;
+      const ymax = P.over ? H * 1.05 : Math.max(P.hs, P.h0, 1) * 1.15;
+      levelChart.options.scales.x.max = xmax;
+      levelChart.options.scales.x.title.text = 'Time (' + tuLabel + '), analogue of strain';
+      levelChart.options.scales.y.max = ymax;
+      levelChart.data.datasets[1].data = exactSeries();
+      levelChart.data.datasets[2].data = P.over ? [] : [{ x: 0, y: P.hs }, { x: xmax, y: P.hs }];
+      levelChart.data.datasets[3].data = P.over ? [{ x: 0, y: H }, { x: xmax, y: H }] : [];
+      rateChart.options.scales.x.max = xmax;
+      rateChart.options.scales.x.title.text = 'Time (' + tuLabel + ')';
+      rateChart.options.scales.y.max = Math.max(P.QinL, qoutL(P.h0), 0.1) * 1.2;
+      rateChart.data.datasets[0].data = [{ x: 0, y: P.QinL }, { x: xmax, y: P.QinL }];
+    }
+
+    function initCharts() {
+      const common = (xt, yt) => ({
+        responsive: true, maintainAspectRatio: false, animation: false, parsing: false,
+        plugins: { legend: { labels: { color: c.text } } },
+        scales: {
+          x: { type: 'linear', min: 0, max: 1, title: { display: true, text: xt } },
+          y: { min: 0, title: { display: true, text: yt } }
+        }
+      });
+      levelChart = new Chart($('levelChart'), {
+        type: 'line',
+        data: { datasets: [
+          { label: 'Simulation', data: [], borderColor: c.blue, borderWidth: 3, pointRadius: 0 },
+          { label: 'Exact solution', data: [], borderColor: c.white, borderDash: [6, 5], borderWidth: 1.5, pointRadius: 0 },
+          { label: 'Steady level h*', data: [], borderColor: c.green, borderDash: [4, 4], borderWidth: 1.5, pointRadius: 0 },
+          { label: 'Rim of the bucket', data: [], borderColor: c.red, borderDash: [4, 4], borderWidth: 1.5, pointRadius: 0 }
+        ] },
+        options: common('Time (s)', 'Water level, h (cm), analogue of dislocation density')
+      });
+      rateChart = new Chart($('rateChart'), {
+        type: 'line',
+        data: { datasets: [
+          { label: 'Inflow (production)', data: [], borderColor: c.green, borderWidth: 2.5, pointRadius: 0 },
+          { label: 'Outflow (recovery)', data: [], borderColor: c.red, borderWidth: 3, pointRadius: 0 }
+        ] },
+        options: common('Time (s)', 'Rate (L/min)')
+      });
+    }
+
+    // ---- the bucket drawing ----
+    const cv = $('bucket'), ctx = cv.getContext('2d');
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    cv.width = 300 * dpr; cv.height = 390 * dpr; ctx.scale(dpr, dpr);
+
+    function drawBucket() {
+      const W = 300, Ht = 390;
+      ctx.clearRect(0, 0, W, Ht);
+      ctx.fillStyle = c.bg; ctx.fillRect(0, 0, W, Ht);
+      const D = parseFloat(el.dia.value);
+      const bw = 100 + (D - 20) / 20 * 80;              // px
+      const x0 = W / 2 - bw / 2, x1 = W / 2 + bw / 2;
+      const yRim = 90, yBot = 340, sc = (yBot - yRim) / H;
+      const yW = yBot - h * sc;
+      const dmm = parseFloat(el.dh.value);
+      const hw = 3 + dmm * 1.6;                          // hole width in px
+      const qin = P.QinL, qo = qoutL(h);
+
+      // water
+      if (h > 0) {
+        const g = ctx.createLinearGradient(0, yW, 0, yBot);
+        g.addColorStop(0, 'rgba(96,165,250,0.85)'); g.addColorStop(1, 'rgba(37,99,235,0.9)');
+        ctx.fillStyle = g; ctx.fillRect(x0, yW, bw, yBot - yW);
+        ctx.strokeStyle = c.white; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(x0, yW); ctx.lineTo(x1, yW); ctx.stroke();
+      }
+      // tap and incoming stream
+      const tapX = x1 - 28;
+      ctx.fillStyle = '#6b7280';
+      ctx.fillRect(tapX - 14, 24, 60, 14);
+      ctx.fillRect(tapX - 4, 38, 14, 10);
+      const sw = 2 + 9 * qin / 3;
+      ctx.fillStyle = 'rgba(147,197,253,0.9)';
+      ctx.fillRect(tapX + 3 - sw / 2, 48, sw, (h > 0 ? yW : yBot) - 48);
+      // bucket walls, bottom with a gap for the hole
+      ctx.strokeStyle = c.text; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(x0, yRim); ctx.lineTo(x0, yBot); ctx.lineTo(W / 2 - hw / 2, yBot);
+      ctx.moveTo(W / 2 + hw / 2, yBot); ctx.lineTo(x1, yBot); ctx.lineTo(x1, yRim); ctx.stroke();
+      // outgoing stream
+      const ow = Math.max(1.5, 2 + 9 * qo / 3);
+      const ow2 = Math.min(ow, hw);
+      ctx.fillStyle = 'rgba(147,197,253,0.9)';
+      ctx.fillRect(W / 2 - ow2 / 2, yBot, ow2, 38);
+      // spill at the rim
+      if (overflowing) {
+        ctx.fillStyle = 'rgba(147,197,253,0.9)';
+        ctx.fillRect(x1 + 1, yRim, 6, yBot - yRim + 20);
+      }
+      // scale and labels
+      ctx.fillStyle = c.muted; ctx.font = '11px sans-serif'; ctx.textAlign = 'right';
+      for (let v = 0; v <= H; v += 10) {
+        const y = yBot - v * sc;
+        ctx.fillRect(x0 - 8, y - 0.5, 6, 1);
+        ctx.fillText(v, x0 - 11, y + 4);
+      }
+      ctx.textAlign = 'left'; ctx.fillStyle = c.text; ctx.font = '12px sans-serif';
+      ctx.fillText('h = ' + h.toFixed(1) + ' cm', x0 + 6, Math.min(Math.max(yW - 7, yRim + 14), yBot - 6));
+      ctx.fillStyle = c.muted; ctx.textAlign = 'left';
+      ctx.fillText('bucket D = ' + D + ' cm', 10, 18);
+      ctx.fillText('hole d = ' + dmm.toFixed(1) + ' mm', 10, 34);
+    }
+
+    // ---- readouts ----
+    function showReadouts() {
+      $('mT').textContent = fmtTime(t);
+      $('mH').textContent = h.toFixed(1) + ' cm';
+      $('mIn').textContent = P.QinL.toFixed(2) + ' L/min';
+      $('mOut').textContent = (overflowing ? qoutL(H) : qoutL(h)).toFixed(2) + ' L/min';
+      $('mStar').textContent = P.over ? '> rim (' + P.hs.toFixed(0) + ' cm)' : P.hs.toFixed(1) + ' cm';
+      $('mTau').textContent = (P.over || !(P.tau >= 0)) ? '–' : fmtTime(P.tau);
+    }
+    function setStatus() {
+      const s = $('status');
+      s.classList.remove('warn');
+      if (P.over && state === 'idle') { s.textContent = 'This setting overflows: the steady level (' + P.hs.toFixed(0) + ' cm) is above the rim (' + H + ' cm).'; s.classList.add('warn'); }
+      else if (state === 'idle') s.textContent = 'Ready. Press Start.';
+      else if (state === 'running') s.textContent = overflowing ? 'Running. The bucket is overflowing.' : 'Running…';
+      else if (state === 'paused') s.textContent = 'Paused.';
+      else if (state === 'finished') {
+        if (P.over) { s.textContent = 'Finished. The bucket overflowed at ' + fmtTime(P.tOver || 0) + '.'; s.classList.add('warn'); }
+        else if (P.us === 0 && P.h0 > 0) s.textContent = 'Finished. With no inflow the bucket has drained: recovery alone (static recovery).';
+        else s.textContent = 'Finished. Level at ' + h.toFixed(1) + ' cm, steady level ' + P.hs.toFixed(1) + ' cm.';
+      }
+    }
+
+    function labels() {
+      $('qinV').textContent = parseFloat(el.qin.value).toFixed(2);
+      $('dhV').textContent = parseFloat(el.dh.value).toFixed(1);
+      $('diaV').textContent = el.dia.value;
+      $('h0V').textContent = el.h0.value;
+      $('spdV').textContent = Math.round(Math.pow(10, parseFloat(el.spd.value)));
+    }
+
+    function autoSpeed() {
+      const sp = Math.min(Math.max(tEnd / 12, 1), 5000);
+      el.spd.value = Math.min(3.7, Math.max(0, Math.log10(sp))).toFixed(2);
+      $('spdV').textContent = Math.round(Math.pow(10, parseFloat(el.spd.value)));
+    }
+
+    function reset() {
+      state = 'idle'; lastTs = null; overflowing = false;
+      readParams();
+      t = 0; h = P.h0;
+      hData = [{ x: 0, y: h }]; qData = [{ x: 0, y: qoutL(h) }];
+      levelChart.data.datasets[0].data = hData;
+      rateChart.data.datasets[1].data = qData;
+      setAxes();
+      levelChart.update('none'); rateChart.update('none');
+      $('runBtn').textContent = 'Start';
+      labels(); showReadouts(); setStatus(); drawBucket();
+    }
+
+    function advance(dtSim) {
+      const dtMax = tEnd / 2000;
+      let left = dtSim;
+      while (left > 1e-12 && t < tEnd) {
+        const dt = Math.min(dtMax, left, tEnd - t);
+        h = Math.max(rk4(h, dt), 0);
+        if (h >= H) { h = H; overflowing = rhs(H) > 0; }
+        else overflowing = false;
+        t += dt; left -= dt;
+      }
+      hData.push({ x: t / tu, y: h });
+      qData.push({ x: t / tu, y: overflowing ? qoutL(H) : qoutL(h) });
+    }
+
+    function frame(ts) {
+      if (state !== 'running') return;
+      if (lastTs === null) lastTs = ts;
+      const dtReal = Math.min((ts - lastTs) / 1000, 0.1); lastTs = ts;
+      advance(dtReal * Math.pow(10, parseFloat(el.spd.value)));
+      if (t >= tEnd - 1e-9) { state = 'finished'; $('runBtn').textContent = 'Start'; }
+      levelChart.update('none'); rateChart.update('none');
+      showReadouts(); setStatus(); drawBucket();
+      if (state === 'running') requestAnimationFrame(frame);
+    }
+
+    $('runBtn').addEventListener('click', () => {
+      if (state === 'running') { state = 'paused'; $('runBtn').textContent = 'Resume'; setStatus(); return; }
+      if (state === 'finished') reset();
+      state = 'running'; lastTs = null; $('runBtn').textContent = 'Pause'; setStatus();
+      requestAnimationFrame(frame);
+    });
+    $('resetBtn').addEventListener('click', reset);
+    ['qin', 'dh', 'dia', 'h0'].forEach(id => el[id].addEventListener('input', () => { reset(); autoSpeed(); }));
+    el.spd.addEventListener('input', labels);
+
+    initCharts();
+    reset();
+    autoSpeed();
+  </script>
+</body>
+</html>

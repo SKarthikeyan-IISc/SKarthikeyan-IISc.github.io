@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Free Energy of a Dislocation Loop: Nucleation under Stress | Teaching Tools</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .cwrap { position: relative; width: 100%; max-width: 760px; }
+    canvas#plot-canvas { cursor: default; width: 100%; height: auto; display: block; }
+    .legend-box { position: absolute; top: 14px; right: 14px; background: rgba(22,27,34,0.9); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; font-size: 0.82rem; color: #e0e0e0; }
+    .legend-box div { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin: 2px 0; }
+    .legend-box i { display: inline-block; width: 22px; height: 0; border-top: 3px solid; }
+    .legend-box i.dot { border-top-style: dotted; }
+    .panel.plain { align-items: center; }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Free Energy of a Dislocation Loop: Nucleation under Stress</h1>
+  <p class="subtitle">A loop of radius <i>r</i> costs line energy and gains work from the applied stress. Their sum has a maximum, the energy barrier to nucleating a loop.</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>&tau; slider:</strong> sets the applied shear stress, in units of the shear modulus &mu;, from 0 to 0.1.</li>
+        <li><strong>Curves:</strong> the red dotted line is the energy penalty <i>E</i>(<i>r</i>) of the dislocation line, the green dotted line is the work <i>W</i>(<i>r</i>) done by the stress, and the blue line is their sum, the free energy <i>F</i>(<i>r</i>).</li>
+        <li><strong>Blue marker:</strong> the maximum of <i>F</i>, which is the critical radius <i>r</i>* and the nucleation barrier <i>F</i>*, printed next to it. Loops smaller than <i>r</i>* shrink; loops larger than <i>r</i>* grow freely.</li>
+        <li>Try &tau; = 0.01, 0.02 and 0.05. With &tau; = 0 there is no maximum, and every loop shrinks.</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="tool">
+    <div class="panel wide" style="padding: 12px 20px;">
+      <div class="ctl"><label for="tau-slider">&tau; (in &mu;)</label><input type="range" id="tau-slider" min="0" max="0.1" step="0.001" value="0.02"><span id="value-display" class="val">0.020</span></div>
+    </div>
+    <div class="panel wide plain">
+      <div class="cwrap">
+        <canvas id="plot-canvas" width="760" height="440"></canvas>
+        <div class="legend-box">
+          <div>F(r) = 2&pi;r &minus; &tau;&pi;r&sup2; <i style="border-color:#60a5fa"></i></div>
+          <div>E(r) = 2&pi;r <i class="dot" style="border-color:#f87171"></i></div>
+          <div>W(r) = &minus;&tau;&pi;r&sup2; <i class="dot" style="border-color:#34d399"></i></div>
+        </div>
+      </div>
+      <ul style="font-size:0.85rem;color:#aaa;align-self:flex-start;margin-top:14px">
+        <li>Energy is in units of &mu;&middot;<i>b</i><sup>3</sup>, where &mu; is the shear modulus and <i>b</i> is the Burgers vector.</li>
+        <li>The loop radius is in units of <i>b</i>.</li>
+        <li>The applied shear stress &tau; is in units of &mu;.</li>
+      </ul>
+    </div>
+  </div>
+
+  <details class="note">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <p>Consider a circular dislocation loop of radius \(r\) and Burgers vector \(b\) nucleating on a glide plane under a shear stress \(\tau\). Two terms control its energy.</p>
+      <p>First, the dislocation line has a line energy of about \(\mu b^2\) per unit length (a typical value), so the energy of the loop, which grows with the length of the line, is</p>
+      <div class="eq">\( E(r) = 2\pi r\cdot \mu b^2 \;\;\rightarrow\;\; 2\pi r \) in units of \(\mu b^3\)</div>
+      <p>Second, when the loop expands, the part of the glide plane inside it (area \(\pi r^2\)) is displaced by \(b\) and the stress does work \(\tau b\,\pi r^2\). This lowers the free energy:</p>
+      <div class="eq">\( W(r) = -\tau\,\pi r^2 \)</div>
+      <p>The free energy of the loop is the sum:</p>
+      <div class="eq">\( F(r) = 2\pi r - \tau\pi r^2 \)</div>
+      <p>At small \(r\) the linear term wins, so \(F\) rises. At large \(r\) the quadratic term wins, so \(F\) falls. The maximum is at</p>
+      <div class="eq">\( r^* = \dfrac{1}{\tau}, \qquad F^* = \dfrac{\pi}{\tau} \)</div>
+      <p>(in units of \(b\) and \(\mu b^3\)). A loop smaller than \(r^*\) lowers its energy by shrinking, one larger than \(r^*\) by growing. To nucleate a loop, thermal activation (or a stress concentration) must supply the energy \(F^*\), which is why homogeneous nucleation of dislocations needs a stress near the theoretical strength, whereas heterogeneous sources, such as the Frank&ndash;Read source, need only a small stress. The same shape of curve, an energy barrier that falls as the driving force rises, arises for the nucleation of a crystal in a liquid.</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt>Dislocation loop</dt><dd>A closed dislocation line enclosing a region of slipped crystal.</dd>
+        <dt><i>b</i></dt><dd>Burgers vector, the magnitude of the slip.</dd>
+        <dt>&mu;</dt><dd>Shear modulus.</dd>
+        <dt>&tau;</dt><dd>Applied resolved shear stress, here in units of &mu;.</dd>
+        <dt>Critical radius, <i>r</i>*</dt><dd>The radius of the loop at the maximum of <i>F</i>(<i>r</i>), above which the loop grows spontaneously.</dd>
+        <dt>Nucleation barrier, <i>F</i>*</dt><dd>The free energy of the critical loop.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /* Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved. */
+    const C = TOOL.c;
+    const canvas = document.getElementById('plot-canvas');
+    const ctx = canvas.getContext('2d');
+    const slider = document.getElementById('tau-slider');
+    const valueDisplay = document.getElementById('value-display');
+
+    const PI = Math.PI;
+    const minX = 0, maxX = 160, minY = -100, maxY = 400;
+    const m = { l: 70, r: 20, t: 20, b: 55 };
+    const pw = canvas.width - m.l - m.r, ph = canvas.height - m.t - m.b;
+    const mapX = r => m.l + (r - minX) / (maxX - minX) * pw;
+    const mapY = f => m.t + ph - (f - minY) / (maxY - minY) * ph;
+
+    const calcF = (r, tau) => 2 * PI * r - tau * PI * r * r;
+    const calcE = r => 2 * PI * r;
+    const calcW = (r, tau) => -tau * PI * r * r;
+
+    function drawAxes() {
+      ctx.font = '13px sans-serif'; ctx.lineWidth = 1;
+      for (let i = 0; i <= 8; i++) {
+        const r = minX + (maxX - minX) * i / 8, x = mapX(r);
+        ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(x, m.t); ctx.lineTo(x, m.t + ph); ctx.stroke();
+        ctx.strokeStyle = C.axis; ctx.beginPath(); ctx.moveTo(x, m.t + ph); ctx.lineTo(x, m.t + ph + 5); ctx.stroke();
+        ctx.fillStyle = C.text; ctx.textAlign = 'center'; ctx.fillText(r.toFixed(0), x, m.t + ph + 20);
+      }
+      for (let i = 0; i <= 5; i++) {
+        const f = minY + (maxY - minY) * i / 5, y = mapY(f);
+        ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(m.l, y); ctx.lineTo(m.l + pw, y); ctx.stroke();
+        ctx.strokeStyle = C.axis; ctx.beginPath(); ctx.moveTo(m.l - 5, y); ctx.lineTo(m.l, y); ctx.stroke();
+        ctx.fillStyle = C.text; ctx.textAlign = 'right'; ctx.fillText(f.toFixed(0), m.l - 9, y + 4);
+      }
+      ctx.strokeStyle = C.text; ctx.lineWidth = 1.5;               // zero-energy line
+      ctx.beginPath(); ctx.moveTo(m.l, mapY(0)); ctx.lineTo(m.l + pw, mapY(0)); ctx.stroke();
+      ctx.strokeStyle = C.axis; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(m.l, m.t); ctx.lineTo(m.l, m.t + ph); ctx.lineTo(m.l + pw, m.t + ph); ctx.stroke();
+      ctx.fillStyle = C.text; ctx.textAlign = 'center'; ctx.font = '14px sans-serif';
+      ctx.fillText('Loop radius, r  (in b)', m.l + pw / 2, canvas.height - 12);
+      ctx.save(); ctx.translate(18, m.t + ph / 2); ctx.rotate(-PI / 2); ctx.fillText('Energy  (in μ·b³)', 0, 0); ctx.restore();
+    }
+
+    function line(fn, color, width, dash) {
+      ctx.save();
+      ctx.beginPath(); ctx.rect(m.l, m.t, pw, ph); ctx.clip();
+      ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = width; ctx.setLineDash(dash || []);
+      for (let r = 0; r <= maxX; r += 0.5) { const x = mapX(r), y = mapY(fn(r)); if (r === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }
+      ctx.stroke(); ctx.restore();
+    }
+
+    function plotFunction(tau) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = C.bg; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      drawAxes();
+      line(r => calcF(r, tau), C.blue, 3);
+      line(r => calcE(r), C.red, 2, [5, 5]);
+      line(r => calcW(r, tau), C.green, 2, [5, 5]);
+
+      if (tau > 0) {
+        const rs = 1 / tau, Fs = PI / tau;
+        if (rs <= maxX) {
+          const x = mapX(rs), y = mapY(Fs);
+          ctx.beginPath(); ctx.arc(x, y, 6, 0, 2 * PI); ctx.fillStyle = C.blue; ctx.fill();
+          ctx.fillStyle = C.text; ctx.font = '14px sans-serif';
+          const txt = 'r* = ' + rs.toFixed(1) + ' b,   F* = ' + Fs.toFixed(1) + ' μ·b³';
+          ctx.textAlign = x > canvas.width * 0.55 ? 'right' : 'left';
+          ctx.fillText(txt, x + (ctx.textAlign === 'left' ? 12 : -12), y - 12);
+        }
+      }
+    }
+
+    function update() {
+      const tau = parseFloat(slider.value);
+      valueDisplay.textContent = tau.toFixed(3);
+      plotFunction(tau);
+    }
+    slider.addEventListener('input', update);
+    update();
+  </script>
+</body>
+</html>

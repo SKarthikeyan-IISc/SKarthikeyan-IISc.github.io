@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Misfit Stress around a Spherical Precipitate | Teaching Tools</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .mf { width: 100%; max-width: 1100px; display: grid; grid-template-columns: 310px minmax(0, 1fr); gap: 16px; align-items: start; }
+    @media (max-width: 860px) { .mf { grid-template-columns: minmax(0, 1fr); } }
+    .mpanel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; box-sizing: border-box; min-width: 0; }
+    .mrail { display: flex; flex-direction: column; gap: 14px; }
+    .mgroup { display: flex; flex-direction: column; gap: 10px; padding-top: 14px; border-top: 1px solid var(--line); }
+    .mgroup:first-child { border-top: 0; padding-top: 0; }
+    .meyebrow { font-size: 0.75rem; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); margin: 0; }
+    .mctl { display: flex; flex-direction: column; gap: 5px; font-size: 0.88rem; color: var(--ink-soft); }
+    .mctl .mrow { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+    .mctl output { font-family: ui-monospace, Menlo, Consolas, monospace; color: #fff; font-size: 0.85rem; white-space: nowrap; }
+    .mctl small, .mhint { color: var(--muted); font-size: 0.78rem; line-height: 1.4; }
+    .mctl input[type=range] { width: 100%; }
+    .mctl select { max-width: 100%; }
+    .mchips { display: flex; flex-wrap: wrap; gap: 6px; }
+    button.mchip { background: transparent; border: 1px solid var(--line); color: var(--ink-soft); border-radius: 999px; padding: 4px 10px; font-size: 0.78rem; font-weight: 500; }
+    button.mchip:hover { border-color: var(--blue-soft); background: transparent; }
+    button.mchip[aria-pressed="true"] { background: #14304f; border-color: var(--blue); color: var(--blue-soft); }
+    .mcheck { display: flex; gap: 8px; align-items: center; font-size: 0.86rem; color: var(--ink-soft); }
+    .mseg { display: flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+    .mseg button { flex: 1; background: transparent; color: var(--ink-soft); border: 0; border-radius: 0; padding: 6px 8px; font-size: 0.8rem; font-weight: 500; }
+    .mseg button + button { border-left: 1px solid var(--line); }
+    .mseg button:hover { background: var(--panel-2); }
+    .mseg button[aria-pressed="true"] { background: #14304f; color: var(--blue-soft); }
+    .mtool { display: flex; flex-wrap: wrap; gap: 12px 22px; align-items: flex-end; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--line); }
+    .mtool .mseg { min-width: 230px; }
+    .mstage { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+    .mapbox { display: flex; gap: 12px; align-items: stretch; flex-wrap: wrap; }
+    .mapcol { flex: 1 1 340px; min-width: 0; max-width: 560px; }
+    #map { width: 100%; aspect-ratio: 1; display: block; border-radius: 6px; border: 1px solid var(--line); cursor: crosshair; touch-action: none; }
+    .cbar { display: flex; gap: 8px; align-items: stretch; min-height: 240px; padding-bottom: 22px; }
+    .cbwrap { position: relative; width: 16px; flex: 0 0 16px; }
+    #cbar { position: absolute; left: 0; top: 0; width: 100%; height: 100%; border-radius: 3px; border: 1px solid var(--line); box-sizing: border-box; }
+    .cbticks { position: relative; width: 82px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.75rem; color: var(--ink-soft); }
+    .cbticks span { position: absolute; left: 0; transform: translateY(-50%); white-space: nowrap; }
+    .mside { display: flex; flex-direction: column; gap: 10px; flex: 0 1 200px; min-width: 150px; }
+    .probe { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.8rem; line-height: 1.6; color: var(--ink-soft); }
+    .probe b { color: #fff; font-weight: 500; }
+    .mstats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+    .mstat { border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; background: var(--panel); }
+    .mstat .k { font-size: 0.75rem; color: var(--muted); }
+    .mstat .v { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 1.1rem; color: #fff; line-height: 1.3; }
+    .mstat .v small { font-size: 0.75rem; color: var(--ink-soft); }
+    .mstat .s { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+    #prof { width: 100%; height: 240px; display: block; }
+    .mlegend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.8rem; color: var(--ink-soft); margin-top: 8px; }
+    .mlegend i { display: inline-block; width: 18px; height: 0; border-top: 2px solid; vertical-align: middle; margin-right: 6px; }
+    .mwarn { font-size: 0.8rem; color: #f0c46a; background: #33290f; border-radius: 6px; padding: 8px 10px; }
+    .meqs { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px 26px; margin-top: 10px; }
+    .meq { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.8rem; line-height: 1.6; color: var(--ink); overflow-x: auto; min-width: 0; }
+    .meq .lbl { font-family: inherit; font-size: 0.78rem; color: var(--muted); display: block; font-family: "Segoe UI", sans-serif; }
+    .meq em { font-style: normal; color: var(--blue-soft); }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Misfit Stress around a Spherical Precipitate</h1>
+  <p class="subtitle">The elastic stress field of a spherical precipitate or solute atom in an isotropic matrix, found with Eshelby's equivalent-inclusion method. Set the size, the lattice misfit, the elastic constants of both phases and a remote applied stress, and probe the stress on a plane through the centre.</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>Examples:</strong> the buttons at the top of the controls load typical cases, such as a coherent precipitate, a solute atom, and a hard particle or a pore under tension. Every control can then be changed.</li>
+        <li><strong>Geometry and misfit:</strong> the radius <i>r</i><sub>0</sub> (0.1 to 30 nm) and the lattice misfit &delta; = (<i>a</i><sub>p</sub> &minus; <i>a</i><sub>m</sub>) / <i>a</i><sub>m</sub>, positive when the precipitate is oversized. The field of view can be set by hand or locked to 4<i>r</i><sub>0</sub>.</li>
+        <li><strong>Matrix and precipitate:</strong> the shear modulus and Poisson&rsquo;s ratio of the matrix, and either the same constants for the precipitate or its own shear and bulk moduli. Set both moduli of the precipitate near zero to model a pore.</li>
+        <li><strong>Applied stress:</strong> a remote stress (uniaxial along <i>x</i> or <i>y</i>, equibiaxial, pure shear or hydrostatic), positive in tension. With zero applied stress only the misfit field is shown.</li>
+        <li><strong>Display (above the map):</strong> choose the stress component. <em>Total field</em> includes the applied stress; <em>Disturbance only</em> subtracts it and shows what the precipitate adds. The colour scale follows the largest value in view, or can be fixed so that two cases are compared on the same scale.</li>
+        <li><strong>Map and probe:</strong> the map is the plane <i>z</i> = 0 through the centre of the sphere, with ten contour bands, blue for compression and red for tension for the signed components. Hover or drag on it to read all components at a point; the vertical line on the profile marks the same distance.</li>
+        <li><strong>Profile and numbers:</strong> the profile shows the stresses along the <i>x</i> axis, and the panels under it give the constrained misfit strain, the pressure inside, the largest stress in view and the misfit energy, with the quantities used in the calculation.</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="mf">
+    <aside class="mpanel mrail" aria-label="Controls">
+      <div class="mgroup">
+        <p class="meyebrow">Examples</p>
+        <div class="mchips" id="presets"></div>
+      </div>
+
+      <div class="mgroup">
+        <p class="meyebrow">Geometry and misfit</p>
+        <div class="mctl">
+          <div class="mrow"><label for="r0">Precipitate radius <i>r</i><sub>0</sub></label><output id="r0o"></output></div>
+          <input type="range" id="r0" min="-1" max="1.5" step="0.005" value="0.699">
+          <small>Log scale, 0.1 to 30 nm.</small>
+        </div>
+        <div class="mctl">
+          <div class="mrow"><label for="dl">Lattice misfit &delta;</label><output id="dlo"></output></div>
+          <input type="range" id="dl" min="-5" max="5" step="0.05" value="0.5">
+          <small>&delta; = (a<sub>p</sub> &minus; a<sub>m</sub>) / a<sub>m</sub>. Positive means oversized.</small>
+        </div>
+        <div class="mctl">
+          <div class="mrow"><label for="fov">Field of view (half-width)</label><output id="fovo"></output></div>
+          <input type="range" id="fov" min="-0.3" max="2" step="0.005" value="1.477">
+          <label class="mcheck"><input type="checkbox" id="lock"> Lock view to 4 <i>r</i><sub>0</sub></label>
+        </div>
+      </div>
+
+      <div class="mgroup">
+        <p class="meyebrow">Matrix</p>
+        <div class="mctl">
+          <div class="mrow"><label for="mu">Shear modulus &mu;<sub>m</sub></label><output id="muo"></output></div>
+          <input type="range" id="mu" min="10" max="150" step="1" value="76">
+        </div>
+        <div class="mctl">
+          <div class="mrow"><label for="nu">Poisson&rsquo;s ratio &nu;<sub>m</sub></label><output id="nuo"></output></div>
+          <input type="range" id="nu" min="0.1" max="0.45" step="0.01" value="0.3">
+        </div>
+      </div>
+
+      <div class="mgroup">
+        <p class="meyebrow">Precipitate</p>
+        <label class="mcheck"><input type="checkbox" id="same" checked> Same elastic constants as matrix</label>
+        <div class="mctl">
+          <div class="mrow"><label for="mup">Shear modulus &mu;<sub>p</sub></label><output id="mupo"></output></div>
+          <input type="range" id="mup" min="0" max="400" step="1" value="76">
+        </div>
+        <div class="mctl">
+          <div class="mrow"><label for="kp">Bulk modulus <i>K</i><sub>p</sub></label><output id="kpo"></output></div>
+          <input type="range" id="kp" min="0" max="400" step="1" value="165">
+        </div>
+        <small class="mhint">Set both near zero to model a pore.</small>
+      </div>
+
+      <div class="mgroup">
+        <p class="meyebrow">Applied stress (far field)</p>
+        <div class="mctl">
+          <label for="ltype">Loading</label>
+          <select id="ltype">
+            <option value="ux">Uniaxial along x</option>
+            <option value="uy">Uniaxial along y</option>
+            <option value="bi">Equibiaxial in x&ndash;y</option>
+            <option value="sh">Pure shear &tau;xy</option>
+            <option value="hy">Hydrostatic</option>
+          </select>
+        </div>
+        <div class="mctl">
+          <div class="mrow"><label for="sa">Magnitude &sigma;<sub>A</sub></label><output id="sao"></output></div>
+          <input type="range" id="sa" min="-1500" max="1500" step="10" value="0">
+          <small>Positive is tension. Zero gives the misfit field alone.</small>
+        </div>
+      </div>
+    </aside>
+
+    <section class="mstage">
+      <div class="mpanel">
+        <div class="mtool">
+          <div class="mctl">
+            <label for="comp">Stress component</label>
+            <select id="comp">
+              <option value="xx">&sigma;xx</option>
+              <option value="yy">&sigma;yy</option>
+              <option value="zz">&sigma;zz (out of plane)</option>
+              <option value="xy">&sigma;xy (shear)</option>
+              <option value="rr">&sigma;rr (radial)</option>
+              <option value="tt">&sigma;&theta;&theta; (hoop, in plane)</option>
+              <option value="m">Mean (hydrostatic) stress</option>
+              <option value="vm">Von Mises stress</option>
+            </select>
+          </div>
+          <div class="mctl">
+            <span>Show</span>
+            <div class="mseg" role="group" aria-label="Field to show" title="Disturbance subtracts the applied stress, leaving what the precipitate adds.">
+              <button type="button" id="vTot" aria-pressed="true">Total field</button>
+              <button type="button" id="vDis" aria-pressed="false">Disturbance only</button>
+            </div>
+          </div>
+          <div class="mctl">
+            <label class="mcheck"><input type="checkbox" id="fixed"> Fixed colour scale</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="number" id="fixv" value="1000" min="1" step="50" style="width:100px" aria-label="Fixed colour scale limit in MPa"><span class="mhint">&plusmn; MPa</span>
+            </div>
+          </div>
+        </div>
+        <div class="mapbox">
+          <div class="mapcol">
+            <canvas id="map" width="460" height="460" role="img" aria-label="Contour map of the selected stress component around the precipitate"></canvas>
+          </div>
+          <div class="cbar">
+            <div class="cbwrap"><canvas id="cbar" width="16" height="300" aria-hidden="true"></canvas></div>
+            <div class="cbticks" id="cbt"></div>
+          </div>
+          <div class="mside">
+            <p class="meyebrow">Probe</p>
+            <div class="probe" id="probe">Hover or drag on the map.</div>
+            <div class="mwarn" id="warn" hidden></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mstats" id="stats"></div>
+
+      <div class="mpanel">
+        <p class="meyebrow">Profile along the x axis</p>
+        <canvas id="prof" role="img" aria-label="Stress components plotted against distance from the precipitate centre along x"></canvas>
+        <div class="mlegend">
+          <span><i style="border-color:#60a5fa"></i>&sigma;xx (radial on this line)</span>
+          <span><i style="border-color:#f87171"></i>&sigma;yy (hoop on this line)</span>
+          <span><i style="border-color:#9aa3a0;border-top-style:dashed"></i>Mean stress</span>
+        </div>
+      </div>
+
+      <div class="mpanel">
+        <p class="meyebrow">The numbers behind the picture</p>
+        <div class="meqs" id="eqs"></div>
+      </div>
+    </section>
+  </div>
+
+  <details class="note" style="margin-top:16px">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <h4>The misfitting precipitate</h4>
+      <p>A coherent precipitate, or a solute atom, whose lattice parameter differs from that of the matrix by \(\delta=(a_p-a_m)/a_m\) cannot fit into the hole it occupies. To keep the interface coherent, the precipitate is compressed and the matrix is stretched around it (for \(\delta>0\)), and both are elastically strained. The tool treats a sphere of radius \(r_0\) in an infinite, isotropic matrix of shear modulus \(\mu_m\) and Poisson&rsquo;s ratio \(\nu_m\), and shows the stress on the plane \(z=0\) through its centre.</p>
+
+      <h4>Eshelby&rsquo;s equivalent inclusion</h4>
+      <p>Eshelby (1957) showed that for an ellipsoid the strain inside is uniform, and that a particle with different elastic constants can be replaced by a particle of matrix material that carries a fictitious misfit strain, an <em>eigenstrain</em> \(\varepsilon^*\), chosen so that the stress inside is the same as in the real particle. For a sphere the Eshelby tensor has two numbers, set by the matrix only:</p>
+      <div class="eq">\( \alpha = \dfrac{1+\nu_m}{3(1-\nu_m)}, \qquad \beta = \dfrac{2(4-5\nu_m)}{15(1-\nu_m)} \)</div>
+      <p>The eigenstrain has a volumetric part, driven by the misfit and by any applied pressure, and a deviatoric part, driven only by an applied shear and only when \(\mu_p\neq\mu_m\). The strain inside the particle is then uniform, and so is the stress. The stress outside is the applied stress plus a disturbance that is the field of the eigenstrain.</p>
+
+      <h4>Misfit alone</h4>
+      <p>With no applied stress, the misfit produces a uniform hydrostatic pressure in the particle and a pure-shear field in the matrix:</p>
+      <div class="eq">\( p_\text{in} = 4\mu_m\,\varepsilon, \qquad \varepsilon = \dfrac{3K_p\,\delta}{3K_p+4\mu_m} \)</div>
+      <div class="eq">\( \sigma_{rr} = -4\mu_m\,\varepsilon\,(r_0/r)^3, \qquad \sigma_{\theta\theta}=\sigma_{\phi\phi} = +2\mu_m\,\varepsilon\,(r_0/r)^3 \)</div>
+      <p>The mean stress \(\sigma_{rr}+2\sigma_{\theta\theta}\) is zero everywhere in the matrix, so the misfit of a sphere produces no hydrostatic pressure outside it, only shear. This is why a spherical solute atom interacts with a screw dislocation only through second-order effects, and with an edge dislocation, whose field has a hydrostatic part, to first order. The field falls off as \(r^{-3}\), so it is short-ranged. The constrained strain \(\varepsilon\) is smaller than \(\delta\), and for equal elastic constants \(\varepsilon=\alpha\delta\).</p>
+
+      <h4>Applied stress</h4>
+      <p>An applied stress is concentrated by a stiffer or softer particle. A pore under tension is the extreme case: for uniaxial tension \(\sigma\) the stress at the equator of a spherical pore is \(\sigma\,(27-15\nu)/[2(7-5\nu)]\), about 2.05\(\sigma\) for \(\nu=0.3\). A hard particle carries more stress than the matrix and unloads it nearby. The \(r^{-3}\) and \(r^{-5}\) terms of the disturbance are visible in the profile, where the \(r^{-5}\) term matters near the interface.</p>
+
+      <h4>Energy</h4>
+      <p>The elastic energy stored by the misfit alone is</p>
+      <div class="eq">\( W = 6\,\mu_m\,\delta\,\varepsilon\,V, \qquad V = \tfrac{4}{3}\pi r_0^3 \)</div>
+      <p>which for equal elastic constants becomes the familiar \(2\mu\,\frac{1+\nu}{1-\nu}\,\delta^2 V\). It grows with the volume, so a large precipitate with a large misfit can lower its energy by losing coherency and forming misfit dislocations at the interface, and the tool warns when the product \(|\delta|\,r_0\) is large. The energy does not include the interaction of the precipitate with the applied stress.</p>
+
+      <h4>Limits of the model</h4>
+      <ul>
+        <li>The matrix and the precipitate are isotropic and linear elastic. Real crystals are anisotropic, which changes the shape of the field, though not its \(r^{-3}\) decay.</li>
+        <li>There is a single particle in an infinite matrix, so the results hold for a dilute dispersion. At a high volume fraction the fields overlap.</li>
+        <li>At atomic size (below about 0.5 nm) continuum elasticity holds only approximately.</li>
+        <li>A pore cannot carry a misfit, and the tool gives the pore field for any misfit.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt>Lattice misfit, &delta;</dt><dd>The relative difference of the lattice parameters of the precipitate and the matrix, (<i>a</i><sub>p</sub> &minus; <i>a</i><sub>m</sub>) / <i>a</i><sub>m</sub>.</dd>
+        <dt>Coherent interface</dt><dd>An interface across which the lattice planes are continuous. The misfit is then taken up by elastic strain.</dd>
+        <dt>Eigenstrain</dt><dd>A strain that a region would have in the absence of the constraint of its surroundings, such as the misfit strain of a precipitate.</dd>
+        <dt>Equivalent inclusion</dt><dd>Eshelby&rsquo;s replacement of a particle with different elastic constants by a matrix-like particle that carries a fictitious eigenstrain.</dd>
+        <dt>Constrained strain, &epsilon;</dt><dd>The part of the misfit that actually appears as strain in the inclusion once the matrix resists it.</dd>
+        <dt>Mean (hydrostatic) stress</dt><dd>One third of the trace of the stress tensor. A positive value is tension.</dd>
+        <dt>Von Mises stress</dt><dd>A scalar measure of the shear (deviatoric) part of the stress, used for yielding.</dd>
+        <dt>Disturbance field</dt><dd>The stress minus the applied stress: what the precipitate adds.</dd>
+        <dt>Stress concentration factor</dt><dd>The ratio of the largest local stress to the applied stress.</dd>
+        <dt>Bulk modulus, <i>K</i></dt><dd>The resistance to uniform volume change, <i>K</i> = 2&mu;(1 + &nu;)/[3(1 &minus; 2&nu;)] for an isotropic solid.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /* Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved. */
+    (function (g) {
+      const I3 = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+      const tr = A => A[0][0] + A[1][1] + A[2][2];
+      const add = (A, B, b = 1) => A.map((r, i) => r.map((v, j) => v + b * B[i][j]));
+      const scl = (A, s) => A.map(r => r.map(v => v * s));
+      function hooke(e, lam, mu) { const t = tr(e); return e.map((r, i) => r.map((v, j) => 2 * mu * v + (i === j ? lam * t : 0))); }
+      function makeModel(o) {
+        const mu_m = o.mu_m, nu = o.nu_m, K_m = 2 * mu_m * (1 + nu) / (3 * (1 - 2 * nu)), lam_m = K_m - 2 * mu_m / 3;
+        const mu_p = o.mu_p, K_p = o.K_p, lam_p = K_p - 2 * mu_p / 3, d = o.delta, a = o.r0, sA = o.sA;
+        const ts = tr(sA), eA = sA.map((r, i) => r.map((v, j) => v / (2 * mu_m) - (i === j ? lam_m * ts / (2 * mu_m * (3 * lam_m + 2 * mu_m)) : 0)));
+        const ea = tr(eA) / 3, dA = add(eA, scl(I3, ea), -1);
+        const al = (1 + nu) / (3 * (1 - nu)), be = 2 * (4 - 5 * nu) / (15 * (1 - nu));
+        const ev = (K_p * d + (K_m - K_p) * ea) / (K_m + al * (K_p - K_m));
+        const kd = (mu_m - mu_p) / (mu_m + be * (mu_p - mu_m));
+        const Es = add(scl(I3, ev), scl(dA, kd));
+        const eIn = add(add(eA, scl(I3, al * ev)), scl(dA, be * kd));
+        const sIn = hooke(add(eIn, scl(I3, d), -1), lam_p, mu_p);
+        const trE = tr(Es);
+        function stress(x, y, z) {
+          const r = Math.hypot(x, y, z);
+          if (r < a) return sIn;
+          const n = [x / r, y / r, z / r], p = a / r, p2 = p * p, p3 = p2 * p;
+          const En = [0, 1, 2].map(i => Es[i][0] * n[0] + Es[i][1] * n[1] + Es[i][2] * n[2]);
+          const nEn = En[0] * n[0] + En[1] * n[1] + En[2] * n[2];
+          const A = 3 * p2 + 10 * nu - 5, B = 3 * p2 - 10 * nu + 5, f = p3 / (30 * (1 - nu));
+          const e = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+          for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) {
+            const dij = i === j ? 1 : 0;
+            e[i][j] = eA[i][j] + f * (A * trE * dij + 2 * B * Es[i][j] + 15 * (1 - p2) * nEn * dij + 15 * (1 - 2 * nu - p2) * trE * n[i] * n[j]
+              + 30 * (nu - p2) * (En[i] * n[j] + n[i] * En[j]) + 15 * (7 * p2 - 5) * nEn * n[i] * n[j]);
+          }
+          return hooke(e, lam_m, mu_m);
+        }
+        return { stress, K_m, ev, kd, al, be, sIn, eIn, Es, ea };
+      }
+      g.MisfitCore = { makeModel, tr };
+    })(window);
+  </script>
+
+  <script>
+    (function () {
+      const $ = id => document.getElementById(id);
+      const { makeModel } = window.MisfitCore;
+      const S = { r0: 5, dl: 0.5, H: 30, mu: 76, nu: 0.3, mup: 76, kp: 165, lt: "ux", sa: 0, comp: "xx", dist: false, probe: null };
+      let M = null, SA = null;
+      const presets = [
+        { n: "Coherent precipitate", r0: 5, dl: 0.5, H: 30, same: true, sa: 0 },
+        { n: "Large precipitate", r0: 20, dl: 0.5, H: 60, same: true, sa: 0 },
+        { n: "Undersized", r0: 5, dl: -1, H: 30, same: true, sa: 0 },
+        { n: "Solute atom", r0: 0.14, dl: 4, H: 0.8, same: true, sa: 0 },
+        { n: "Hard particle in tension", r0: 5, dl: 0, H: 20, same: false, mup: 230, kp: 330, lt: "ux", sa: 400, comp: "xx" },
+        { n: "Pore in tension", r0: 5, dl: 0, H: 20, same: false, mup: 0, kp: 0, lt: "ux", sa: 400, comp: "xx" },
+        { n: "Hard misfitting particle in tension", r0: 5, dl: 0.5, H: 20, same: false, mup: 230, kp: 330, lt: "ux", sa: 400, comp: "xx" }
+      ];
+      const signedComp = { xx: 1, yy: 1, zz: 1, xy: 1, rr: 1, tt: 1, m: 1, vm: 0 };
+      const fmt = (v, d = 0) => { const a = Math.abs(v); if (a >= 1e5) return v.toExponential(2); if (a < 0.5 && d === 0 && a > 0) return v.toFixed(2); return v.toFixed(d); };
+      const nm = v => v < 1 ? v.toFixed(2) + " nm" : v < 10 ? v.toFixed(1) + " nm" : v.toFixed(0) + " nm";
+
+      function appliedTensor() {
+        const s = S.sa, t = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+        if (S.lt === "ux") t[0][0] = s; else if (S.lt === "uy") t[1][1] = s;
+        else if (S.lt === "bi") { t[0][0] = s; t[1][1] = s; }
+        else if (S.lt === "sh") { t[0][1] = s; t[1][0] = s; }
+        else { t[0][0] = s; t[1][1] = s; t[2][2] = s; }
+        return t;
+      }
+      function build() {
+        SA = appliedTensor();
+        M = makeModel({ mu_m: S.mu * 1000, nu_m: S.nu, mu_p: S.mup * 1000, K_p: S.kp * 1000, delta: S.dl / 100, r0: S.r0, sA: SA });
+      }
+      function comps(x, y) {
+        let s = M.stress(x, y, 0);
+        if (S.dist) s = s.map((r, i) => r.map((v, j) => v - SA[i][j]));
+        const r = Math.hypot(x, y), c = r > 0 ? x / r : 1, sn = r > 0 ? y / r : 0;
+        const xx = s[0][0], yy = s[1][1], zz = s[2][2], xy = s[0][1], yz = s[1][2], zx = s[0][2];
+        const rr = xx * c * c + yy * sn * sn + 2 * xy * c * sn, tt = xx * sn * sn + yy * c * c - 2 * xy * c * sn;
+        const m = (xx + yy + zz) / 3;
+        const vm = Math.sqrt(0.5 * ((xx - yy) ** 2 + (yy - zz) ** 2 + (zz - xx) ** 2) + 3 * (xy * xy + yz * yz + zx * zx));
+        return { xx, yy, zz, xy, rr, tt, m, vm, r, inside: r < S.r0 };
+      }
+      function misfitEps() { return 3 * S.kp / (3 * S.kp + 4 * S.mu) * S.dl / 100; }
+
+      /* fixed dark palette, matching the other tools */
+      const pal = { neg: [96, 165, 250], mid: [38, 44, 52], pos: [248, 113, 113], ink: '#e0e0e0', ink2: '#c9d1d9', ink3: '#8b949e', line: '#30363d', load: '#c084fc', s1: '#60a5fa', s2: '#f87171', s3: '#9aa3a0', bg: '#161b22', fb: "'Segoe UI', Tahoma, sans-serif", fm: "ui-monospace, Menlo, Consolas, monospace" };
+      const LV = 10;
+      function band(v, lim, signed) { const q = Math.floor(v / lim * LV); return signed ? Math.max(-LV, Math.min(LV - 1, q)) : Math.max(0, Math.min(LV - 1, q)); }
+      function bandColor(b, signed) {
+        let t, end;
+        if (signed) { const c = b + 0.5; t = Math.min(1, Math.abs(c) / LV); end = c < 0 ? pal.neg : pal.pos; } else { t = (b + 0.5) / LV; end = pal.pos; }
+        t = Math.pow(t, 0.8); return pal.mid.map((m, i) => Math.round(m + (end[i] - m) * t));
+      }
+
+      const mc = $("map"), mx = mc.getContext("2d"), N = mc.width;
+      let vals = new Float64Array(N * N), lim = 1, peak = { v: 0, x: 0, y: 0 };
+      function computeGrid() {
+        const H = S.H; peak = { v: 0, x: 0, y: 0 };
+        for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+          const x = ((i + 0.5) / N * 2 - 1) * H, y = (1 - (j + 0.5) / N * 2) * H, v = comps(x, y)[S.comp];
+          vals[j * N + i] = v; if (Math.abs(v) > Math.abs(peak.v)) peak = { v, x, y };
+        }
+        for (let k = 0; k < 720; k++) { const t = k / 720 * 2 * Math.PI; for (const f of [0.999999, 1.000001]) { const x = S.r0 * f * Math.cos(t), y = S.r0 * f * Math.sin(t); if (Math.abs(x) <= H && Math.abs(y) <= H) { const v = comps(x, y)[S.comp]; if (Math.abs(v) > Math.abs(peak.v)) peak = { v, x, y }; } } }
+        if ($("fixed").checked) { const f = +$("fixv").value; lim = f > 0 ? f : 1000; }
+        else lim = Math.abs(peak.v) > 1e-9 ? Math.abs(peak.v) : 1;
+      }
+      function arrow(x1, y1, x2, y2) { mx.beginPath(); mx.moveTo(x1, y1); mx.lineTo(x2, y2); mx.stroke(); const a = Math.atan2(y2 - y1, x2 - x1); mx.beginPath(); mx.moveTo(x2, y2); mx.lineTo(x2 - 9 * Math.cos(a - 0.45), y2 - 9 * Math.sin(a - 0.45)); mx.lineTo(x2 - 9 * Math.cos(a + 0.45), y2 - 9 * Math.sin(a + 0.45)); mx.closePath(); mx.fill(); }
+      function drawLoad() {
+        if (!S.sa) return;
+        mx.strokeStyle = pal.load; mx.fillStyle = pal.load; mx.lineWidth = 2.5;
+        const out = S.sa > 0, L = 26, m = 8, c = N / 2;
+        const hx = () => { out ? (arrow(m + L, c, m, c), arrow(N - m - L, c, N - m, c)) : (arrow(m, c, m + L, c), arrow(N - m, c, N - m - L, c)); };
+        const hy = () => { out ? (arrow(c, m + L, c, m), arrow(c, N - m - L, c, N - m)) : (arrow(c, m, c, m + L), arrow(c, N - m, c, N - m - L)); };
+        if (S.lt === "ux") hx(); else if (S.lt === "uy") hy(); else if (S.lt === "bi" || S.lt === "hy") { hx(); hy(); }
+        else { const d = S.sa > 0 ? 1 : -1; arrow(c - 20 * d, m + 4, c + 20 * d, m + 4); arrow(c + 20 * d, N - m - 4, c - 20 * d, N - m - 4); arrow(N - m - 4, c + 20 * d, N - m - 4, c - 20 * d); arrow(m + 4, c - 20 * d, m + 4, c + 20 * d); }
+        mx.font = "500 12px " + pal.fm; mx.fillStyle = pal.load; mx.textAlign = "right";
+        mx.fillText(({ ux: "σxx", uy: "σyy", bi: "σxx = σyy", sh: "τxy", hy: "p" }[S.lt]) + (S.lt === "hy" ? " = " + fmt(-S.sa) : " = " + fmt(S.sa)) + " MPa", N - 10, 20); mx.textAlign = "left";
+      }
+      function drawMap() {
+        const signed = !!signedComp[S.comp], img = mx.createImageData(N, N), H = S.H;
+        const bands = new Int16Array(N * N); for (let k = 0; k < N * N; k++) bands[k] = band(vals[k], lim, signed);
+        const cache = {};
+        for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+          const k = j * N + i, b = bands[k], c = cache[b] || (cache[b] = bandColor(b, signed));
+          const edge = (i < N - 1 && bands[k + 1] !== b) || (j < N - 1 && bands[k + N] !== b), o = k * 4, f = edge ? 0.72 : 1;
+          img.data[o] = c[0] * f; img.data[o + 1] = c[1] * f; img.data[o + 2] = c[2] * f; img.data[o + 3] = 255;
+        }
+        mx.putImageData(img, 0, 0);
+        const px = N / (2 * H), cx = N / 2, cy = N / 2;
+        mx.lineWidth = 2; mx.strokeStyle = pal.ink;
+        if (S.r0 * px > 1.5) { mx.beginPath(); mx.arc(cx, cy, S.r0 * px, 0, Math.PI * 2); mx.stroke(); }
+        else { mx.fillStyle = pal.ink; mx.beginPath(); mx.arc(cx, cy, 2, 0, Math.PI * 2); mx.fill(); }
+        mx.setLineDash([4, 5]); mx.lineWidth = 1; mx.strokeStyle = pal.ink3;
+        [2, 3].forEach(k => { if (k * S.r0 < H * 1.4) { mx.beginPath(); mx.arc(cx, cy, k * S.r0 * px, 0, Math.PI * 2); mx.stroke(); } });
+        mx.setLineDash([]);
+        mx.font = "500 13px " + pal.fb; mx.fillStyle = pal.ink2;
+        if (2 * S.r0 < H * 0.9) mx.fillText("2r₀", cx + 2 * S.r0 * px * 0.707 + 4, cy - 2 * S.r0 * px * 0.707 - 4);
+        const raw = H / 2.5, mag = Math.pow(10, Math.floor(Math.log10(raw))), nice = [1, 2, 5].map(m => m * mag).filter(v => v <= raw).pop() || mag;
+        const L = nice * px, bx = 16, by = N - 18;
+        mx.fillStyle = pal.bg; mx.globalAlpha = 0.85; mx.fillRect(bx - 8, by - 22, L + 16, 32); mx.globalAlpha = 1;
+        mx.strokeStyle = pal.ink; mx.lineWidth = 2; mx.beginPath(); mx.moveTo(bx, by); mx.lineTo(bx + L, by); mx.moveTo(bx, by - 4); mx.lineTo(bx, by + 4); mx.moveTo(bx + L, by - 4); mx.lineTo(bx + L, by + 4); mx.stroke();
+        mx.fillStyle = pal.ink; mx.fillText(nm(nice), bx, by - 8);
+        mx.fillStyle = pal.ink2; mx.fillText("x →", N - 38, N - 10); mx.fillText("y ↑", 10, 20);
+        drawLoad();
+        if (S.probe) {
+          const ix = (S.probe.x / H + 1) / 2 * N, iy = (1 - S.probe.y / H) / 2 * N;
+          mx.strokeStyle = pal.ink; mx.lineWidth = 1.5; mx.beginPath(); mx.arc(ix, iy, 6, 0, Math.PI * 2); mx.stroke();
+          mx.beginPath(); mx.moveTo(ix - 11, iy); mx.lineTo(ix - 7, iy); mx.moveTo(ix + 7, iy); mx.lineTo(ix + 11, iy); mx.moveTo(ix, iy - 11); mx.lineTo(ix, iy - 7); mx.moveTo(ix, iy + 7); mx.lineTo(ix, iy + 11); mx.stroke();
+        }
+      }
+      function drawBar() {
+        const cb = $("cbar"), h = 300; cb.width = 16; cb.height = h; const c = cb.getContext("2d"), signed = !!signedComp[S.comp];
+        for (let y = 0; y < h; y++) { const v = signed ? lim - (y + 0.5) / h * 2 * lim : lim - (y + 0.5) / h * lim; const col = bandColor(band(v, lim, signed), signed); c.fillStyle = `rgb(${col})`; c.fillRect(0, y, 16, 1); }
+        const t = $("cbt"); t.innerHTML = "";
+        const vs = signed ? [lim, lim / 2, 0, -lim / 2, -lim] : [lim, lim * 0.75, lim / 2, lim / 4, 0];
+        vs.forEach((v, i) => { const s = document.createElement("span"); s.style.top = (i / 4 * 100) + "%"; s.textContent = (v > 0 && signed ? "+" : "") + fmt(v) + (i === 0 ? " MPa" : ""); t.appendChild(s); });
+        if (signed) { const cap = document.createElement("span"); cap.style.top = "calc(100% + 14px)"; cap.style.color = "var(--muted)"; cap.textContent = "− is compression"; t.appendChild(cap); }
+      }
+
+      const pc = $("prof"), pg = pc.getContext("2d");
+      function niceStep(raw) { const m = Math.pow(10, Math.floor(Math.log10(raw))); for (const k of [1, 2, 5, 10]) if (k * m >= raw) return k * m; return 10 * m; }
+      function drawProf() {
+        const dpr = window.devicePixelRatio || 1, w = pc.clientWidth, h = pc.clientHeight;
+        pc.width = w * dpr; pc.height = h * dpr; pg.setTransform(dpr, 0, 0, dpr, 0, 0); pg.clearRect(0, 0, w, h);
+        const padL = 64, padR = 14, padT = 12, padB = 34, W = Math.max(10, w - padL - padR), Hh = h - padT - padB, H = S.H;
+        const pts = []; let mxv = 0;
+        for (let i = 0; i <= W; i++) { const r = i / W * H, f = comps(r, 0); pts.push(f); mxv = Math.max(mxv, Math.abs(f.xx), Math.abs(f.yy), Math.abs(f.m)); }
+        const ymax = Math.max(mxv * 1.15, 1);
+        const X = r => padL + r / H * W, Y = v => padT + (1 - (v + ymax) / (2 * ymax)) * Hh;
+        pg.font = "12px " + pal.fm; pg.fillStyle = pal.ink3; pg.strokeStyle = pal.line; pg.lineWidth = 1;
+        if (S.r0 < H) { pg.fillStyle = pal.line; pg.globalAlpha = 0.55; pg.fillRect(padL, padT, X(S.r0) - padL, Hh); pg.globalAlpha = 1; }
+        const step = niceStep(ymax / 2); pg.fillStyle = pal.ink3;
+        for (let v = -Math.floor(ymax / step) * step; v <= ymax + 1e-9; v += step) { const y = Y(v); pg.strokeStyle = Math.abs(v) < 1e-9 ? pal.ink3 : pal.line; pg.beginPath(); pg.moveTo(padL, y); pg.lineTo(padL + W, y); pg.stroke(); pg.textAlign = "right"; pg.fillText(fmt(v), padL - 8, y + 4); }
+        const xs = niceStep(H / 5); pg.textAlign = "center";
+        for (let r = 0; r <= H + 1e-9; r += xs) pg.fillText(r < 1 ? r.toFixed(2) : r < 10 ? r.toFixed(1) : r.toFixed(0), X(r), padT + Hh + 18);
+        pg.fillText("distance from centre along x (nm)", padL + W / 2, h - 2);
+        pg.save(); pg.translate(14, padT + Hh / 2); pg.rotate(-Math.PI / 2); pg.fillText("MPa", 0, 0); pg.restore();
+        if (S.r0 < H) { pg.fillStyle = pal.ink3; pg.textAlign = "left"; pg.fillText("inside", padL + 4, padT + 14); }
+        [["xx", pal.s1, []], ["yy", pal.s2, []], ["m", pal.s3, [6, 5]]].forEach(([k, col, dash]) => {
+          pg.strokeStyle = col; pg.lineWidth = 2; pg.setLineDash(dash); pg.lineJoin = "round"; pg.beginPath();
+          pts.forEach((f, i) => { const x = X(i / W * H), y = Y(f[k]); i ? pg.lineTo(x, y) : pg.moveTo(x, y); }); pg.stroke();
+        });
+        pg.setLineDash([]);
+        if (S.probe) { const r = Math.min(Math.hypot(S.probe.x, S.probe.y), H); pg.strokeStyle = pal.ink2; pg.lineWidth = 1; pg.beginPath(); pg.moveTo(X(r), padT); pg.lineTo(X(r), padT + Hh); pg.stroke(); }
+      }
+
+      function stats() {
+        const e = misfitEps(), V = 4 / 3 * Math.PI * Math.pow(S.r0 * 1e-9, 3);
+        const W = 6 * S.mu * 1e9 * (S.dl / 100) * e * V, WeV = W / 1.602e-19;
+        const sIn = M.sIn, pin = -(sIn[0][0] + sIn[1][1] + sIn[2][2]) / 3;
+        const lab = { xx: "σxx", yy: "σyy", zz: "σzz", xy: "σxy", rr: "σrr", tt: "σθθ", m: "mean stress", vm: "von Mises" }[S.comp];
+        const pr = Math.hypot(peak.x, peak.y);
+        const scf = S.sa ? Math.abs(peak.v) / Math.abs(S.sa) : null;
+        const eV = v => v === 0 ? "0" : Math.abs(v) < 0.01 ? v.toExponential(2) : Math.abs(v) < 1e4 ? v.toFixed(Math.abs(v) < 10 ? 3 : 0) : v.toExponential(2);
+        const cards = [
+          ["Constrained misfit strain ε", (e * 100).toFixed(3) + "<small> %</small>", "3K<sub>p</sub>δ/(3K<sub>p</sub>+4μ<sub>m</sub>)"],
+          ["Pressure inside precipitate", fmt(pin) + "<small> MPa</small>", "misfit plus applied"],
+          ["Inside: σxx, σyy, σzz", `<span style="font-size:0.9rem">${fmt(sIn[0][0])}, ${fmt(sIn[1][1])}, ${fmt(sIn[2][2])}</span>`, "MPa, uniform"],
+          [`Peak ${S.dist ? "disturbance " : ""}${lab} in view`, (peak.v > 0 && signedComp[S.comp] ? "+" : "") + fmt(peak.v) + "<small> MPa</small>", `at r = ${nm(pr)} (${(pr / S.r0).toFixed(2)} r₀), largest magnitude`],
+          [`Peak ${S.dist ? "disturbance " : ""}${lab} ÷ |σ<sub>A</sub>|`, scf == null ? "—" : scf.toFixed(2), scf == null ? "set an applied stress" : "selected component in view; not the max principal stress"],
+          ["Misfit self-energy", eV(WeV) + "<small> eV</small>", "6μ<sub>m</sub>δεV; excludes interaction with the applied stress"]
+        ];
+        $("stats").innerHTML = cards.map(([k, v, s]) => `<div class="mstat"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join("");
+        const Km = M.K_m / 1000;
+        $("eqs").innerHTML = `
+      <div class="meq"><span class="lbl">Matrix bulk modulus</span>K<sub>m</sub> = 2μ<sub>m</sub>(1+ν)/3(1−2ν) = <em>${Km.toFixed(0)} GPa</em></div>
+      <div class="meq"><span class="lbl">Eshelby factors for a sphere</span>α = (1+ν)/3(1−ν) = <em>${M.al.toFixed(3)}</em><br>β = 2(4−5ν)/15(1−ν) = <em>${M.be.toFixed(3)}</em></div>
+      <div class="meq"><span class="lbl">Volumetric eigenstrain (each normal component)</span>e* = [K<sub>p</sub>δ + (K<sub>m</sub>−K<sub>p</sub>)e<sub>A</sub>] / [K<sub>m</sub> + α(K<sub>p</sub>−K<sub>m</sub>)]<br>= <em>${(M.ev * 100).toFixed(4)} %</em></div>
+      <div class="meq"><span class="lbl">Deviatoric eigenstrain</span>d* = (μ<sub>m</sub>−μ<sub>p</sub>) / [μ<sub>m</sub> + β(μ<sub>p</sub>−μ<sub>m</sub>)] · d<sub>A</sub><br>= <em>${M.kd.toFixed(3)}</em> × applied deviatoric strain</div>
+      <div class="meq"><span class="lbl">Uniform strain inside</span>ε<sup>in</sup> = ε<sub>A</sub> + S:ε*<br>volumetric part = <em>${(M.ea * 100 + M.al * M.ev * 100).toFixed(4)} %</em></div>
+      <div class="meq"><span class="lbl">Field outside</span>σ = σ<sub>A</sub> + C<sub>m</sub>:D(x):ε*<br>decays as (r₀/r)³, plus (r₀/r)⁵ near the interface</div>`;
+        const w = $("warn");
+        if (S.r0 < 0.5) { w.hidden = false; w.textContent = "At atomic size, continuum elasticity is only approximate within one or two neighbour distances."; }
+        else if (Math.abs(S.dl) * S.r0 > 12) { w.hidden = false; w.textContent = "Large particle with large misfit: in practice the interface would likely lose coherency and relax by misfit dislocations."; }
+        else if (S.kp < 1 && S.mup < 1 && S.dl !== 0) { w.hidden = false; w.textContent = "A pore cannot sustain a misfit, so the misfit has no effect here."; }
+        else w.hidden = true;
+      }
+      function probeText() {
+        if (!S.probe) { $("probe").textContent = "Hover or drag on the map."; return; }
+        const f = comps(S.probe.x, S.probe.y);
+        const rows = [["σxx", f.xx], ["σyy", f.yy], ["σzz", f.zz], ["σxy", f.xy], ["σrr", f.rr], ["σθθ", f.tt], ["mean", f.m], ["von Mises", f.vm]];
+        $("probe").innerHTML = (f.inside ? "<b>inside precipitate</b>" : "<b>matrix</b>") + (S.dist ? " · disturbance" : "") + `<br>r&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>${nm(f.r)}</b> (${(f.r / S.r0).toFixed(2)} r₀)<br>` +
+          rows.map(([k, v]) => `${k.padEnd(10, " ").replace(/ /g, "&nbsp;")}<b>${fmt(v)}</b> MPa`).join("<br>");
+      }
+
+      let raf = 0;
+      function render() { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; build(); computeGrid(); drawMap(); drawBar(); drawProf(); stats(); probeText(); }); }
+      function quick() { drawMap(); drawProf(); probeText(); }
+
+      function sync() {
+        S.r0 = Math.pow(10, +$("r0").value); S.dl = +$("dl").value;
+        if ($("lock").checked) { S.H = 4 * S.r0; $("fov").value = Math.log10(S.H); } else S.H = Math.pow(10, +$("fov").value);
+        S.mu = +$("mu").value; S.nu = +$("nu").value;
+        const same = $("same").checked;
+        if (same) { S.mup = S.mu; S.kp = Math.round(2 * S.mu * (1 + S.nu) / (3 * (1 - 2 * S.nu))); $("mup").value = S.mup; $("kp").value = S.kp; }
+        else { S.mup = +$("mup").value; S.kp = +$("kp").value; }
+        $("mup").disabled = same; $("kp").disabled = same;
+        S.lt = $("ltype").value; S.sa = +$("sa").value; S.comp = $("comp").value;
+        $("r0o").textContent = nm(S.r0); $("dlo").textContent = (S.dl > 0 ? "+" : "") + S.dl.toFixed(2) + " %";
+        $("fovo").textContent = "± " + nm(S.H); $("muo").textContent = S.mu + " GPa"; $("nuo").textContent = S.nu.toFixed(2);
+        $("mupo").textContent = S.mup + " GPa"; $("kpo").textContent = S.kp + " GPa";
+        $("sao").textContent = (S.sa > 0 ? "+" : "") + S.sa + " MPa";
+        $("vTot").setAttribute("aria-pressed", String(!S.dist)); $("vDis").setAttribute("aria-pressed", String(S.dist));
+        document.querySelectorAll("#presets .mchip").forEach((b, i) => {
+          const p = presets[i];
+          const on = Math.abs(p.r0 - S.r0) / p.r0 < 0.02 && p.dl === S.dl && p.sa === S.sa && p.same === same && (same || (p.mup === S.mup && p.kp === S.kp));
+          b.setAttribute("aria-pressed", String(on));
+        });
+        render();
+      }
+      presets.forEach(p => {
+        const b = document.createElement("button"); b.className = "mchip"; b.type = "button"; b.textContent = p.n;
+        b.onclick = () => {
+          $("r0").value = Math.log10(p.r0); $("dl").value = p.dl; $("fov").value = Math.log10(p.H); $("lock").checked = false;
+          $("same").checked = p.same; if (!p.same) { $("mup").value = p.mup; $("kp").value = p.kp; }
+          $("sa").value = p.sa; if (p.lt) $("ltype").value = p.lt; if (p.comp) $("comp").value = p.comp;
+          S.probe = { x: p.r0 * 1.05, y: 0 }; sync();
+        };
+        $("presets").appendChild(b);
+      });
+      ["r0", "dl", "mu", "nu", "mup", "kp", "sa"].forEach(id => $(id).addEventListener("input", sync));
+      $("fov").addEventListener("input", () => { $("lock").checked = false; sync(); });
+      ["lock", "same", "comp", "ltype", "fixed", "fixv"].forEach(id => $(id).addEventListener("change", sync));
+      $("fixv").addEventListener("input", () => { if ($("fixed").checked) sync(); });
+      $("vTot").onclick = () => { S.dist = false; sync(); }; $("vDis").onclick = () => { S.dist = true; sync(); };
+
+      function setProbe(e) { const r = mc.getBoundingClientRect(); S.probe = { x: ((e.clientX - r.left) / r.width * 2 - 1) * S.H, y: (1 - (e.clientY - r.top) / r.height * 2) * S.H }; quick(); }
+      mc.addEventListener("pointermove", setProbe);
+      mc.addEventListener("pointerdown", e => { try { mc.setPointerCapture(e.pointerId); } catch (_) { } setProbe(e); });
+      let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(render, 120); });
+      S.probe = { x: S.r0 * 1.6 * 0.866, y: S.r0 * 1.6 * 0.5 };
+      sync();
+    })();
+  </script>
+</body>
+</html>

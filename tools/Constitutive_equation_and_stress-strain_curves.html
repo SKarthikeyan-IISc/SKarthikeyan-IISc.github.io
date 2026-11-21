@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Constitutive Equations: True and Engineering Stress-Strain Curves | Teaching Tools</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    canvas#plot { cursor: default; max-width: 100%; height: auto; }
+    fieldset.model { border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; margin: 0; background: var(--panel-2); }
+    fieldset.model.active { border-color: var(--blue); }
+    fieldset.model legend { font-weight: 600; color: var(--ink-soft); padding: 0 6px; }
+    fieldset.model label.p { display: inline-flex; align-items: center; gap: 6px; margin: 4px 14px 4px 0; font-size: 0.85rem; color: #ccc; }
+    .models { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; width: 100%; }
+    #sampleTable { width: 100%; overflow-x: auto; margin-top: 14px; }
+    .plot-wrap { width: 100%; overflow-x: auto; }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Constitutive Equations: True and Engineering Stress&ndash;Strain Curves</h1>
+  <p class="subtitle">Three models of work hardening (Hollomon, Ludwik, Voce), and how a true stress&ndash;true strain curve converts into engineering stress&ndash;strain in tension and in compression.</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>Choose a model:</strong> click the circle next to Hollomon, Ludwik or Voce, then edit its parameters. The plot updates as you type.</li>
+        <li><strong>Plot settings:</strong> <em>Max true strain</em> is the end of the curve, <em>Points</em> is the number of points used to draw it, and <em>Sample points</em> is how many marked points (P1, P2, &hellip;) are placed along it.</li>
+        <li><strong>Tension and compression boxes:</strong> add the engineering stress&ndash;strain curves (blue dashed for tension, red dotted for compression). Arrows lead from each sample point on the true curve to its engineering counterpart.</li>
+        <li><strong>Table box:</strong> lists the numerical values at the sample points.</li>
+        <li>The axes rescale so that every curve shown stays in view.</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="tool">
+    <div class="panel wide plain">
+      <h3>Model and parameters</h3>
+      <div class="models">
+        <fieldset class="model" id="fs_hollomon">
+          <legend><label><input type="radio" name="model" value="hollomon" checked> Hollomon</label></legend>
+          <div class="eq" style="margin:0 0 6px">\( \sigma = K\varepsilon^n \)</div>
+          <label class="p">K (MPa) <input type="number" id="K_h" value="500" step="10"></label>
+          <label class="p">n <input type="number" id="n_h" value="0.2" step="0.01"></label>
+        </fieldset>
+        <fieldset class="model" id="fs_ludwik">
+          <legend><label><input type="radio" name="model" value="ludwik"> Ludwik</label></legend>
+          <div class="eq" style="margin:0 0 6px">\( \sigma = \sigma_0 + K\varepsilon^n \)</div>
+          <label class="p">&sigma;<sub>0</sub> (MPa) <input type="number" id="sigma0_l" value="200" step="10"></label>
+          <label class="p">K (MPa) <input type="number" id="K_l" value="500" step="10"></label>
+          <label class="p">n <input type="number" id="n_l" value="0.2" step="0.01"></label>
+        </fieldset>
+        <fieldset class="model" id="fs_voce">
+          <legend><label><input type="radio" name="model" value="voce"> Voce</label></legend>
+          <div class="eq" style="margin:0 0 6px">\( \sigma = \sigma_s - (\sigma_s-\sigma_0)\,e^{-\varepsilon/\varepsilon_0} \)</div>
+          <label class="p">&sigma;<sub>0</sub> (MPa) <input type="number" id="sigma0_v" value="200" step="10"></label>
+          <label class="p">&sigma;<sub>s</sub> (MPa) <input type="number" id="sigmaS_v" value="800" step="10"></label>
+          <label class="p">&epsilon;<sub>0</sub> <input type="number" id="eps0_v" value="0.2" step="0.01"></label>
+        </fieldset>
+      </div>
+      <div class="ctl-grid" style="margin-top:12px">
+        <div class="ctl"><label for="maxStrain">Max true strain</label><input type="number" id="maxStrain" value="1.0" step="0.1" min="0.1"></div>
+        <div class="ctl"><label for="numPoints">Points</label><input type="number" id="numPoints" value="500" step="10" min="10"></div>
+        <div class="ctl"><label for="numSamples">Sample points</label><input type="number" id="numSamples" value="2" step="1" min="1" max="8"></div>
+      </div>
+      <div class="ctl-stack" style="margin-top:12px">
+        <label class="toggle-group"><input type="checkbox" id="showTension"> Show engineering stress (s) &ndash; engineering strain (e) in tension</label>
+        <label class="toggle-group"><input type="checkbox" id="showCompression"> Show engineering stress (s) &ndash; engineering strain (e) in compression</label>
+        <label class="toggle-group"><input type="checkbox" id="showTable"> Show the values at the sample points in a table</label>
+      </div>
+    </div>
+
+    <div class="panel wide">
+      <div class="plot-wrap"><canvas id="plot" width="900" height="600"></canvas></div>
+      <div id="sampleTable" style="display:none;"></div>
+    </div>
+  </div>
+
+  <details class="note">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <p>When a metal is deformed plastically it work-hardens: the flow stress rises with accumulated strain, because dislocations multiply and obstruct one another. The true stress \(\sigma = F/A\) and the true strain \(\varepsilon = \ln(L/L_0)\) use the instantaneous area and length. Three empirical laws describe the hardening:</p>
+      <ul>
+        <li><strong>Hollomon:</strong> \(\sigma = K\varepsilon^n\). Simple, with a strain-hardening exponent \(n\) of about 0.1 to 0.5, but it gives zero stress at zero strain and so is a poor description of the early stages.</li>
+        <li><strong>Ludwik:</strong> \(\sigma = \sigma_0 + K\varepsilon^n\). It adds a yield stress \(\sigma_0\).</li>
+        <li><strong>Voce:</strong> \(\sigma = \sigma_s-(\sigma_s-\sigma_0)e^{-\varepsilon/\varepsilon_0}\). The hardening rate falls steadily and the stress saturates at \(\sigma_s\), as when dynamic recovery balances dislocation storage.</li>
+      </ul>
+      <p>The engineering quantities use the original area \(A_0\) and length \(L_0\): \(s=F/A_0\) and \(e=(L-L_0)/L_0\). If the volume is constant and the deformation is uniform:</p>
+      <div class="eq">Tension: \( e = e^{\varepsilon}-1,\quad s = \sigma/(1+e) = \sigma e^{-\varepsilon} \)</div>
+      <div class="eq">Compression: \( e = 1-e^{-\varepsilon},\quad s = \sigma\,e^{\varepsilon} \) (magnitudes)</div>
+      <p>In tension the area shrinks, so the engineering stress falls below the true stress and can even pass through a maximum, the ultimate tensile strength. In compression the area grows, so the engineering stress is above the true stress. The two engineering curves differ for the same material, but the true curve is the same. This is why constitutive laws are written in true quantities.</p>
+      <p>The conversion holds only as long as the strain is uniform. In a tension test it ceases to be valid at necking, which begins when the hardening rate falls to the level of the stress (Consid&egrave;re criterion, \(d\sigma/d\varepsilon=\sigma\)). For the Hollomon law this happens at \(\varepsilon = n\).</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt>True stress, &sigma;</dt><dd>Force divided by the instantaneous cross-sectional area.</dd>
+        <dt>True strain, &epsilon;</dt><dd>The natural logarithm of the ratio of current length to original length.</dd>
+        <dt>Engineering stress, <i>s</i></dt><dd>Force divided by the original cross-sectional area.</dd>
+        <dt>Engineering strain, <i>e</i></dt><dd>Change in length divided by original length.</dd>
+        <dt><i>K</i>, <i>n</i></dt><dd>Strength coefficient and strain-hardening exponent.</dd>
+        <dt>&sigma;<sub>0</sub>, &sigma;<sub>s</sub></dt><dd>Initial (yield) stress and saturation stress.</dd>
+        <dt>Necking</dt><dd>Localisation of tensile deformation into a small region, after which the stress and strain are no longer uniform.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /* Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved. */
+    const C = TOOL.c;
+    let currentModel = 'hollomon';
+    const num = (id, d) => { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? d : v; };
+
+    function trueStress(strain, model) {
+      if (model === 'hollomon') return num('K_h', 0) * Math.pow(strain, num('n_h', 0));
+      if (model === 'ludwik') return num('sigma0_l', 0) + num('K_l', 0) * Math.pow(strain, num('n_l', 0));
+      if (model === 'voce') {
+        const s0 = num('sigma0_v', 0), ss = num('sigmaS_v', 0), e0 = num('eps0_v', 0.1) || 0.1;
+        return ss - (ss - s0) * Math.exp(-strain / e0);
+      }
+      return 0;
+    }
+
+    function niceStep(range, target) {
+      const raw = range / target, mag = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / mag;
+      return (f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10) * mag;
+    }
+
+    function drawArrow(ctx, fx, fy, tx, ty, color) {
+      const head = 8, ang = Math.atan2(ty - fy, tx - fx);
+      ctx.save();
+      ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(tx, ty);
+      ctx.strokeStyle = color; ctx.globalAlpha = 0.6; ctx.lineWidth = 1; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(tx, ty);
+      ctx.lineTo(tx - head * Math.cos(ang - Math.PI / 6), ty - head * Math.sin(ang - Math.PI / 6));
+      ctx.lineTo(tx - head * Math.cos(ang + Math.PI / 6), ty - head * Math.sin(ang + Math.PI / 6));
+      ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+      ctx.restore();
+    }
+
+    function plotCurves() {
+      document.querySelectorAll('fieldset.model').forEach(f => f.classList.toggle('active', f.id === 'fs_' + currentModel));
+      const maxStrain = Math.max(0.0001, num('maxStrain', 1));
+      const numPoints = Math.max(10, parseInt(document.getElementById('numPoints').value, 10) || 500);
+      const numSamples = Math.min(8, Math.max(1, parseInt(document.getElementById('numSamples').value, 10) || 2));
+      const showT = document.getElementById('showTension').checked;
+      const showC = document.getElementById('showCompression').checked;
+      const showTable = document.getElementById('showTable').checked;
+
+      const tS = [], tSig = [], eT = [], sT = [], eC = [], sC = [];
+      for (let i = 0; i <= numPoints; i++) {
+        const eps = (i / numPoints) * maxStrain;
+        const sig = trueStress(eps, currentModel);
+        if (!isFinite(sig)) continue;
+        const e_t = Math.exp(eps) - 1;
+        tS.push(eps); tSig.push(sig);
+        eT.push(e_t); sT.push(sig / (1 + e_t));
+        eC.push(1 - Math.exp(-eps)); sC.push(sig / Math.exp(-eps));
+      }
+
+      // axis limits so that every visible curve fits
+      let xMax = maxStrain, yMax = Math.max(...tSig, 1e-6);
+      if (showT) { xMax = Math.max(xMax, ...eT); yMax = Math.max(yMax, ...sT); }
+      if (showC) { xMax = Math.max(xMax, ...eC); yMax = Math.max(yMax, ...sC); }
+      yMax *= 1.1;
+      const xStep = niceStep(xMax, 6), yStep = niceStep(yMax, 6);
+      xMax = Math.ceil(xMax / xStep - 1e-9) * xStep;
+      yMax = Math.ceil(yMax / yStep - 1e-9) * yStep;
+
+      const canvas = document.getElementById('plot');
+      const ctx = canvas.getContext('2d');
+      const margin = { l: 80, r: 40, t: 30, b: 70 };
+      const W = canvas.width - margin.l - margin.r, H = canvas.height - margin.t - margin.b;
+      const mapX = x => margin.l + (x / xMax) * W;
+      const mapY = y => margin.t + (1 - y / yMax) * H;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = C.bg; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.lineWidth = 1; ctx.font = '12px sans-serif';
+      for (let v = 0; v <= xMax + 1e-9; v += xStep) {
+        const px = mapX(v);
+        ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(px, margin.t); ctx.lineTo(px, margin.t + H); ctx.stroke();
+        ctx.strokeStyle = C.axis; ctx.beginPath(); ctx.moveTo(px, margin.t + H); ctx.lineTo(px, margin.t + H + 6); ctx.stroke();
+        ctx.fillStyle = C.text; ctx.textAlign = 'center'; ctx.fillText(v.toFixed(2), px, margin.t + H + 20);
+      }
+      for (let v = 0; v <= yMax + 1e-9; v += yStep) {
+        const py = mapY(v);
+        ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(margin.l, py); ctx.lineTo(margin.l + W, py); ctx.stroke();
+        ctx.strokeStyle = C.axis; ctx.beginPath(); ctx.moveTo(margin.l, py); ctx.lineTo(margin.l - 6, py); ctx.stroke();
+        ctx.fillStyle = C.text; ctx.textAlign = 'right'; ctx.fillText(v.toFixed(0), margin.l - 10, py + 4);
+      }
+      ctx.strokeStyle = C.axis; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(margin.l, margin.t); ctx.lineTo(margin.l, margin.t + H); ctx.lineTo(margin.l + W, margin.t + H); ctx.stroke();
+
+      ctx.fillStyle = C.text; ctx.textAlign = 'center'; ctx.font = '14px sans-serif';
+      ctx.fillText('Strain', margin.l + W / 2, canvas.height - 18);
+      ctx.save(); ctx.translate(18, margin.t + H / 2); ctx.rotate(-Math.PI / 2); ctx.fillText('Stress (MPa)', 0, 0); ctx.restore();
+
+      function series(xs, ys, color, dash) {
+        if (!xs.length) return;
+        ctx.beginPath(); ctx.setLineDash(dash || []); ctx.lineWidth = 3; ctx.strokeStyle = color;
+        ctx.moveTo(mapX(xs[0]), mapY(ys[0]));
+        for (let i = 1; i < xs.length; i++) ctx.lineTo(mapX(xs[i]), mapY(ys[i]));
+        ctx.stroke(); ctx.setLineDash([]);
+      }
+      series(tS, tSig, C.white, []);
+      if (showT) series(eT, sT, C.blue, [8, 5]);
+      if (showC) series(eC, sC, C.red, [2, 5]);
+
+      // legend
+      ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
+      const leg = [['True stress-strain', C.white]].concat(showT ? [['Engineering, tension', C.blue]] : [], showC ? [['Engineering, compression', C.red]] : []);
+      leg.forEach(([t, col], i) => {
+        ctx.fillStyle = col; ctx.fillRect(margin.l + 14, margin.t + 12 + i * 20, 22, 3);
+        ctx.fillStyle = C.text; ctx.fillText(t, margin.l + 44, margin.t + 17 + i * 20);
+      });
+
+      let html = '<table class="data"><thead><tr><th>Point</th><th>True &epsilon;</th><th>True &sigma; (MPa)</th>';
+      if (showT) html += '<th>Eng. e (T)</th><th>Eng. s (T) (MPa)</th>';
+      if (showC) html += '<th>Eng. e (C)</th><th>Eng. s (C) (MPa)</th>';
+      html += '</tr></thead><tbody>';
+      for (let j = 0; j < numSamples; j++) {
+        const idx = Math.floor(((j + 1) / (numSamples + 1)) * tS.length);
+        if (idx < 0 || idx >= tS.length) continue;
+        const tx = mapX(tS[idx]), ty = mapY(tSig[idx]);
+        ctx.fillStyle = C.white; ctx.beginPath(); ctx.arc(tx, ty, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = C.text; ctx.font = '12px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('P' + (j + 1), tx + 10, ty - 8);
+        html += '<tr><td>P' + (j + 1) + '</td><td>' + tS[idx].toFixed(4) + '</td><td>' + tSig[idx].toFixed(2) + '</td>';
+        if (showT) {
+          const x = mapX(eT[idx]), y = mapY(sT[idx]);
+          drawArrow(ctx, tx, ty, x, y, C.blue);
+          ctx.fillStyle = C.blue; ctx.fillRect(x - 5, y - 5, 10, 10);
+          html += '<td>' + eT[idx].toFixed(4) + '</td><td>' + sT[idx].toFixed(2) + '</td>';
+        }
+        if (showC) {
+          const x = mapX(eC[idx]), y = mapY(sC[idx]);
+          drawArrow(ctx, tx, ty, x, y, C.red);
+          ctx.fillStyle = C.red; ctx.beginPath(); ctx.moveTo(x, y - 6); ctx.lineTo(x - 6, y + 5); ctx.lineTo(x + 6, y + 5); ctx.closePath(); ctx.fill();
+          html += '<td>' + eC[idx].toFixed(4) + '</td><td>' + sC[idx].toFixed(2) + '</td>';
+        }
+        html += '</tr>';
+      }
+      html += '</tbody></table>';
+      const tbl = document.getElementById('sampleTable');
+      tbl.style.display = showTable ? 'block' : 'none';
+      tbl.innerHTML = showTable ? html : '';
+    }
+
+    document.querySelectorAll('input').forEach(el => {
+      el.addEventListener('input', () => {
+        if (el.name === 'model') currentModel = el.value;
+        requestAnimationFrame(plotCurves);
+      });
+      el.addEventListener('change', () => {
+        if (el.name === 'model') currentModel = el.value;
+        requestAnimationFrame(plotCurves);
+      });
+    });
+    // typing in a model's parameter box selects that model
+    ['hollomon', 'ludwik', 'voce'].forEach(m => {
+      document.querySelectorAll('#fs_' + m + ' input[type=number]').forEach(el => el.addEventListener('focus', () => {
+        currentModel = m; document.querySelector('input[name=model][value=' + m + ']').checked = true; plotCurves();
+      }));
+    });
+    plotCurves();
+  </script>
+</body>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Schmid Factor and Slip Systems in BCC Crystals | Teaching Tools</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
+    .presets button { font-family: ui-monospace, Menlo, Consolas, monospace; }
+    .uvw { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
+    .uvw label { display: flex; flex-direction: column; gap: 2px; font-size: 0.75rem; color: var(--muted); }
+    .uvw input { width: 100%; box-sizing: border-box; }
+    .field-title { font-size: 0.78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; align-self: flex-start; }
+    .crss { border: 1px solid; border-radius: 8px; padding: 10px 12px; width: 100%; box-sizing: border-box; }
+    .crss.a { border-color: rgba(234,179,8,.45); background: rgba(234,179,8,.06); }
+    .crss.f { border-color: rgba(217,70,239,.45); background: rgba(217,70,239,.06); }
+    .crss .hd { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 0.85rem; }
+    .crss input[type=range] { width: 100%; }
+    .badge { display: inline-block; padding: 1px 9px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; background: var(--panel-2); border: 1px solid var(--line); color: var(--ink-soft); }
+    .badge.on { background: rgba(52,211,153,.15); border-color: rgba(52,211,153,.4); color: var(--green); }
+    .key { display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.8rem; color: #ccc; margin-bottom: 8px; }
+    .key i { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+    .key i.ln { height: 0; width: 22px; border-top: 3px dashed; border-radius: 0; vertical-align: 3px; }
+    .tbl-wrap { overflow-x: auto; width: 100%; }
+    table.data { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.8rem; }
+    table.data td, table.data th { text-align: left; }
+    table.data td.r, table.data th.r { text-align: right; }
+    table.data td.c, table.data th.c { text-align: center; }
+    .fam110 { color: var(--amber); font-weight: 700; }
+    .fam112 { color: #e879f9; font-weight: 700; }
+    .met { color: var(--green); font-weight: 700; }
+    .no { color: var(--muted); }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Schmid Factor and Slip Systems in BCC Crystals</h1>
+  <p class="subtitle">The resolved shear stress on the 24 {110}&lt;111&gt; and {112}&lt;111&gt; slip systems of a body-centred cubic crystal loaded in tension along any direction, compared with a critical resolved shear stress.</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>Tensile axis:</strong> click a preset button, or type the direction <code>[u v w]</code> of the tensile axis into the three boxes.</li>
+        <li><strong>Applied stress &sigma;:</strong> drag the slider from 0 to 200&nbsp;MPa.</li>
+        <li><strong>CRSS sliders:</strong> set the critical resolved shear stress of the {110}&lt;111&gt; family (amber) and of the {112}&lt;111&gt; family (magenta), from 25 to 90&nbsp;MPa. The dashed lines in the chart show the same values.</li>
+        <li><strong>Chart and table:</strong> each bar is the resolved shear stress on one slip system. It turns green when it reaches the CRSS, so that the system can operate. The table lists the Schmid factor of every system, and <em>Export CSV</em> saves it.</li>
+        <li>Try [001], where all the systems have the same Schmid factor, and compare with [011] and [111].</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="tool">
+    <div class="row">
+      <div class="panel plain" style="gap:14px">
+        <h3>Tensile axis and stress</h3>
+        <div style="width:100%"><p class="field-title">Orientation presets [u v w]</p>
+          <div class="presets">
+            <button type="button" class="secondary" data-uvw="0,0,1">[001]</button>
+            <button type="button" class="secondary" data-uvw="0,1,1">[011]</button>
+            <button type="button" class="secondary" data-uvw="1,1,1">[111]</button>
+            <button type="button" class="secondary" data-uvw="1,1,2">[112]</button>
+            <button type="button" class="secondary" data-uvw="1,2,3">[123]</button>
+            <button type="button" class="secondary" data-uvw="0,1,2">[012]</button>
+          </div>
+        </div>
+        <div style="width:100%"><p class="field-title">Custom direction [u v w]</p>
+          <div class="uvw">
+            <label>u<input type="number" id="inputU" value="0"></label>
+            <label>v<input type="number" id="inputV" value="1"></label>
+            <label>w<input type="number" id="inputW" value="1"></label>
+          </div>
+        </div>
+        <div class="ctl" style="width:100%;box-sizing:border-box"><label for="appliedStressRange">Applied stress &sigma;</label><input type="range" id="appliedStressRange" min="0" max="200" step="1" value="0"><span id="stressValDisplay" class="val" style="min-width:5em">0 MPa</span></div>
+      </div>
+
+      <div class="panel plain" style="gap:14px">
+        <h3>Critical resolved shear stress (CRSS)</h3>
+        <div class="crss a"><div class="hd"><label for="crss110Range" style="color:var(--amber)">CRSS {110}&lt;111&gt;</label><span id="crss110Display" class="val" style="color:var(--amber)">50 MPa</span></div>
+          <input type="range" id="crss110Range" min="25" max="90" step="1" value="50" style="accent-color:#eab308"></div>
+        <div class="crss f"><div class="hd"><label for="crss112Range" style="color:#e879f9">CRSS {112}&lt;111&gt;</label><span id="crss112Display" class="val" style="color:#e879f9">60 MPa</span></div>
+          <input type="range" id="crss112Range" min="25" max="90" step="1" value="60" style="accent-color:#d946ef"></div>
+      </div>
+
+      <div class="panel plain">
+        <h3>Evaluation summary</h3>
+        <div class="metrics">
+          <div class="metric"><span>Maximum Schmid factor, m</span><b id="statMaxSchmid">0.000</b></div>
+          <div class="metric"><span>Maximum RSS</span><b id="statMaxRSS">0.0 MPa</b></div>
+          <div class="metric"><span>Active systems</span><b id="statActiveCount" style="color:var(--green)">0 / 24</b></div>
+        </div>
+        <p style="margin:12px 0 0;font-size:0.8rem;color:var(--muted)">Bars turn green when RSS &ge; CRSS.</p>
+        <span id="activeCountBadge" class="badge" style="margin-top:10px">0 / 24 Active</span>
+      </div>
+    </div>
+
+    <div class="panel wide plain">
+      <h3>Resolved shear stress against CRSS</h3>
+      <div class="key">
+        <span><i style="background:#34d399"></i>Criterion met (RSS &ge; CRSS)</span>
+        <span><i style="background:#475569"></i>Inactive</span>
+        <span><i class="ln" style="border-color:#f59e0b"></i>CRSS {110}</span>
+        <span><i class="ln" style="border-color:#d946ef"></i>CRSS {112}</span>
+      </div>
+      <div class="plotbox" style="height:380px"><canvas id="schmidChart"></canvas></div>
+    </div>
+
+    <div class="panel wide plain">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap">
+        <h3 style="margin:0">Slip systems in detail</h3>
+        <button type="button" class="secondary" id="exportBtn">Export CSV</button>
+      </div>
+      <div class="tbl-wrap">
+        <table class="data">
+          <thead><tr><th>System</th><th>Family</th><th>Plane (h k l)</th><th>Direction [u v w]</th><th class="r">Schmid factor, m</th><th class="r">RSS</th><th class="r">CRSS</th><th class="c">Criterion met</th></tr></thead>
+          <tbody id="resultsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <details class="note">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <p>Plastic flow in a crystal takes place by slip: dislocations glide on a slip plane (normal \(\mathbf{n}\)) in a slip direction (\(\mathbf{d}\)). Only the shear stress on that plane, in that direction, drives the glide. For a uniaxial tensile stress \(\sigma\) along the axis \(\mathbf{t}\), this resolved shear stress is (Schmid's law):</p>
+      <div class="eq">\( \tau_\text{RSS} = \sigma\cos\phi\cos\lambda = m\,\sigma, \qquad m = (\mathbf{t}\cdot\mathbf{n})(\mathbf{t}\cdot\mathbf{d}) \)</div>
+      <p>where \(\phi\) is the angle between the tensile axis and the plane normal, \(\lambda\) is the angle between the tensile axis and the slip direction, and \(m\) is the Schmid factor. Its maximum value is 0.5, when both angles are 45&deg;. A system operates when the resolved shear stress reaches the critical resolved shear stress, \(\tau_\text{RSS} \ge \tau_\text{CRSS}\), which is a property of the material, the temperature and the strain rate, but not of the orientation.</p>
+      <p>In BCC crystals the close-packed directions are \(\langle 111\rangle\), but there is no close-packed plane. Slip occurs on the \(\{110\}\), \(\{112\}\) and sometimes \(\{123\}\) planes, and the critical resolved shear stress is similar on each, so the active plane depends on the orientation, the temperature and the purity. The calculation here covers the 12 \(\{110\}\langle 111\rangle\) and the 12 \(\{112\}\langle 111\rangle\) systems, with a separate CRSS for each family. The systems with the largest Schmid factor reach the CRSS first; they are the primary systems.</p>
+      <p>Two simplifications are made. The absolute value of each factor is used, so that tension and compression are the same. In a real BCC crystal the screw dislocation core is not planar and the CRSS depends on the sign of the stress and on the stress components other than the resolved shear stress (the twinning&ndash;antitwinning asymmetry of the {112} family and non-Schmid effects). The calculation also ignores the change of orientation during deformation.</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt>Slip system</dt><dd>A combination of a slip plane and a slip direction in that plane.</dd>
+        <dt>Schmid factor, <i>m</i></dt><dd>The product cos&phi;&middot;cos&lambda;: the fraction of the applied stress that is resolved as shear on a slip system.</dd>
+        <dt>RSS</dt><dd>Resolved shear stress, <i>m</i>&sigma;.</dd>
+        <dt>CRSS</dt><dd>Critical resolved shear stress, at which a slip system starts to operate.</dd>
+        <dt>&lt;111&gt;</dt><dd>The family of body-diagonal directions of the cube, the close-packed directions of the BCC lattice.</dd>
+        <dt>{110}, {112}</dt><dd>Families of crystal planes on which slip is found in BCC metals.</dd>
+        <dt>Tensile axis</dt><dd>The direction of the applied uniaxial stress.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /* Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved. */
+    let chartInstance = null, currentStress = 0, crss110 = 50, crss112 = 60, evaluatedSystems = [];
+    const $ = id => document.getElementById(id);
+
+    // BCC slip systems, each satisfying n . d = 0
+    const slipSystems = [
+      { id: 'S1',  family: '{110}', plane: [1, 1, 0],   dir: [1, -1, 1] },
+      { id: 'S2',  family: '{110}', plane: [1, 1, 0],   dir: [-1, 1, 1] },
+      { id: 'S3',  family: '{110}', plane: [1, -1, 0],  dir: [1, 1, 1] },
+      { id: 'S4',  family: '{110}', plane: [1, -1, 0],  dir: [1, 1, -1] },
+      { id: 'S5',  family: '{110}', plane: [1, 0, 1],   dir: [-1, 1, 1] },
+      { id: 'S6',  family: '{110}', plane: [1, 0, 1],   dir: [1, 1, -1] },
+      { id: 'S7',  family: '{110}', plane: [1, 0, -1],  dir: [1, 1, 1] },
+      { id: 'S8',  family: '{110}', plane: [1, 0, -1],  dir: [1, -1, 1] },
+      { id: 'S9',  family: '{110}', plane: [0, 1, 1],   dir: [1, 1, -1] },
+      { id: 'S10', family: '{110}', plane: [0, 1, 1],   dir: [1, -1, 1] },
+      { id: 'S11', family: '{110}', plane: [0, 1, -1],  dir: [1, 1, 1] },
+      { id: 'S12', family: '{110}', plane: [0, 1, -1],  dir: [-1, 1, 1] },
+      { id: 'S13', family: '{112}', plane: [1, 1, 2],   dir: [1, 1, -1] },
+      { id: 'S14', family: '{112}', plane: [1, -1, 2],  dir: [1, -1, -1] },
+      { id: 'S15', family: '{112}', plane: [-1, 1, 2],  dir: [-1, 1, -1] },
+      { id: 'S16', family: '{112}', plane: [-1, -1, 2], dir: [-1, -1, -1] },
+      { id: 'S17', family: '{112}', plane: [1, 2, 1],   dir: [1, -1, 1] },
+      { id: 'S18', family: '{112}', plane: [1, -2, 1],  dir: [1, 1, 1] },
+      { id: 'S19', family: '{112}', plane: [-1, 2, 1],  dir: [-1, -1, 1] },
+      { id: 'S20', family: '{112}', plane: [-1, -2, 1], dir: [-1, 1, 1] },
+      { id: 'S21', family: '{112}', plane: [2, 1, 1],   dir: [-1, 1, 1] },
+      { id: 'S22', family: '{112}', plane: [2, -1, 1],  dir: [1, 1, -1] },
+      { id: 'S23', family: '{112}', plane: [-2, 1, 1],  dir: [1, 1, 1] },
+      { id: 'S24', family: '{112}', plane: [-2, -1, 1], dir: [1, -1, 1] }
+    ];
+
+    function setOrientation(u, v, w) { $('inputU').value = u; $('inputV').value = v; $('inputW').value = w; calculate(); }
+
+    function calculate() {
+      const u = parseFloat($('inputU').value) || 0, v = parseFloat($('inputV').value) || 0, w = parseFloat($('inputW').value) || 0;
+      let magT = Math.sqrt(u * u + v * v + w * w); if (magT === 0) magT = 1;
+      const t = [u / magT, v / magT, w / magT];
+      evaluatedSystems = slipSystems.map(sys => {
+        const pm = Math.hypot(...sys.plane), dm = Math.hypot(...sys.dir);
+        const n = sys.plane.map(x => x / pm), d = sys.dir.map(x => x / dm);
+        const cosPhi = Math.abs(t[0] * n[0] + t[1] * n[1] + t[2] * n[2]);
+        const cosLambda = Math.abs(t[0] * d[0] + t[1] * d[1] + t[2] * d[2]);
+        const schmidFactor = cosPhi * cosLambda;
+        const rss = schmidFactor * currentStress;
+        const crss = sys.family === '{110}' ? crss110 : crss112;
+        return { ...sys, schmidFactor, rss, crss, criterionMet: rss >= crss };
+      });
+      updateUI();
+    }
+
+    function updateUI() {
+      const maxSchmid = Math.max(...evaluatedSystems.map(s => s.schmidFactor));
+      const maxRSS = Math.max(...evaluatedSystems.map(s => s.rss));
+      const active = evaluatedSystems.filter(s => s.criterionMet).length;
+      $('statMaxSchmid').textContent = maxSchmid.toFixed(3);
+      $('statMaxRSS').textContent = maxRSS.toFixed(1) + ' MPa';
+      $('statActiveCount').textContent = active + ' / 24';
+      const badge = $('activeCountBadge');
+      badge.textContent = active + ' / 24 Active';
+      badge.classList.toggle('on', active > 0);
+
+      const tbody = $('resultsTableBody');
+      tbody.innerHTML = '';
+      evaluatedSystems.forEach(s => {
+        const fam = s.family === '{110}' ? 'fam110' : 'fam112';
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td>' + s.id + '</td><td class="' + fam + '">' + s.family + '</td>' +
+          '<td>(' + s.plane.join(' ') + ')</td><td>[' + s.dir.join(' ') + ']</td>' +
+          '<td class="r">' + s.schmidFactor.toFixed(3) + '</td><td class="r">' + s.rss.toFixed(1) + ' MPa</td>' +
+          '<td class="r ' + fam + '">' + s.crss + ' MPa</td>' +
+          '<td class="c ' + (s.criterionMet ? 'met' : 'no') + '">' + (s.criterionMet ? 'MET' : 'no') + '</td>';
+        tbody.appendChild(tr);
+      });
+      updateChart();
+    }
+
+    function updateChart() {
+      const labels = evaluatedSystems.map(s => s.id + ' ' + s.family);
+      const data = evaluatedSystems.map(s => parseFloat(s.rss.toFixed(2)));
+      const colors = evaluatedSystems.map(s => s.criterionMet ? '#34d399' : '#475569');
+      if (chartInstance) {
+        chartInstance.data.labels = labels;
+        chartInstance.data.datasets[0].data = data;
+        chartInstance.data.datasets[0].backgroundColor = colors;
+        chartInstance.update('none');
+        return;
+      }
+      chartInstance = new Chart($('schmidChart').getContext('2d'), {
+        type: 'bar',
+        data: { labels, datasets: [{ label: 'Resolved shear stress (MPa)', data, backgroundColor: colors, borderRadius: 4, borderSkipped: false }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, max: 200, title: { display: true, text: 'Resolved shear stress (MPa)' }, grid: { color: 'rgba(51,65,85,0.5)' } },
+            x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 60, minRotation: 45 } }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => {
+              const s = evaluatedSystems[ctx.dataIndex];
+              return [' RSS: ' + s.rss.toFixed(1) + ' MPa', ' Schmid factor m: ' + s.schmidFactor.toFixed(3), ' CRSS of family: ' + s.crss + ' MPa', ' Criterion met: ' + (s.criterionMet ? 'yes' : 'no')];
+            } } }
+          }
+        },
+        plugins: [{
+          id: 'thresholdLines',
+          afterDraw: chart => {
+            const { ctx, chartArea: { left, right }, scales: { y } } = chart;
+            [[crss110, 'rgba(245,158,11,0.95)', '#f59e0b', [6, 6], '{110}', false], [crss112, 'rgba(217,70,239,0.95)', '#d946ef', [4, 4], '{112}', true]].forEach(([val, stroke, fill, dash, name, atRight]) => {
+              if (val < y.min || val > y.max) return;
+              const yPos = y.getPixelForValue(val);
+              ctx.save(); ctx.beginPath(); ctx.moveTo(left, yPos); ctx.lineTo(right, yPos);
+              ctx.lineWidth = 2; ctx.strokeStyle = stroke; ctx.setLineDash(dash); ctx.stroke();
+              ctx.fillStyle = fill; ctx.font = '11px monospace'; ctx.setLineDash([]);
+              ctx.textAlign = atRight ? 'right' : 'left';
+              ctx.fillText('CRSS ' + name + ': ' + val + ' MPa', atRight ? right - 8 : left + 8, yPos - 6);
+              ctx.restore();
+            });
+          }
+        }]
+      });
+    }
+
+    function exportCSV() {
+      let csv = 'System ID,Family,Plane (hkl),Direction [uvw],Schmid Factor (m),RSS (MPa),CRSS (MPa),Criterion Met\n';
+      evaluatedSystems.forEach(s => {
+        csv += s.id + ',' + s.family + ',"' + s.plane.join(' ') + '","' + s.dir.join(' ') + '",' + s.schmidFactor.toFixed(4) + ',' + s.rss.toFixed(2) + ',' + s.crss + ',' + (s.criterionMet ? 'YES' : 'NO') + '\n';
+      });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+      link.download = 'bcc_schmid_analysis.csv';
+      link.click();
+    }
+
+    document.querySelectorAll('.presets button').forEach(b => b.addEventListener('click', () => setOrientation(...b.dataset.uvw.split(',').map(Number))));
+    ['inputU', 'inputV', 'inputW'].forEach(id => $(id).addEventListener('input', calculate));
+    $('appliedStressRange').addEventListener('input', e => { currentStress = parseFloat(e.target.value); $('stressValDisplay').textContent = currentStress + ' MPa'; calculate(); });
+    $('crss110Range').addEventListener('input', e => { crss110 = parseFloat(e.target.value); $('crss110Display').textContent = crss110 + ' MPa'; calculate(); });
+    $('crss112Range').addEventListener('input', e => { crss112 = parseFloat(e.target.value); $('crss112Display').textContent = crss112 + ' MPa'; calculate(); });
+    $('exportBtn').addEventListener('click', exportCSV);
+    calculate();
+  </script>
+</body>
+</html>

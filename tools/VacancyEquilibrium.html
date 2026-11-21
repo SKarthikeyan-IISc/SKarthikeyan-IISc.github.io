@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Equilibrium Vacancy Concentration | Teaching Tools</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Equilibrium Vacancy Concentration</h1>
+  <p class="subtitle">How the competition between the energy cost and the entropy gain of vacancies sets their equilibrium concentration, and how that concentration varies with temperature.</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>&Delta;H<sub>v</sub>:</strong> the enthalpy of formation of a vacancy, in eV.</li>
+        <li><strong>T (left plot):</strong> the temperature for the free-energy curves on the left. The right plot always shows all temperatures.</li>
+        <li><strong>Left plot:</strong> the enthalpy term (rising line), the entropy term &minus;T&Delta;S (falling curve) and their sum, the free energy &Delta;G, against vacancy fraction <i>X</i><sub>v</sub>. The yellow marker is the minimum of &Delta;G predicted by the equation in the notes. It should sit at the bottom of the &Delta;G curve.</li>
+        <li><strong>Right plot:</strong> the equilibrium concentration against 1/T on a logarithmic axis. A straight line means Arrhenius behaviour, and its slope is &minus;&Delta;H<sub>v</sub>/<i>k</i><sub>B</sub>.</li>
+        <li>Try raising &Delta;H<sub>v</sub> and then T, and watch the minimum of &Delta;G move.</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="tool">
+    <div class="panel wide" style="padding: 12px 20px;">
+      <div class="ctl-grid">
+        <div class="ctl"><label for="dHvSlider">&Delta;H<sub>v</sub> (eV)</label><input type="range" id="dHvSlider" min="0.9" max="1.1" step="0.005" value="1.0"><span id="dHvVal" class="val">1.000</span></div>
+        <div class="ctl"><label for="Tslider">T (K), left plot</label><input type="range" id="Tslider" min="700" max="900" step="5" value="800"><span id="Tval" class="val">800</span></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="panel"><h3>Free energy of vacancy formation</h3><div class="plotbox" style="height:380px"><canvas id="energyChart"></canvas></div></div>
+      <div class="panel"><h3>Equilibrium vacancy concentration</h3><div class="plotbox" style="height:380px"><canvas id="arrheniusChart"></canvas></div></div>
+    </div>
+  </div>
+
+  <details class="note">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <p>Creating a vacancy costs energy, the enthalpy of formation \(\Delta H_v\), because bonds are broken. It also adds disorder, so the entropy increases. Per atom of the crystal, for a vacancy fraction \(X_v\):</p>
+      <div class="eq">\( \Delta G = X_v\,\Delta H_v - T\,\Delta S,\qquad \Delta S = -k_B\big[(1-X_v)\ln(1-X_v) + X_v\ln X_v\big] + X_v\,\Delta S_v \)</div>
+      <p>The first term in \(\Delta S\) is the configurational entropy of distributing the vacancies over the lattice sites. The second is the vibrational entropy that each vacancy adds, because the atoms around it vibrate at lower frequencies. Here \(\Delta S_v = 3k_B\ln 1.2 \approx 0.55\,k_B\) is assumed.</p>
+      <p>The enthalpy rises linearly with \(X_v\), but the configurational entropy rises very steeply from zero (the slope of \(X\ln X\) is infinite at \(X=0\)), so \(\Delta G\) first falls and then rises. The minimum, found from \(d\Delta G/dX_v = 0\) with \(X_v \ll 1\), is the equilibrium concentration:</p>
+      <div class="eq">\( X_v^{eq} = \exp\!\left(\dfrac{\Delta S_v}{k_B}\right)\exp\!\left(-\dfrac{\Delta H_v}{k_B T}\right) \)</div>
+      <p>A crystal is therefore never perfect at any temperature above 0&nbsp;K. The concentration increases exponentially with T, and a plot of \(\ln X_v^{eq}\) against \(1/T\) is a straight line with slope \(-\Delta H_v/k_B\). This is how \(\Delta H_v\) is measured experimentally. For typical metals, \(X_v\) near the melting point is of the order of \(10^{-4}\) to \(10^{-3}\).</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt>Vacancy</dt><dd>An empty lattice site in a crystal.</dd>
+        <dt><i>X</i><sub>v</sub></dt><dd>Fraction of lattice sites that are vacant.</dd>
+        <dt>&Delta;H<sub>v</sub></dt><dd>Enthalpy of vacancy formation (eV).</dd>
+        <dt>&Delta;S<sub>v</sub></dt><dd>Vibrational entropy of formation of one vacancy.</dd>
+        <dt>Configurational entropy</dt><dd>The entropy from the number of ways of arranging the vacancies on the lattice sites.</dd>
+        <dt><i>k</i><sub>B</sub></dt><dd>Boltzmann constant, 8.617&times;10<sup>&minus;5</sup>&nbsp;eV/K.</dd>
+        <dt>Arrhenius plot</dt><dd>A plot of the logarithm of a thermally activated quantity against 1/T.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /* Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved. */
+    const kB = 8.617333262e-5;                 // eV/K
+    const dSv = kB * Math.log(Math.pow(1.2, 3)); // vibrational entropy of formation, eV/K
+    const dHvSlider = document.getElementById('dHvSlider');
+    const Tslider = document.getElementById('Tslider');
+    const dHvVal = document.getElementById('dHvVal');
+    const Tval = document.getElementById('Tval');
+    const c = TOOL.c;
+
+    function generateLeftPlot(dHv, T) {
+      const H = [], S = [], G = [];
+      const xmax = 2.5e-6, N = 1000;
+      for (let i = 0; i <= N; i++) {
+        const x = (i / N) * xmax;
+        let minusTS = 0;
+        if (x > 0) {
+          const entropy = -kB * ((1 - x) * Math.log(1 - x) + x * Math.log(x)) + dSv * x;
+          minusTS = -T * entropy;
+        }
+        H.push({ x, y: x * dHv });
+        S.push({ x, y: minusTS });
+        G.push({ x, y: x * dHv + minusTS });
+      }
+      return { H, S, G };
+    }
+
+    // Equilibrium concentration, including the vibrational-entropy factor exp(dSv/kB)
+    function xEq(dHv, T) { return Math.exp(dSv / kB) * Math.exp(-dHv / (kB * T)); }
+
+    function generateArrheniusData(dHv) {
+      const pts = [];
+      for (let T = 300; T <= 1000; T++) pts.push({ x: 1 / T, y: xEq(dHv, T) });
+      return pts;
+    }
+
+    let leftChart, rightChart;
+
+    function updatePlots() {
+      const dHv = +dHvSlider.value;
+      const T = +Tslider.value;
+      dHvVal.textContent = dHv.toFixed(3);
+      Tval.textContent = T;
+
+      const L = generateLeftPlot(dHv, T);
+      const R = generateArrheniusData(dHv);
+      const xe = xEq(dHv, T);
+      const gAtXe = (function () {
+        const e = -kB * ((1 - xe) * Math.log(1 - xe) + xe * Math.log(xe)) + dSv * xe;
+        return xe * dHv - T * e;
+      })();
+
+      if (leftChart) leftChart.destroy();
+      if (rightChart) rightChart.destroy();
+
+      leftChart = new Chart(document.getElementById('energyChart'), {
+        type: 'line',
+        data: { datasets: [
+          { label: 'Enthalpy', data: L.H, borderColor: c.orange, backgroundColor: c.orange, borderWidth: 2, pointRadius: 0 },
+          { label: '−TΔS', data: L.S, borderColor: c.green, backgroundColor: c.green, borderDash: [6, 4], borderWidth: 2, pointRadius: 0 },
+          { label: 'ΔG', data: L.G, borderColor: c.blue, backgroundColor: c.blue, borderWidth: 3, pointRadius: 0 },
+          { label: 'Predicted minimum', type: 'scatter', data: (xe <= 2.5e-6 ? [{ x: xe, y: gAtXe }] : []), borderColor: c.amber, backgroundColor: c.amber, pointRadius: 6 }
+        ] },
+        options: {
+          parsing: false, animation: false, responsive: true, maintainAspectRatio: false,
+          scales: {
+            x: { type: 'linear', min: 0, max: 2.5e-6, ticks: { stepSize: 5e-7, callback: v => v.toExponential(1) }, title: { display: true, text: 'Xv' } },
+            y: { min: -1e-7, max: 1e-7, title: { display: true, text: 'Energy (eV)' } }
+          }
+        }
+      });
+
+      rightChart = new Chart(document.getElementById('arrheniusChart'), {
+        type: 'scatter',
+        data: { datasets: [{ label: 'Xv(eq) = exp(ΔSv/kB) exp(−ΔHv/kBT)', data: R, borderColor: c.blue, backgroundColor: c.blue, pointRadius: 2 }] },
+        options: {
+          parsing: false, animation: false, responsive: true, maintainAspectRatio: false,
+          scales: {
+            x: { type: 'linear', title: { display: true, text: '1 / T  (K⁻¹)' } },
+            y: { type: 'logarithmic', min: 1e-18, max: 1e-5, title: { display: true, text: 'Xv(eq)' }, ticks: { callback: value => Number(value).toExponential(0) } }
+          }
+        }
+      });
+    }
+
+    dHvSlider.addEventListener('input', updatePlots);
+    Tslider.addEventListener('input', updatePlots);
+    updatePlots();
+  </script>
+</body>
+</html>

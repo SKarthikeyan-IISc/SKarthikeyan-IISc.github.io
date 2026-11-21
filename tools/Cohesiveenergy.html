@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Cohesive Energy of a Lennard-Jones Crystal | Teaching Tools</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .plot-panel { flex: 1 1 420px; min-height: 420px; padding: 10px; }
+    .plot-panel > div { width: 100%; height: 400px; }
+    #cohPanel.hidden { visibility: hidden; }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Cohesive Energy of a Lennard-Jones Crystal</h1>
+  <p class="subtitle">How the energy per atom of a crystal depends on its lattice parameter, when atoms interact through a Lennard-Jones pair potential.</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>&epsilon; and &sigma;:</strong> type the well depth (eV) and the zero-crossing distance (&Aring;) of the pair potential.</li>
+        <li><strong>Crystal structure:</strong> choose FCC, BCC, simple cubic (SC) or diamond cubic (DC).</li>
+        <li><strong>Lattice parameter <i>a</i>:</strong> drag the slider. On the left plot, the dashed vertical lines show where the first five neighbour shells of the chosen crystal fall, labelled NN1, NN2, &hellip; with the number of atoms in each shell. The first shell is red.</li>
+        <li><strong>Cohesive energy plot:</strong> tick <em>YES</em> to show the energy per atom as a function of <i>a</i>. The red marker is the current <i>a</i>; the blue marker is the minimum, which gives the equilibrium lattice parameter and the cohesive energy.</li>
+        <li><strong>Plot controls:</strong> drag to zoom, double-click to reset, hover for exact values.</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="tool">
+    <div class="panel wide" style="padding: 12px 20px;">
+      <div class="ctl-grid">
+        <div class="ctl"><label for="epsilonInput">&epsilon; (eV)</label><input id="epsilonInput" type="number" step="0.1" value="0.5"></div>
+        <div class="ctl"><label for="sigmaInput">&sigma; (&Aring;)</label><input id="sigmaInput" type="number" step="0.01" value="2.5"></div>
+        <div class="ctl"><label for="crystalSelect">Structure</label>
+          <select id="crystalSelect">
+            <option value="FCC">FCC</option>
+            <option value="BCC">BCC</option>
+            <option value="SC">SC</option>
+            <option value="DC">Diamond (DC)</option>
+          </select>
+        </div>
+        <div class="ctl"><label for="latticeSlider"><i>a</i> (&Aring;)</label><input id="latticeSlider" type="range" min="2.5" max="7" step="0.01" value="7"><span id="latticeVal" class="val">7.00</span></div>
+        <div class="ctl"><label class="toggle-group"><input id="toggleCohesive" type="checkbox"> Show cohesive energy vs <i>a</i></label></div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="panel plot-panel"><div id="ljPlot"></div></div>
+      <div class="panel plot-panel hidden" id="cohPanel"><div id="cohPlot"></div></div>
+    </div>
+  </div>
+
+  <details class="note">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <p>In a pair-potential model the energy of a crystal is the sum of the interaction energies of all pairs of atoms. For a perfect crystal every atom sees the same environment, so the energy per atom is obtained from one reference atom and its neighbours, which sit in shells at distances \(r_i = d_i\,a\) with \(N_i\) atoms in shell \(i\). The factor \(\tfrac12\) stops each bond being counted twice, once from each end:</p>
+      <div class="eq">\( E_\text{coh}(a) = \tfrac{1}{2}\sum_i N_i\,V(r_i), \qquad V(r) = 4\epsilon\left[\left(\dfrac{\sigma}{r}\right)^{12} - \left(\dfrac{\sigma}{r}\right)^{6}\right] \)</div>
+      <p>When the crystal is expanded, all distances grow in proportion to \(a\), the repulsive \(r^{-12}\) terms fall quickly and the attractive \(r^{-6}\) terms fall slowly. The energy therefore has a minimum at the equilibrium lattice parameter \(a_0\), and the depth of that minimum is the cohesive energy, the energy needed to pull the crystal apart into isolated atoms (strictly, in this model, at zero temperature and neglecting zero-point motion).</p>
+      <p>Close-packed structures have more neighbours in the nearest shells, so for the same potential they have a more negative cohesive energy. For this reason the Lennard-Jones model, which has no directional bonding, predicts close-packed FCC (or HCP) crystals for the noble gases, and is a poor model for the open diamond structure, which is stabilised in real materials by directional covalent bonds.</p>
+      <p>Only the first five shells are summed here, so the result is slightly less negative than the full lattice sum. The slope of \(E_\text{coh}(a)\) gives the pressure, and its curvature at \(a_0\) gives the bulk modulus.</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt>&epsilon;</dt><dd>Depth of the Lennard-Jones well (eV). A larger value means stronger bonding.</dd>
+        <dt>&sigma;</dt><dd>Distance (&Aring;) at which the pair potential is zero. It sets the size of the atom.</dd>
+        <dt>Lattice parameter, <i>a</i></dt><dd>Edge length of the cubic unit cell (&Aring;). Changing it scales every interatomic distance.</dd>
+        <dt>Neighbour shell</dt><dd>The set of atoms at the same distance from a reference atom. NN1 is the nearest-neighbour shell; the number in brackets is the coordination number of that shell.</dd>
+        <dt>Cohesive energy</dt><dd>Energy per atom, relative to isolated atoms. More negative means a more strongly bound crystal.</dd>
+        <dt>Equilibrium lattice parameter, <i>a</i><sub>0</sub></dt><dd>The value of <i>a</i> that minimises the energy per atom.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /* Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved. */
+    const epsilonInput = document.getElementById('epsilonInput');
+    const sigmaInput = document.getElementById('sigmaInput');
+    const crystalSelect = document.getElementById('crystalSelect');
+    const latticeSlider = document.getElementById('latticeSlider');
+    const latticeVal = document.getElementById('latticeVal');
+    const toggleCohesive = document.getElementById('toggleCohesive');
+    const cohPanel = document.getElementById('cohPanel');
+
+    function ljPotential(r, epsilon, sigma) {
+      const sr6 = Math.pow(sigma / r, 6);
+      return 4 * epsilon * (sr6 * sr6 - sr6);
+    }
+
+    // First five neighbour shells (distance, number of atoms) for each structure.
+    function getNeighborData(crystal, a) {
+      let distances = [], counts = [];
+      const s2 = Math.sqrt(2), s3 = Math.sqrt(3);
+      switch (crystal) {
+        case 'SC':
+          distances = [a, s2*a, s3*a, 2*a, Math.sqrt(5)*a];
+          counts = [6, 12, 8, 6, 24];
+          break;
+        case 'BCC':
+          distances = [s3/2*a, a, s2*a, Math.sqrt(11)/2*a, s3*a];
+          counts = [8, 6, 12, 24, 8];            // corrected: fifth shell has 8 atoms (was 14)
+          break;
+        case 'FCC':
+          distances = [a/s2, a, s3/s2*a, s2*a, 3*a/s2];
+          counts = [12, 6, 24, 12, 24];
+          break;
+        case 'DC':
+          distances = [s3/4*a, s2/2*a, Math.sqrt(11)/4*a, a, Math.sqrt(19)/4*a];
+          counts = [4, 12, 12, 6, 12];           // corrected: shell 4 has 6 atoms, shell 5 is at sqrt(19)/4 a with 12
+          break;
+        default:
+          distances = [a]; counts = [6];
+      }
+      return { distances, counts };
+    }
+
+    function computeCohesiveEnergy(a, epsilon, sigma, crystal) {
+      const { distances, counts } = getNeighborData(crystal, a);
+      let sum = 0;
+      for (let i = 0; i < distances.length; i++) sum += counts[i] * ljPotential(distances[i], epsilon, sigma);
+      return 0.5 * sum;
+    }
+
+    function updatePlots() {
+      const epsilon = parseFloat(epsilonInput.value);
+      const sigma = parseFloat(sigmaInput.value);
+      const a = parseFloat(latticeSlider.value);
+      latticeVal.textContent = a.toFixed(2);
+      const crystal = crystalSelect.value;
+
+      const r = [], V = [];
+      const n = 500, rMin = 1, rMax = 5;
+      for (let i = 0; i <= n; i++) {
+        const ri = rMin + i * (rMax - rMin) / n;
+        r.push(ri); V.push(ljPotential(ri, epsilon, sigma));
+      }
+      const traceLJ = { x: r, y: V, mode: 'lines', name: 'LJ potential', line: { color: '#60a5fa', width: 2.5 } };
+
+      const { distances, counts } = getNeighborData(crystal, a);
+      const neighborTraces = distances.map((d, i) => {
+        const label = 'NN' + (i + 1) + ' (' + counts[i] + ')';
+        return {
+          x: [d, d], y: [-4.5, 1], mode: 'lines+text',
+          line: { dash: 'dash', color: (i === 0 ? '#f87171' : '#34d399'), width: 1.5 },
+          text: ['', label], textposition: 'top right', textfont: { color: '#e0e0e0', size: 11 },
+          name: label, showlegend: false
+        };
+      });
+
+      Plotly.newPlot('ljPlot', [traceLJ, ...neighborTraces], TOOL.plotLayout({
+        title: { text: 'Lennard-Jones potential and neighbour shells', font: { size: 14 } },
+        xaxis: { title: 'r (Å)', range: [1, 5] },
+        yaxis: { title: 'V(r) (eV)', range: [-4.5, 1] },
+        height: 400, showlegend: false
+      }), { responsive: true, displayModeBar: false });
+
+      if (toggleCohesive.checked) {
+        cohPanel.classList.remove('hidden');
+        const aVals = [], Evals = [];
+        const steps = 200, aMin = 2.5, aMax = 7;
+        for (let i = 0; i <= steps; i++) {
+          const ai = aMin + i * (aMax - aMin) / steps;
+          aVals.push(ai); Evals.push(computeCohesiveEnergy(ai, epsilon, sigma, crystal));
+        }
+        const Emin = Math.min(...Evals);
+        const aMinEq = aVals[Evals.indexOf(Emin)];
+        const Ecurrent = computeCohesiveEnergy(a, epsilon, sigma, crystal);
+
+        const traceCoh = { x: aVals, y: Evals, mode: 'lines', name: 'E_coh(a)', line: { color: '#60a5fa', width: 2.5 } };
+        const traceCurrent = {
+          x: [a], y: [Ecurrent], mode: 'markers+text',
+          text: ['Current: ' + Ecurrent.toFixed(3) + ' eV'], textposition: 'top center',
+          textfont: { color: '#f87171' }, marker: { color: '#f87171', size: 9 }, name: 'Current'
+        };
+        const traceMin = {
+          x: [aMinEq], y: [Emin], mode: 'markers+text',
+          text: ['Min: ' + Emin.toFixed(3) + ' eV @ ' + aMinEq.toFixed(2) + ' Å'], textposition: 'bottom center',
+          textfont: { color: '#eab308' }, marker: { color: '#eab308', size: 9 }, name: 'Minimum'
+        };
+        Plotly.newPlot('cohPlot', [traceCoh, traceCurrent, traceMin], TOOL.plotLayout({
+          title: { text: 'Cohesive energy vs lattice parameter', font: { size: 14 } },
+          xaxis: { title: 'a (Å)', range: [2.5, 7] },
+          yaxis: { title: 'E_coh (eV/atom)', range: [-10, 1] },
+          height: 400, showlegend: false
+        }), { responsive: true, displayModeBar: false });
+      } else {
+        cohPanel.classList.add('hidden');
+      }
+    }
+
+    epsilonInput.addEventListener('input', updatePlots);
+    sigmaInput.addEventListener('input', updatePlots);
+    crystalSelect.addEventListener('change', updatePlots);
+    latticeSlider.addEventListener('input', updatePlots);
+    toggleCohesive.addEventListener('change', updatePlots);
+    updatePlots();
+  </script>
+</body>
+</html>

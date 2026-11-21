@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Stress-Strain Curves of FCC Single Crystals | Teaching Tools</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .fld { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+    .fld > label, .fld .t { font-size: 0.8rem; color: var(--muted); }
+    .fld input, .fld select { width: 100%; box-sizing: border-box; }
+    .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
+    .hint { font-size: 0.78rem; color: var(--muted); margin: 2px 0 0; }
+    .box-o { border: 1px solid rgba(251,146,60,.4); background: rgba(251,146,60,.06); border-radius: 8px; padding: 10px 12px; width: 100%; box-sizing: border-box; }
+    #orientationToggles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+    #orientationToggles label { display: flex; align-items: center; gap: 8px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; font-size: 0.85rem; font-weight: 600; cursor: pointer; user-select: none; }
+    #orientationToggles label.on { border-color: var(--blue); background: rgba(59,130,246,.12); }
+    .layout { display: grid; grid-template-columns: minmax(280px, 340px) 1fr; gap: 16px; width: 100%; align-items: start; }
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+    .tbl-wrap { overflow-x: auto; width: 100%; }
+    table.data td, table.data th { text-align: center; }
+    table.data td:first-child, table.data th:first-child { text-align: left; }
+    .mode-multi { color: var(--amber); font-weight: 600; }
+    .mode-single { color: var(--blue-soft); font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Stress&ndash;Strain Curves of FCC Single Crystals</h1>
+  <p class="subtitle">Tensile curves of an FCC single crystal loaded along different axes: anisotropic elasticity, single-slip easy glide with lattice rotation (Stage I), and multiple-slip hardening (Stage II).</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>Material:</strong> choose Cu, Al, Ni or Au to load their elastic constants <i>C</i><sub>11</sub>, <i>C</i><sub>12</sub> and <i>C</i><sub>44</sub>, or type your own values.</li>
+        <li><strong>CRSS &tau;<sub>0</sub> and hardening slope &theta;<sub>0</sub>:</strong> the critical resolved shear stress for slip (MPa) and the hardening rate used after the crystal enters multiple slip (GPa).</li>
+        <li><strong>Loading orientations:</strong> tick any of the preset tensile axes to draw their curves. Type <code>u v w</code> in the orange box to define your own axis, and tick <em>Custom</em>.</li>
+        <li><strong>Max applied strain:</strong> the slider sets the end of the curves. Press <strong>Recalculate and plot</strong> after changing it or any of the numbers.</li>
+        <li><strong>Table:</strong> for each orientation it gives Young's modulus along the axis, the initial yield stress, whether the crystal starts in single or multiple slip, and the strain at which easy glide ends (Stage I to Stage II).</li>
+        <li>Compare [001] and [111] (several systems at once, no easy glide) with [123] and [112] (a single system, so a long easy-glide stage).</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="tool">
+    <div class="layout">
+      <div class="panel plain" style="gap:14px">
+        <h3>Simulation parameters</h3>
+        <div class="fld"><label for="materialPreset">Material preset</label>
+          <select id="materialPreset">
+            <option value="Cu">Copper (Cu)</option>
+            <option value="Al">Aluminium (Al)</option>
+            <option value="Ni">Nickel (Ni)</option>
+            <option value="Au">Gold (Au)</option>
+            <option value="custom">Custom stiffness</option>
+          </select>
+        </div>
+        <div class="three">
+          <div class="fld"><label for="c11Input">C<sub>11</sub> (GPa)</label><input type="number" id="c11Input" value="168.4"></div>
+          <div class="fld"><label for="c12Input">C<sub>12</sub> (GPa)</label><input type="number" id="c12Input" value="121.4"></div>
+          <div class="fld"><label for="c44Input">C<sub>44</sub> (GPa)</label><input type="number" id="c44Input" value="75.4"></div>
+        </div>
+        <div class="fld"><label for="tau0Input">CRSS &tau;<sub>0</sub> (MPa)</label><input type="number" id="tau0Input" value="15.0"></div>
+        <div class="fld"><label for="theta0Input">Taylor hardening slope &theta;<sub>0</sub> (GPa)</label><input type="number" id="theta0Input" value="0.5" step="0.05">
+          <p class="hint">Work-hardening rate after the transition to multiple slip.</p></div>
+        <div class="box-o">
+          <div class="t" style="color:var(--orange);font-size:0.85rem;margin-bottom:6px">User-defined tensile axis [u v w]</div>
+          <div class="three">
+            <div class="fld"><label for="customU">u</label><input type="number" id="customU" value="2" step="1"></div>
+            <div class="fld"><label for="customV">v</label><input type="number" id="customV" value="3" step="1"></div>
+            <div class="fld"><label for="customW">w</label><input type="number" id="customW" value="4" step="1"></div>
+          </div>
+          <p class="hint">Any non-zero direction. Tick its box below to plot it.</p>
+        </div>
+        <div class="fld"><span class="t">Loading orientations</span><div id="orientationToggles"></div></div>
+        <div class="fld"><label for="maxStrainInput">Max applied strain: <b id="maxStrainVal" style="color:#fff">25%</b></label>
+          <input type="range" id="maxStrainInput" min="0.05" max="0.40" step="0.01" value="0.25"></div>
+        <button type="button" id="updateBtn">Recalculate and plot</button>
+      </div>
+
+      <div class="panel plain">
+        <h3>Uniaxial stress&ndash;strain curves</h3>
+        <div class="plotbox" style="height:460px"><canvas id="stressStrainChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="panel wide plain">
+      <h3>Slip activity and Stage I transition</h3>
+      <p class="hint" style="margin:0 0 10px">The strain at which the tensile axis, rotating during single slip, reaches the boundary of the stereographic triangle and a second slip system starts to operate.</p>
+      <div class="tbl-wrap" id="transitionTableContainer"></div>
+    </div>
+  </div>
+
+  <details class="note">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <p><strong>Elasticity.</strong> A cubic crystal is elastically anisotropic. Its Young's modulus along a direction with direction cosines \((\alpha,\beta,\gamma)\) is</p>
+      <div class="eq">\( \dfrac{1}{E} = S_{11} - 2\left(S_{11}-S_{12}-\tfrac12 S_{44}\right)\left(\alpha^2\beta^2+\beta^2\gamma^2+\gamma^2\alpha^2\right) \)</div>
+      <p>where the compliances \(S_{ij}\) are obtained from the stiffnesses \(C_{11}, C_{12}, C_{44}\). The modulus is largest along \(\langle111\rangle\) and smallest along \(\langle001\rangle\) when the anisotropy ratio \(2C_{44}/(C_{11}-C_{12})\) is greater than 1, as in most FCC metals (Cu, Ni, Au).</p>
+      <p><strong>Yielding.</strong> Slip begins on the system with the highest Schmid factor \(m\) when the resolved shear stress reaches \(\tau_0\), so the yield stress is \(\sigma_y=\tau_0/m\). Stress is then \(\sigma = \tau_0/m\) while a single system operates, since slip proceeds at constant resolved shear stress (easy glide, Stage I).</p>
+      <p><strong>Lattice rotation.</strong> Slip by \(d\gamma\) on the primary system changes the direction of the tensile axis \(\mathbf{t}\) in the crystal. In tension the axis turns towards the slip direction \(\mathbf{s}\):</p>
+      <div class="eq">\( d\mathbf{t} = d\gamma\,(\mathbf{t}\cdot\mathbf{n})\,\big[\mathbf{s} - (\mathbf{t}\cdot\mathbf{s})\,\mathbf{t}\big], \qquad d\varepsilon = m\,d\gamma \)</div>
+      <p>so \(m\) changes as the crystal strains. When the axis reaches the edge of the standard stereographic triangle, a second system gets the same Schmid factor as the primary one (the conjugate system, or the critical system), and slip on two or more systems begins. This is the end of Stage I. Slip systems then interact and harden the crystal at a rate that is a fraction of the shear modulus (Stage II); the tool applies a linear hardening law \(\sigma = \sigma_\text{trans} + m\,\theta_0\,(\varepsilon-\varepsilon_\text{trans})\) beyond that point.</p>
+      <p>Orientations at the corners of the triangle ([001], [011], [111]) and along its [001]&ndash;[111] edge (such as [112]) start in multiple slip and have no easy glide. Orientations in the interior of the triangle, such as [123], have a single operating system and a long Stage&nbsp;I. This is why the curves of single crystals depend so strongly on orientation, whereas the curve of a polycrystal is the average over all orientations (the Taylor factor).</p>
+      <p>This is a simplified model. It neglects elastic strain during plastic flow, latent hardening, the sign of the shear stress, and the constraints of the grips on the rotation of a real specimen.</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt>Easy glide (Stage I)</dt><dd>Slip on a single system, with low hardening.</dd>
+        <dt>Stage II</dt><dd>Multiple slip, with a high, nearly constant work-hardening rate.</dd>
+        <dt>CRSS, &tau;<sub>0</sub></dt><dd>Critical resolved shear stress, at which a slip system operates.</dd>
+        <dt>Schmid factor, <i>m</i></dt><dd>cos&phi;&middot;cos&lambda;, the ratio of resolved shear stress to applied tensile stress.</dd>
+        <dt>Lattice rotation</dt><dd>The change of the crystal orientation relative to the tensile axis caused by slip.</dd>
+        <dt><i>C</i><sub>11</sub>, <i>C</i><sub>12</sub>, <i>C</i><sub>44</sub></dt><dd>The three independent elastic stiffnesses of a cubic crystal.</dd>
+        <dt>&theta;<sub>0</sub></dt><dd>Work-hardening slope used in Stage II.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /* Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved. */
+    const materials = {
+      Cu: { c11: 168.4, c12: 121.4, c44: 75.4 },
+      Al: { c11: 108.2, c12: 61.3,  c44: 28.5 },
+      Ni: { c11: 246.5, c12: 147.3, c44: 124.7 },
+      Au: { c11: 192.3, c12: 163.1, c44: 42.0 }
+    };
+
+    const slipSystems = [
+      { n: [1, 1, 1],  d: [0, 1, -1] },  { n: [1, 1, 1],  d: [-1, 0, 1] },  { n: [1, 1, 1],  d: [1, -1, 0] },
+      { n: [1, -1, 1], d: [0, 1, 1] },   { n: [1, -1, 1], d: [1, 0, -1] },  { n: [1, -1, 1], d: [-1, -1, 0] },
+      { n: [1, 1, -1], d: [0, 1, 1] },   { n: [1, 1, -1], d: [1, 0, 1] },   { n: [1, 1, -1], d: [-1, 1, 0] },
+      { n: [-1, 1, 1], d: [0, 1, -1] },  { n: [-1, 1, 1], d: [1, 0, 1] },   { n: [-1, 1, 1], d: [-1, -1, 0] }
+    ];
+
+    const orientations = [
+      { name: '[0 0 1]', uvw: [0, 0, 1], active: false, color: '#f87171' },
+      { name: '[0 1 1]', uvw: [0, 1, 1], active: false, color: '#34d399' },
+      { name: '[1 1 1]', uvw: [1, 1, 1], active: false, color: '#60a5fa' },
+      { name: '[1 1 2]', uvw: [1, 1, 2], active: true,  color: '#fbbf24' },
+      { name: '[1 2 3]', uvw: [1, 2, 3], active: true,  color: '#c084fc' },
+      { name: '[0 1 2]', uvw: [0, 1, 2], active: false, color: '#f472b6' },
+      { name: 'Custom [2 3 4]', uvw: [2, 3, 4], active: false, color: '#fb923c', isCustom: true }
+    ];
+
+    let chartInstance = null;
+    const $ = id => document.getElementById(id);
+    const norm = v => Math.hypot(v[0], v[1], v[2]);
+    const normalize = v => { const l = norm(v); return l === 0 ? [0, 0, 0] : [v[0] / l, v[1] / l, v[2] / l]; };
+    const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+    const scale = (v, s) => [v[0] * s, v[1] * s, v[2] * s];
+    const add = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+    const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+
+    function calculateYoungsModulus(uvw, c11, c12, c44) {
+      const [a, b, g] = normalize(uvw);
+      const S11 = (c11 + c12) / ((c11 - c12) * (c11 + 2 * c12));
+      const S12 = -c12 / ((c11 - c12) * (c11 + 2 * c12));
+      const S44 = 1 / c44;
+      const S = S11 - 2 * (S11 - S12 - 0.5 * S44) * ((a * b) ** 2 + (b * g) ** 2 + (g * a) ** 2);
+      return 1.0 / S;
+    }
+
+    function calculateSchmidFactor(uvw, sys) {
+      const t = normalize(uvw);
+      return Math.abs(dot(t, normalize(sys.n))) * Math.abs(dot(t, normalize(sys.d)));
+    }
+
+    function updateCustomOrientation() {
+      const values = ['customU', 'customV', 'customW'].map(id => { const v = Number($(id).value); return Number.isFinite(v) ? v : 0; });
+      const custom = orientations.find(o => o.isCustom);
+      custom.uvw = values;
+      custom.name = 'Custom [' + values.join(' ') + ']';
+      initToggles();
+      if (custom.active && norm(values) > 0) runSimulation();
+    }
+
+    function initToggles() {
+      const container = $('orientationToggles');
+      container.innerHTML = '';
+      orientations.forEach((ori, idx) => {
+        const label = document.createElement('label');
+        if (ori.active) label.className = 'on';
+        label.innerHTML = '<input type="checkbox" ' + (ori.active ? 'checked' : '') + '><span style="color:' + ori.color + '">' + ori.name + '</span>';
+        label.querySelector('input').addEventListener('change', e => { orientations[idx].active = e.target.checked; initToggles(); runSimulation(); });
+        container.appendChild(label);
+      });
+    }
+
+    function runSimulation() {
+      const c11 = parseFloat($('c11Input').value), c12 = parseFloat($('c12Input').value), c44 = parseFloat($('c44Input').value);
+      const tau0 = parseFloat($('tau0Input').value);
+      const theta0 = parseFloat($('theta0Input').value) * 1000;       // GPa -> MPa
+      const maxStrain = parseFloat($('maxStrainInput').value);
+      const dEpsStep = 0.001;
+      const numSteps = Math.max(10, Math.round(maxStrain / dEpsStep));
+      const summary = [];
+
+      const data = orientations.filter(o => o.active && norm(o.uvw) > 0).map(ori => {
+        const SF = slipSystems.map(sys => calculateSchmidFactor(ori.uvw, sys));
+        const maxM = Math.max(...SF);
+        const activeIdx = SF.map((m, i) => Math.abs(m - maxM) < 1e-3 ? i : -1).filter(i => i !== -1);
+        const isInitiallyMulti = activeIdx.length > 1;
+        const E = calculateYoungsModulus(ori.uvw, c11, c12, c44), E_MPa = E * 1000;
+        const sigmaY = tau0 / maxM;
+        const points = [];
+        let transitionStrainPct = null;
+
+        if (!isInitiallyMulti) {
+          const sys = slipSystems[activeIdx[0]];
+          let currentEps = 0, currentDir = normalize(ori.uvw), currentM = maxM;
+          let isTransitioned = false, transStress = 0, transEps = 0;
+
+          for (let i = 0; i <= numSteps; i++) {
+            const targetEps = (i / numSteps) * maxStrain;
+            const dEps = targetEps - currentEps;
+            if (i === 0) { points.push({ x: 0, y: 0 }); continue; }
+
+            const currentSigmaY = tau0 / currentM;
+            const currentE = calculateYoungsModulus(currentDir, c11, c12, c44) * 1000;
+            const epsY = currentSigmaY / currentE;
+            let sigma = 0;
+
+            if (targetEps <= epsY) {
+              sigma = currentE * targetEps;
+            } else {
+              const sorted = slipSystems.map(s => calculateSchmidFactor(currentDir, s)).sort((a, b) => b - a);
+              const m1 = sorted[0], m2 = sorted[1];
+              if (!isTransitioned && (m1 - m2 < 0.0015)) {
+                isTransitioned = true; transEps = targetEps; transitionStrainPct = targetEps * 100;
+                transStress = tau0 / m1; sigma = transStress;
+              }
+              if (isTransitioned) {
+                sigma = transStress + (m1 * theta0 * (targetEps - transEps));
+              } else {
+                // shear increment from the strain increment (d(eps) = m d(gamma)), then rotate the axis towards the slip direction
+                const dGamma = dEps / Math.max(currentM, 0.05);
+                const nn = normalize(sys.n), ss = normalize(sys.d);
+                const a = dot(currentDir, ss), b = dot(currentDir, nn);
+                const sE = scale(ss, a >= 0 ? 1 : -1);           // slip direction taken in the sense of the shear
+                const bE = Math.abs(b), aE = Math.abs(a);
+                const dDir = scale(sub(sE, scale(currentDir, aE)), bE * dGamma);
+                currentDir = normalize(add(currentDir, dDir));
+                currentM = calculateSchmidFactor(currentDir, sys);
+                sigma = tau0 / Math.max(currentM, 0.05);
+              }
+            }
+            currentEps = targetEps;
+            points.push({ x: currentEps * 100, y: sigma });
+          }
+        } else {
+          transitionStrainPct = 0.0;
+          const epsY = sigmaY / E_MPa;
+          for (let i = 0; i <= numSteps; i++) {
+            const eps = (i / numSteps) * maxStrain;
+            const sigma = eps <= epsY ? E_MPa * eps : sigmaY + (maxM * theta0 * (eps - epsY));
+            points.push({ x: eps * 100, y: sigma });
+          }
+        }
+        summary.push({ name: ori.name, color: ori.color, isInitiallyMulti, transitionStrainPct, sigmaY, E });
+        return { ...ori, points };
+      });
+
+      renderChart(data, maxStrain * 100);
+      renderTable(summary);
+    }
+
+    function renderChart(data, maxStrainPct) {
+      const datasets = data.map(o => ({ label: 'Axis ' + o.name, data: o.points, borderColor: o.color, backgroundColor: o.color, borderWidth: 2.5, pointRadius: 0, tension: 0.1 }));
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = new Chart($('stressStrainChart').getContext('2d'), {
+        type: 'line',
+        data: { datasets },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          scales: {
+            x: { type: 'linear', min: 0, max: maxStrainPct, title: { display: true, text: 'Strain (%)', font: { weight: 'bold' } } },
+            y: { beginAtZero: true, title: { display: true, text: 'Uniaxial stress (MPa)', font: { weight: 'bold' } } }
+          },
+          plugins: { legend: { labels: { font: { weight: 'bold' } } } }
+        }
+      });
+    }
+
+    function renderTable(metrics) {
+      let html = '<table class="data"><thead><tr><th>Orientation</th><th>Young’s modulus E (GPa)</th><th>Initial yield stress σ<sub>y</sub> (MPa)</th><th>Deformation mode</th><th>Stage I → II transition strain</th></tr></thead><tbody>';
+      metrics.forEach(m => {
+        const mode = m.isInitiallyMulti ? '<span class="mode-multi">Immediate multiple slip</span>' : '<span class="mode-single">Single-slip easy glide</span>';
+        const trans = m.isInitiallyMulti ? '0.0% (no Stage I)' : (m.transitionStrainPct !== null ? m.transitionStrainPct.toFixed(1) + '%' : 'beyond max strain');
+        html += '<tr><td style="color:' + m.color + ';font-weight:700">' + m.name + '</td><td>' + m.E.toFixed(1) + '</td><td>' + m.sigmaY.toFixed(1) + '</td><td>' + mode + '</td><td>' + trans + '</td></tr>';
+      });
+      $('transitionTableContainer').innerHTML = html + '</tbody></table>';
+    }
+
+    $('materialPreset').addEventListener('change', e => {
+      const m = materials[e.target.value];
+      if (m) { $('c11Input').value = m.c11; $('c12Input').value = m.c12; $('c44Input').value = m.c44; runSimulation(); }
+    });
+    $('maxStrainInput').addEventListener('input', e => { $('maxStrainVal').textContent = Math.round(e.target.value * 100) + '%'; });
+    $('updateBtn').addEventListener('click', runSimulation);
+    ['customU', 'customV', 'customW'].forEach(id => $(id).addEventListener('change', updateCustomOrientation));
+
+    updateCustomOrientation();
+    initToggles();
+    runSimulation();
+  </script>
+</body>
+</html>

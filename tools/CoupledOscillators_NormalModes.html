@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Coupled Oscillators and Normal Modes | Teaching Tools</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .co { width: 100%; max-width: 1100px; display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
+    .co-panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; box-sizing: border-box; min-width: 0; }
+    .co-panel h3 { margin: 0 0 8px; font-size: 0.95rem; color: var(--blue-soft); font-weight: 600; }
+    .co-panel h3 small { color: var(--muted); font-weight: 400; font-size: 0.8rem; margin-left: 8px; }
+    .co canvas { display: block; width: 100%; touch-action: none; }
+    #chain, #modes { cursor: pointer; }
+    #trace { cursor: default; }
+    .co-row { display: flex; align-items: center; gap: 10px 18px; flex-wrap: wrap; font-size: 0.86rem; color: var(--ink-soft); }
+    .co-row + .co-row { margin-top: 10px; }
+    .co-row label { color: #ccc; }
+    .co-row output { color: #fff; font-weight: 700; min-width: 2.2em; display: inline-block; text-align: right; font-variant-numeric: tabular-nums; }
+    .co-row input[type=range] { width: 150px; }
+    .co-sep { width: 1px; align-self: stretch; background: var(--line); }
+    /* toggle switch */
+    .sw { position: relative; display: inline-flex; align-items: center; gap: 9px; cursor: pointer; user-select: none; font-size: 0.9rem; color: #fff; font-weight: 600; }
+    .sw input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .sw .track { width: 44px; height: 24px; border-radius: 12px; background: #30363d; border: 1px solid #484f58; position: relative; transition: background .15s; flex: none; }
+    .sw .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #e6edf3; transition: transform .15s; }
+    .sw input:checked + .track { background: var(--blue); border-color: var(--blue-soft); }
+    .sw input:checked + .track::after { transform: translateX(20px); }
+    .sw input:focus-visible + .track { outline: 2px solid var(--blue-soft); outline-offset: 2px; }
+    .co-disp { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-start; }
+    .co-disp .plotbox { flex: 1 1 440px; min-width: 0; }
+    .co-disp .co-dos { flex: 0 1 230px; min-width: 190px; }
+    .co-tbl { flex: 1 1 300px; min-width: 0; overflow: auto; max-height: 330px; }
+    .co-tbl table.data thead th { position: sticky; top: 0; background: var(--panel); z-index: 1; }
+    .co-tbl table.data td, .co-tbl table.data th { padding: 4px 8px; font-size: 0.82rem; text-align: right; }
+    .co-tbl table.data td:first-child, .co-tbl table.data th:first-child { text-align: left; }
+    .co-tbl tr.hov td { background: #2a2410; }
+    .co-tbl tbody tr { cursor: pointer; }
+    .co-sw { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+    .co-now { display: flex; align-items: flex-start; gap: 12px; background: #1c1a0e; border: 1px solid #5b4a10; border-left: 4px solid #eab308; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.92rem; line-height: 1.45; }
+    .co-nowlbl { font-weight: 700; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.06em; color: #eab308; white-space: nowrap; padding-top: 3px; }
+    #nowTxt { flex: 1; color: #f5e9b8; min-width: 0; }
+    .co-pill { font-size: 0.72rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; border: 1px solid; }
+    .co-pill.run { color: #34d399; border-color: #1f6f55; background: #0e2a22; }
+    .co-pill.pause { color: #f87171; border-color: #7f2d2d; background: #2a1212; }
+    .co-pill.drag { color: #60a5fa; border-color: #1f4f8a; background: #0e1c33; }
+    .co-group + .co-group { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+    .co-gl { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--blue-soft); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .co-gl small { text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--muted); font-size: 0.8rem; }
+    .co-num { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; background: var(--blue); color: #fff; align-items: center; justify-content: center; font-size: 0.75rem; }
+    .co-hint { font-size: 0.8rem; color: var(--muted); margin: 8px 0 0; line-height: 1.5; }
+    #startSel { min-width: 320px; max-width: 100%; }
+    .co-legend { font-size: 0.8rem; color: var(--muted); line-height: 1.55; margin: 8px 0 0; }
+    .co-readout { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.8rem; color: var(--ink-soft); margin: 8px 0 0; }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Coupled Oscillators and Normal Modes</h1>
+  <p class="subtitle">A line of masses joined by springs (identical, or with alternating masses or alternating spring constants), with fixed ends or periodic boundary conditions. The motion of one chosen mass is shown, together with the sinusoids at each normal-mode frequency that add up to it.</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>The yellow &ldquo;Now playing&rdquo; box</strong> always says what is running: a pluck, one normal mode, a travelling wave, a random shape, or a shape you set by hand. It also says whether the motion is running or paused.</li>
+        <li><strong>Starting condition (menu in section 2):</strong> choose what to start. <em>Pluck the reference mass</em> displaces that one mass by one unit and releases it. <em>Random shape</em> needs no explanation. The button <em>Reset to equilibrium</em> puts every mass back at rest at its rest position. <em>One normal mode only</em> starts a single standing-wave mode, so every mass moves at one frequency. <em>Travelling wave</em> (ring only) sends one wave in one direction. Choosing an item starts it at once, and <em>Start again</em> repeats it (a new random shape for the random case).</li>
+        <li><strong>Starting by hand:</strong> in the chain panel, click a mass to make it the <em>reference mass</em> (amber) and drag it along the chain (or up and down in the transverse view). The motion is frozen while you drag, and the chain is released from rest when you let go. Dragging several masses in turn builds up a shape, because each drag starts from the shape left by the last one. A bar in the mode panel, or a dot in the dispersion panel, can also be used (see below).</li>
+        <li><strong>Pause / Play:</strong> <em>Pause</em> freezes the motion and the time plots, and the button then reads <em>Play</em>. Press <em>Play</em> to continue from the same instant. It does not restart anything.</li>
+        <li><strong>Free ends:</strong> with the periodic switch off, two menus let you choose, for each end separately, a wall (fixed) or a free end. A free end has no wall: the end mass is joined to its neighbour by one spring only. With two free ends nothing holds the chain, so one mode has \(\omega=0\) (the whole chain translates, drawn as <em>translation</em>). The chain does not drift in the tool unless you give it a net momentum, for example with the travelling-wave start in the periodic case or the mode-bar for that mode.</li>
+        <li><strong>Boundary condition:</strong> the switch changes between fixed ends (the end masses are tied to walls) and periodic boundary conditions (the chain is a ring). In the periodic case the faded masses are copies of mass <i>N</i> on the left and mass 1 on the right, so that the end masses are joined to each other.</li>
+        <li><strong>Number of masses:</strong> 10 by default, with the periodic boundary condition switched on. Choose 2 to 10, or 20 or 40 to see the dispersion curve fill in. For 20 and 40 masses the mode panel and time plots are drawn more compactly, and the table scrolls.</li>
+        <li><strong>Two alternating masses:</strong> the switch makes every second mass heavy (mass \(M\), orange) and the others light (mass \(m\), blue), with the same springs. The slider sets \(M/m\). The dispersion panel then shows two branches, acoustic (blue) and optical (orange), with a gap between them. In the periodic case \(N\) must be even. At \(M/m=1\) the gap closes.</li>
+        <li><strong>Two alternating springs:</strong> the switch makes the springs alternate between \(K\) and \(K'\), with all the masses equal (or alternating as well, if the other switch is on). The slider sets \(K'/K\), and the stiffer spring is drawn with the thicker line. The dispersion curve again splits into acoustic and optical branches with a gap, now set by the stiffness ratio. With fixed ends and an odd number of masses, or with \(K'\lt K\), one or two edge modes appear inside the gap (green dots).</li>
+        <li><strong>Density of states:</strong> the slider sets a frequency bin width \(\Delta\omega\). In the panel next to the dispersion plot each bar counts the modes of this chain whose frequency lies in one bin, so the bar length is \(g(\omega)=\text{count}/\Delta\omega\) and the bars add up to \(N\) modes. The dashed line is the same count for a very long chain. Hover a bar to see the count, and the matching band and dots in the dispersion plot.</li>
+        <li><strong>Normal modes (middle):</strong> each bar is the amplitude of one normal mode, and the dial below it is its phasor, which turns at the mode frequency. Hover a bar to see that mode&rsquo;s shape drawn in yellow on the chain. Click or drag a bar to set the amplitude of that mode by hand. The chain is then released from rest with the other modes as they were.</li>
+        <li><strong>Dispersion relation:</strong> the grey curve is \(\omega=2\omega_0|\sin(ka/2)|\), which holds for a chain of any length. The dots are the wavevectors that the boundary condition allows, so they are the modes of this particular chain. Each bar of the mode panel carries its wavelength \(\lambda\), and the table lists \(ka/\pi\), \(\lambda/a\) and \(\omega/\omega_0\) for every mode. There is one dot for each of the \(N\) modes. In the periodic case the dots at \(+k\) and \(-k\) have the same frequency, so the time plots add them into one row per frequency. Hover a dot or a row to see the mode on the chain, and click it to start that mode alone (a travelling wave in the periodic case). The hovered mode is drawn in real space as a continuous curve, with an arrow marking one wavelength. Increase the number of masses and the dots fill in the curve.</li>
+        <li><strong>Time plots (bottom):</strong> the top trace is the displacement of the reference mass against time. Below it is one trace for each normal-mode frequency, showing that frequency&rsquo;s share of the reference mass&rsquo;s motion. Add the rows together and you get the top trace. All rows use the same vertical scale unless you tick <em>Scale each row separately</em>.</li>
+        <li><strong>Things to try:</strong> choose <em>Pluck the reference mass</em> and see that the trace of a single mass is not a sinusoid but a sum of several. Choose <em>One normal mode only</em> and see that all masses move at one frequency. Switch on the periodic boundary conditions and look for the new zero-frequency mode and for the pairs of modes with equal frequency. Set the periodic switch off and make both ends free: there is a mode with \(\omega=0\) (translation), and the other modes have zero slope at the ends. Make one end free and the other fixed and the wavelength condition becomes a quarter-wave one. Choose a <em>Travelling wave</em> and see that the reference trace is a single sinusoid. Set 3 masses, fixed ends, mode n = 2 and reference mass 2, and see a mass that stays still. Increase the number of masses and watch the mode frequencies fill in the curve \(2\sin(\ldots)\). Then switch on <em>Two alternating masses</em>, set the ratio to 3, and find the gap, the optical mode at \(k=0\) (hover it: light and heavy masses move in opposite directions) and the acoustic mode at the zone edge (only the light masses move). Slide the ratio down to 1 and watch the gap close. Do the same with <em>Two alternating springs</em> (the gap closes at \(K'/K=1\)). Now set 40 masses and Δω = 0.1: the bars follow the dashed curve, are short at low frequency, and become long where the dispersion curve flattens (the top of the band). Use 10 masses and a small Δω to see that every mode gets its own bar.</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="co">
+    <div class="co-panel">
+      <div class="co-now" role="status"><span class="co-nowlbl">Now playing</span><span id="nowTxt"></span><span class="co-pill run" id="runPill">Running</span></div>
+
+      <div class="co-group">
+        <div class="co-gl"><span class="co-num">1</span> The chain</div>
+        <div class="co-row">
+          <label for="nSel">Number of masses</label>
+          <select id="nSel"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option selected>10</option><option>20</option><option>40</option></select>
+          <span class="co-sep"></span>
+          <label class="sw" for="perChk"><input type="checkbox" id="perChk" checked><span class="track"></span><span id="perLbl">Periodic boundary conditions</span></label>
+          <span id="bcBox" style="display:none"><label for="lSel">Left end</label> <select id="lSel"><option value="fixed">fixed (wall)</option><option value="free">free</option></select> <label for="rSel">Right end</label> <select id="rSel"><option value="fixed">fixed (wall)</option><option value="free">free</option></select></span>
+          <span class="co-sep"></span>
+          <label for="refSel">Reference mass (the one plotted)</label>
+          <select id="refSel"></select>
+        </div>
+        <div class="co-row">
+          <label class="sw" for="diChk"><input type="checkbox" id="diChk"><span class="track"></span><span>Two alternating masses</span></label>
+          <span id="ratioBox" style="opacity:.45"><label for="rSl">Heavy / light mass</label> <input type="range" id="rSl" min="1" max="6" step="0.5" value="2" disabled><output id="rOut">2</output></span>
+          <span class="co-sep"></span>
+          <label class="sw" for="spChk"><input type="checkbox" id="spChk"><span class="track"></span><span>Two alternating springs</span></label>
+          <span id="kBox" style="opacity:.45"><label for="kSl">Stiffness ratio K&prime;/K</label> <input type="range" id="kSl" min="0.2" max="5" step="0.1" value="2" disabled><output id="kOut" style="min-width:2.4em">2</output></span>
+          <span class="co-sep"></span>
+        </div>
+      </div>
+
+      <div class="co-group">
+        <div class="co-gl"><span class="co-num">2</span> How it starts <small>always released from rest</small></div>
+        <div class="co-row">
+          <label for="startSel">Starting condition</label>
+          <select id="startSel"></select>
+          <button type="button" id="bStart" class="secondary">Start again</button>
+          <button type="button" id="bReset" class="secondary" title="Put every mass back at its rest position and stop the motion">Reset to equilibrium</button>
+        </div>
+        <p class="co-hint">Choosing an item starts it at once. You can also start the chain by hand: drag a mass in the chain panel, click or drag a bar in the mode panel, or click a dot or a row in the dispersion panel. Clicking a mass also makes it the reference mass.</p>
+      </div>
+
+      <div class="co-group">
+        <div class="co-gl"><span class="co-num">3</span> Playback and display</div>
+        <div class="co-row">
+          <button type="button" id="bPause" class="secondary" title="Freeze or continue the motion">&#10074;&#10074; Pause</button>
+          <label for="spSl">Speed</label><input type="range" id="spSl" min="0.25" max="6" step="0.25" value="2"><output id="spOut">2</output>
+          <label for="dpSl">Damping</label><input type="range" id="dpSl" min="0" max="0.4" step="0.01" value="0"><output id="dpOut" style="min-width:3em">0</output>
+          <label for="wnSl">Time window</label><input type="range" id="wnSl" min="10" max="80" step="5" value="30"><output id="wnOut" style="min-width:2.6em">30</output>
+          <label class="sw" for="sepChk" style="font-weight:400;color:#ccc"><input type="checkbox" id="sepChk"><span class="track"></span><span>Scale each row separately</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="co-panel">
+      <h3>The chain <small id="chainNote"></small></h3>
+      <div class="co-row" style="margin:0 0 8px"><label for="dirSel">Motion shown</label>
+        <select id="dirSel"><option value="long">Longitudinal (along the chain)</option><option value="trans">Transverse (up and down)</option></select></div>
+      <div class="plotbox"><canvas id="chain" aria-label="Masses joined by springs"></canvas></div>
+    </div>
+
+    <div class="co-panel">
+      <h3>Normal modes <small>amplitude and phasor of each mode. Hover to see its shape, click or drag a bar to set its amplitude.</small></h3>
+      <div class="plotbox"><canvas id="modes" aria-label="Amplitude of each normal mode"></canvas></div>
+    </div>
+
+    <div class="co-panel">
+      <h3>Dispersion relation and density of states <small>the allowed wavevectors and how many modes fall in each frequency bin. Hover a dot, a row or a bar; click a dot to excite that mode.</small></h3>
+      <div class="co-row" style="margin:0 0 10px"><label for="dwSl">Density of states: bin width &Delta;&omega;</label><input type="range" id="dwSl" min="0.02" max="0.5" step="0.01" value="0.2"><output id="dwOut" style="min-width:3em">0.20</output><span style="color:var(--muted)">&omega;<sub>0</sub></span></div>
+      <div class="co-disp">
+        <div class="plotbox"><canvas id="disp" aria-label="Dispersion relation: frequency against wavevector, with the allowed modes as points"></canvas></div>
+        <div class="plotbox co-dos"><canvas id="dos" aria-label="Density of states: number of modes in each frequency bin"></canvas></div>
+        <div class="co-tbl"><table class="data" id="modeTbl"></table></div>
+      </div>
+      <p class="co-readout" id="dosRead"></p>
+      <p class="co-legend" id="dosNote"></p>
+      <p class="co-legend" id="dispNote"></p>
+    </div>
+
+    <div class="co-panel">
+      <h3>Displacement against time <small>reference mass on top, its components at each normal-mode frequency below</small></h3>
+      <div class="plotbox"><canvas id="trace" aria-label="Displacement of the reference mass and its frequency components against time"></canvas></div>
+      <p class="co-readout" id="readout"></p>
+      <p class="co-legend">Units: the displacement is in units of the starting displacement of one mass, the spacing is fixed, and time is in units of \(1/\omega_0\) with \(\omega_0=\sqrt{k/m}\), so that every frequency is quoted as a multiple of \(\omega_0\). The chain can be drawn with longitudinal motion (the masses move along the chain, as atoms do in a sound wave) or with transverse motion. The equations, the modes and the frequencies are the same in both.</p>
+    </div>
+  </div>
+
+  <details class="note" style="margin-top:16px">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <h4>Equation of motion</h4>
+      <p>Mass \(j\) is joined to its neighbours by springs of stiffness \(k\). For a small displacement \(u_j\) from equilibrium,</p>
+      <div class="eq">\( m\,\ddot u_j = k\,(u_{j+1}-u_j) - k\,(u_j-u_{j-1}) \)</div>
+      <p>With fixed ends, \(u_0=u_{N+1}=0\), because the end masses are tied to walls. At a <em>free</em> end there is no wall spring, so the first mass obeys \(m\ddot u_1=K(u_2-u_1)\). This is the same as the general equation with \(u_0=u_1\), a zero-slope condition, and likewise \(u_{N+1}=u_N\) at a free right end. With periodic boundary conditions, \(u_0=u_N\) and \(u_{N+1}=u_1\), so the chain is a ring with no walls.</p>
+
+      <h4>Normal modes</h4>
+      <p>A normal mode is a pattern in which every mass oscillates at the same frequency \(\omega\) and in step with the others (or exactly out of step). Writing \(u_j=\varphi_j\cos(\omega t+\delta)\) turns the equations of motion into an eigenvalue problem, which is solved by sine and cosine waves. For fixed ends,</p>
+      <div class="eq">\( \varphi_j^{(n)}\propto\sin\dfrac{n\pi j}{N+1},\qquad \omega_n=2\omega_0\sin\dfrac{n\pi}{2(N+1)},\qquad n=1,\dots,N \)</div>
+      <p>For periodic boundary conditions,</p>
+      <div class="eq">\( \varphi_j^{(n)}\propto\cos\dfrac{2\pi nj}{N}\ \text{or}\ \sin\dfrac{2\pi nj}{N},\qquad \omega_n=2\omega_0\left|\sin\dfrac{\pi n}{N}\right|,\qquad n=0,\dots,N-1 \)</div>
+      <p>Three things change when the boundary condition changes. First, there is a mode with \(n=0\) and \(\omega=0\), in which all masses are displaced together. A ring has no wall to push against, so a uniform shift costs no energy. Second, modes \(n\) and \(N-n\) have the same frequency, so most frequencies occur twice, as a cosine and a sine pattern. Third, a travelling wave is allowed. It is the sum of the cosine and the sine mode with their phases a quarter of a period apart. With fixed ends the reflections give only standing waves.</p>
+
+      <h4>Deriving the dispersion curve</h4>
+      <p>Take a travelling wave \(u_j=A\,e^{i(kja-\omega t)}\) on an infinite chain with spacing \(a\) and put it into the equation of motion. The neighbours are \(u_{j\pm1}=u_j\,e^{\pm ika}\), so</p>
+      <div class="eq">\( -m\omega^2=k\left(e^{ika}+e^{-ika}-2\right)=-2k\,(1-\cos ka)=-4k\sin^2\dfrac{ka}{2}\quad\Rightarrow\quad \omega(k)=2\omega_0\left|\sin\dfrac{ka}{2}\right| \)</div>
+      <p>This is the continuous curve in the tool. Because the masses sit only at \(x=ja\), the wavevectors \(k\) and \(k+2\pi/a\) describe the same displacements, so only \(-\pi/a\lt k\le\pi/a\) is needed. This range is the first Brillouin zone. The wavelength is \(\lambda=2\pi/k\), so \(\lambda=2a\) at the zone boundary, the shortest wave the chain can carry, in which neighbours move in opposite directions.</p>
+      <p>The boundary condition then picks the allowed values of \(k\), which is why the dispersion of a finite chain is discrete.</p>
+      <ul>
+        <li><strong>Fixed ends:</strong> \(u_0=u_{N+1}=0\) requires a standing wave \(\sin(kja)\) with \(\sin(k(N+1)a)=0\), so \(k=\dfrac{n\pi}{(N+1)a}\) and \(\lambda=\dfrac{2(N+1)a}{n}\), with \(n=1,\dots,N\).</li>
+        <li><strong>Free ends:</strong> with a free end the slope is zero there, \(u_0=u_1\). Two free ends give \(k=\dfrac{(n-1)\pi}{Na}\) and \(\lambda=\dfrac{2Na}{n-1}\), with \(n=1,\dots,N\); the case \(n=1\) is \(k=0\), \(\omega=0\), the whole chain translating. One free and one fixed end give \(k=\dfrac{(2n-1)\pi}{(2N+1)a}\), so the allowed wavelengths are those of a chain of length \((2N+1)a/2\) with a node at one end and an antinode at the other (a quarter-wave condition).</li>
+        <li><strong>Periodic:</strong> \(u_{j+N}=u_j\) requires \(e^{ikNa}=1\), so \(k_n=\dfrac{2\pi n}{Na}\) and \(\lambda_n=\dfrac{Na}{|n|}\), with \(n\) an integer. (For fixed or free ends \(n\) is a different integer, defined in the items below.) Only \(N\) of these are different, and \(+k\) and \(-k\) have the same frequency.</li>
+      </ul>
+      <p>Putting these values of \(k\) into \(\omega(k)\) gives the frequencies in the table. The number of allowed wavevectors equals the number of masses, because each mass has one degree of freedom, and as \(N\) grows the points lie closer together along the curve. The only difference between the two boundary conditions is the spacing of the points: \(\pi/((N+1)a)\) for fixed ends and \(2\pi/(Na)\) for a ring, with the ring also allowing the \(k=0\) point.</p>
+
+      <h4>What the time plots show</h4>
+      <p>Any starting state is a sum of normal modes, and each mode oscillates independently:</p>
+      <div class="eq">\( u_j(t)=\sum_{n} \varphi^{(n)}_j\, a_n\cos(\omega_n t+\delta_n) \)</div>
+      <p>The upper trace is this sum for the reference mass \(j\). The lower traces are the separate terms \(\varphi^{(n)}_j\,a_n\cos(\omega_n t+\delta_n)\), each a pure sinusoid at its own frequency. Where two modes share a frequency (the periodic case) their terms are added into one sinusoid. A mode with \(\varphi^{(n)}_j=0\) has a node at the reference mass and contributes nothing to its motion, however large its amplitude. Because the periods are generally not whole-number multiples of each other, the total trace does not repeat.</p>
+
+      <h4>Two alternating masses: acoustic and optical branches</h4>
+      <p>Let light masses \(m\) sit on odd sites and heavy masses \(M\) on even sites, joined by the same springs \(K\). The repeat length is now \(2a\). Try \(u_{2l}=A\,e^{i(2lka-\omega t)}\) for the heavy and \(u_{2l+1}=B\,e^{i((2l+1)ka-\omega t)}\) for the light masses. The two equations of motion give</p>
+      <div class="eq">\( (2K-m\omega^2)\,B = 2K\cos(ka)\,A,\qquad (2K-M\omega^2)\,A = 2K\cos(ka)\,B \)</div>
+      <p>and a non-zero solution needs the determinant to vanish:</p>
+      <div class="eq">\( \omega^2=K\left(\frac1m+\frac1M\right)\mp K\sqrt{\left(\frac1m+\frac1M\right)^2-\frac{4\sin^2(ka)}{mM}} \)</div>
+      <p>There are two values of \(\omega\) for each \(k\), so two branches. The zone is half as wide, \(|k|\le\pi/(2a)\), because the cell is twice as long. Limits:</p>
+      <ul>
+        <li>Acoustic branch, \(k\to0\): \(\omega\to0\) and both kinds of mass move together, with sound speed \(v^2=2Ka^2/(m+M)\). At the zone edge \(\omega=\sqrt{2K/M}\), only the light masses move.</li>
+        <li>Optical branch, \(k\to0\): \(\omega=\sqrt{2K(1/m+1/M)}\), the two kinds of mass move against each other with the centre of mass at rest. At the zone edge \(\omega=\sqrt{2K/m}\), only the heavy masses move.</li>
+        <li>No wave travels between \(\sqrt{2K/M}\) and \(\sqrt{2K/m}\): the gap. For \(M=m\) it closes and the two branches are the one-mass curve folded at \(ka=\pi/2\).</li>
+      </ul>
+      <p>In an ionic crystal the two kinds of mass carry opposite charge, so the optical mode at \(k=0\) makes an oscillating dipole that couples to light. That is the origin of the name. With \(N\) masses there are \(N/2\) modes in each branch. With fixed ends the allowed wavevectors are \(n\pi/((N+1)a)\), and those above \(\pi/(2a)\) belong to the optical branch.</p>
+
+      <h4>Two alternating springs</h4>
+      <p>Now let all masses be equal to \(m\) and let the springs alternate, \(K\) and \(K'\). In the two-site cell the equations of motion are</p>
+      <div class="eq">\( m\omega^2 A = (K+K')A-(K'+K e^{-2ika})B,\qquad m\omega^2 B = (K+K')B-(K'+K e^{2ika})A \)</div>
+      <div class="eq">\( \omega^2=\frac{1}{m}\left[(K+K')\mp\sqrt{K^2+K'^2+2KK'\cos(2ka)}\right] \)</div>
+      <ul>
+        <li>Acoustic branch at small \(k\): \(\omega\approx v k\) with \(v^2=2a^2KK'/\big(m(K+K')\big)\). This is a single spring of stiffness \(KK'/(K+K')\), the two in series, spread over the cell length \(2a\).</li>
+        <li>Optical branch at \(k=0\): \(\omega=\sqrt{2(K+K')/m}\). Neighbouring masses move against each other.</li>
+        <li>At the zone edge \(k=\pi/(2a)\) the branches end at \(\sqrt{2K_{\min}/m}\) and \(\sqrt{2K_{\max}/m}\). The gap is therefore set by the stiffness ratio and closes at \(K'=K\).</li>
+      </ul>
+      <p>With both kinds of alternation switched on, \(\omega^2=\tfrac12\big[\Sigma\mp\sqrt{\Sigma^2-16KK'\sin^2(ka)/(mM)}\big]\) with \(\Sigma=(K+K')(1/m+1/M)\), which contains both cases.</p>
+      <p>With fixed ends the walls are joined by springs too, so there are \(N+1\) of them. The wall springs are all \(K\) when \(N\) is even. If \(K\gt K'\) (that is, \(K'/K\lt1\)), the mass next to each wall is held firmly by the wall spring and is only weakly coupled to the rest, so it vibrates near \(\sqrt{K/m}\), which lies inside the gap. This gives an <em>edge mode</em>, large at the wall and decaying into the chain. An odd number of masses always has one, because the two walls then see different springs. This is the chain version of the end states of the Su&ndash;Schrieffer&ndash;Heeger model.</p>
+
+      <h4>Density of states</h4>
+      <p>The density of states \(g(\omega)\) is the number of modes per unit frequency, so that \(g(\omega)\,d\omega\) is the number of modes with frequency between \(\omega\) and \(\omega+d\omega\). The tool counts this directly: it takes the \(N\) mode frequencies, puts them into bins of width \(\Delta\omega\), and divides each count by \(\Delta\omega\). A small \(\Delta\omega\) resolves single modes and is noisy. A large one averages over many modes and is smooth, but blurs sharp features.</p>
+      <p>For a long chain the allowed \(k\) are evenly spaced, with \(Na/\pi\) of them per unit \(k\), so \(g(\omega)=\dfrac{Na}{\pi}\,\dfrac{1}{|d\omega/dk|}\). For the one-mass chain \(d\omega/dk=\omega_0 a\cos(ka/2)\) and</p>
+      <div class="eq">\( g(\omega)=\frac{2N}{\pi\sqrt{4\omega_0^2-\omega^2}},\qquad \int_0^{2\omega_0} g\,d\omega=N \)</div>
+      <p>The density is finite and constant at low frequency, because \(\omega\) is proportional to \(k\) there. It diverges at \(\omega=2\omega_0\), where the dispersion curve is flat. These peaks, at every place where \(d\omega/dk=0\), are called van Hove singularities. For two alternating masses or springs the acoustic branch peaks at its top (the zone edge), the optical branch peaks at its bottom (the zone edge) and at its top (\(k=0\)), and \(g=0\) in the gap. In three dimensions the low-frequency density becomes \(g\propto\omega^2\) (the Debye result) and the singularities soften to kinks, but the principle is the same: a flat part of the dispersion curve means many modes in a narrow range of frequency.</p>
+
+      <h4>Link to vibrations in solids</h4>
+      <p>For a long chain the allowed frequencies lie on the curve \(\omega(k)=2\omega_0\,|\sin(ka/2)|\), with wavevector \(k=2\pi q/(Na)\) and spacing \(a\). This is the dispersion relation of a one-dimensional crystal. Periodic boundary conditions (Born&ndash;von K&aacute;rm&aacute;n) are the usual way to count the allowed \(k\) values, and the largest frequency, \(2\omega_0=2\sqrt{k/m}\), shows how the bond stiffness \(k\) sets the frequency scale of a solid. At low frequency \(\omega\approx\omega_0 ka\), so the wave speed is \(\omega_0 a\), which is the speed of sound of the chain.</p>
+      <p>The longitudinal view is the one that corresponds to sound and to the vibrations of atoms along a bond. For transverse motion of a stretched string of tension \(T\), the same equations hold with \(k\) replaced by \(T/a\). A longitudinal spring is red where it is stretched and blue where it is compressed, so a standing or travelling wave appears as a pattern of compressions and rarefactions.</p>
+      <p>The tool uses the exact solution for each mode, so there is no numerical error in the frequencies. With damping \(\ddot q_n+2\beta\dot q_n+\omega_n^2 q_n=0\) applies to every mode, so all modes decay at the same rate \(\beta\), and a mode with \(\omega_n\lt\beta\) is overdamped. This is a simplification of real damping, which usually acts more strongly on the high-frequency modes.</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt>Normal mode</dt><dd>A pattern of motion in which all masses oscillate at one common frequency. Any motion of the chain is a sum of normal modes.</dd>
+        <dt>\(\omega_0\)</dt><dd>\(\sqrt{k/m}\), the natural frequency of one mass on one spring. The unit of frequency in the tool.</dd>
+        <dt>Reference mass</dt><dd>The mass whose displacement is plotted against time. It is the amber mass in the chain.</dd>
+        <dt>Component</dt><dd>The part of the reference mass&rsquo;s displacement that oscillates at one normal-mode frequency.</dd>
+        <dt>Free end</dt><dd>An end mass with no wall: it feels one spring only, so the force on it is \(K(u_2-u_1)\) and the slope of the displacement is zero there. Two free ends allow a zero-frequency mode in which the whole chain translates.</dd>
+        <dt>Fixed ends</dt><dd>Boundary condition with the end masses tied to walls, so that the end displacements are zero.</dd>
+        <dt>Periodic boundary conditions</dt><dd>Boundary condition in which the last mass is joined to the first, so that the chain is a ring.</dd>
+        <dt>Phasor</dt><dd>The point (\(q\), \(\dot q/\omega\)) of a mode, which turns at the mode frequency. Its length is the mode amplitude.</dd>
+        <dt>Degenerate modes</dt><dd>Two or more modes with the same frequency, as in the periodic chain.</dd>
+        <dt>Travelling wave</dt><dd>A wave pattern that moves along the ring. It is built from two degenerate standing modes a quarter of a period out of phase.</dd>
+        <dt>Wavevector, \(k\)</dt><dd>\(2\pi/\lambda\), a measure of how fast the pattern varies along the chain. Here it is quoted as \(ka/\pi\).</dd>
+        <dt>Wavelength, \(\lambda\)</dt><dd>The distance over which the pattern repeats, quoted in units of the spacing \(a\). The shortest possible value is \(2a\).</dd>
+        <dt>Brillouin zone</dt><dd>The range of wavevectors \(-\pi/a\lt k\le\pi/a\) that gives all different motions of a chain of spacing \(a\).</dd>
+        <dt>Acoustic and optical branches</dt><dd>The two solutions \(\omega(k)\) of a chain with two different masses. On the acoustic branch neighbouring masses move together and \(\omega\to0\) at \(k=0\). On the optical branch they move against each other.</dd>
+        <dt>Edge mode</dt><dd>A mode inside the frequency gap that is large at one end of the chain and decays into the interior. It has no wavelength.</dd>
+        <dt>Density of states, \(g(\omega)\)</dt><dd>The number of modes per unit frequency. In the tool, the number of modes in a bin of width \(\Delta\omega\), divided by \(\Delta\omega\).</dd>
+        <dt>Van Hove singularity</dt><dd>A peak in the density of states at a frequency where the dispersion curve is flat, \(d\omega/dk=0\).</dd>
+        <dt>Frequency gap</dt><dd>The band of frequencies between the two branches in which no wave can propagate.</dd>
+        <dt>Dispersion relation</dt><dd>The frequency as a function of wavevector, \(\omega(k)\).</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    const C = (window.TOOL && TOOL.c) || { axis:'#8b949e', text:'#e0e0e0', muted:'#8b949e', blue:'#60a5fa', red:'#f87171', green:'#34d399', amber:'#eab308', purple:'#c084fc', orange:'#fb923c', pink:'#f472b6' };
+    const $ = id => document.getElementById(id);
+    const COLS = [C.green, C.blue, C.purple, C.orange, C.pink, C.red, '#2dd4bf', '#a3e635', '#facc15', '#38bdf8'];
+    const TWO_PI = 2 * Math.PI;
+
+    const S = { N: 10, per: true, lb: 'fixed', rb: 'fixed', di: false, sp: false, ratio: 2, kr: 2, dosW: 0.2, dosHover: -1, ref: 0, q: [], p: [], t: 0, run: true, beta: 0, speed: 2, win: 30,
+                sep: false, now: '', lastStart: 'pluck', dir: 'long', hover: -1, hist: [], scale: 0.4, rs: [], barMax: 1.5, drag: null, M: null, ex: [] };
+
+    /* ---------- normal modes ---------- */
+    const longL = t => t.replace(/^ac /, 'acoustic ').replace(/^op /, 'optical ').replace(/^ed /, 'edge ');
+    const ACP = [C.blue, '#38bdf8', '#818cf8', '#2dd4bf', '#60a5fa', '#a5b4fc'], OPP = [C.orange, C.red, C.pink, '#facc15', '#f59e0b', '#fb7185'];
+    // di = false: N identical masses.  di = true: masses alternate m (odd sites) and M = r m (even sites), all springs K = 1, m = 1.
+    function buildModes(N, per, di, r) {
+      r = r || 2;
+      let w = [], phi = [], lab = [], qv = [], br = [], ph = [], xk = [], amp = [], env = [];
+      const mass = Array.from({ length: N }, (_, j) => (di && j % 2 === 1 ? r : 1));
+      const arr = f => Array.from({ length: N }, (_, j) => f(j));
+      const add = (om, vec, l, q, b, p, x, a, e) => { w.push(om); phi.push(vec); lab.push(l); qv.push(q); br.push(b); ph.push(p); xk.push(x); amp.push(a); env.push(e); };
+      if (!di) {
+        if (!per) {
+          for (let n = 1; n <= N; n++) add(2 * Math.sin(n * Math.PI / (2 * (N + 1))), arr(j => Math.sqrt(2 / (N + 1)) * Math.sin(n * Math.PI * (j + 1) / (N + 1))), 'n = ' + n, n, null, null, n / (N + 1), Math.sqrt(2 / (N + 1)), null);
+        } else {
+          add(0, arr(() => 1 / Math.sqrt(N)), 'n = 0', 0, null, null, 0, 1 / Math.sqrt(N), null);
+          for (let q = 1; 2 * q < N; q++) {
+            const om = 2 * Math.sin(Math.PI * q / N);
+            add(om, arr(j => Math.sqrt(2 / N) * Math.cos(TWO_PI * q * j / N)), 'n = ' + q + ' cos', q, null, 'cos', 2 * q / N, Math.sqrt(2 / N), null);
+            add(om, arr(j => Math.sqrt(2 / N) * Math.sin(TWO_PI * q * j / N)), 'n = ' + q + ' sin', q, null, 'sin', 2 * q / N, Math.sqrt(2 / N), null);
+          }
+          if (N % 2 === 0) add(2, arr(j => (j % 2 ? -1 : 1) / Math.sqrt(N)), 'n = ' + (N / 2), N / 2, null, null, 1, 1 / Math.sqrt(N), null);
+        }
+      } else {
+        // dispersion: (2 - w2)(2 - r w2) = 4 cos^2(th),  th = k a;  roots w2 = (1 + 1/r) -/+ sqrt((1 + 1/r)^2 - 4 sin^2(th)/r)
+        const sum = 1 + 1 / r;
+        const roots = th => { const sn = Math.sin(th), sq = Math.sqrt(Math.max(0, sum * sum - 4 * sn * sn / r)); return [Math.max(0, sum - sq), sum + sq]; };
+        const vec = (w2, th, ac) => { const c = Math.cos(th), v1 = [2 * c, 2 - w2], v2 = [2 - r * w2, 2 * c], n1 = Math.hypot(v1[0], v1[1]), n2 = Math.hypot(v2[0], v2[1]);
+          if (Math.max(n1, n2) < 1e-9) return ac ? [1, 0] : [0, 1]; return n1 >= n2 ? v1 : v2; };
+        const nrm = p => p.reduce((t, x, j) => t + mass[j] * x * x, 0);
+        if (per) {
+          for (let q = 0; 4 * q <= N; q++) {
+            const th = TWO_PI * q / N;
+            ['ac', 'op'].forEach(b => {
+              const w2 = roots(th)[b === 'ac' ? 0 : 1], v = vec(w2, th, b === 'ac'), surv = [];
+              ['cos', 'sin'].forEach(f => {
+                const g = f === 'cos' ? (x => Math.cos(x * th)) : (x => Math.sin(x * th)), p = arr(j => (j % 2 ? v[1] : v[0]) * g(j)), nm = nrm(p);
+                if (nm > 1e-9) surv.push({ f, g, sc: 1 / Math.sqrt(nm), p });
+              });
+              surv.forEach(m => {
+                const two = surv.length === 2;
+                add(Math.sqrt(w2), m.p.map(x => x * m.sc), b + ' n = ' + q + (two ? ' ' + m.f : ''), q, b, two ? m.f : null, 2 * q / N, m.sc * Math.max(Math.abs(v[0]), Math.abs(v[1])),
+                    { fA: s => v[0] * m.sc * m.g(s - 1), fB: s => v[1] * m.sc * m.g(s - 1) });
+              });
+            });
+          }
+        } else {
+          for (let n = 1; n <= N; n++) {
+            const th = n * Math.PI / (N + 1), mid = 2 * n === N + 1, b = (2 * n < N + 1) ? 'ac' : 'op';
+            const w2 = roots(th)[b === 'ac' ? 0 : 1], v = mid ? [1, 0] : vec(w2, th, b === 'ac');
+            const p = arr(j => (j % 2 ? v[1] : v[0]) * Math.sin((j + 1) * th)), nm = nrm(p); if (nm < 1e-9) continue;
+            const sc = 1 / Math.sqrt(nm), red = 2 * n > N + 1, thr = red ? Math.PI - th : th, sB = red ? -1 : 1;
+            add(Math.sqrt(w2), p.map(x => x * sc), b + ' n = ' + n, n, b, null, thr / Math.PI, sc * Math.max(Math.abs(v[0]), Math.abs(v[1])),
+                { fA: s => v[0] * sc * Math.sin(thr * s), fB: s => sB * v[1] * sc * Math.sin(thr * s) });
+          }
+        }
+      }
+      // sort by frequency (stable)
+      const ord = w.map((_, k) => k).sort((a, b) => w[a] - w[b] || a - b), P = a => ord.map(k => a[k]);
+      w = P(w); phi = P(phi); lab = P(lab); qv = P(qv); br = P(br); ph = P(ph); xk = P(xk); amp = P(amp); env = P(env);
+      // group modes of equal frequency
+      const groups = [], gi = [], cnt = { ac: 0, op: 0 };
+      w.forEach((om, i) => {
+        let g = groups.findIndex(G => Math.abs(G.w - om) < 1e-9);
+        if (g < 0) {
+          let col = COLS[groups.length % COLS.length];
+          if (di) { const b = br[i]; col = (b === 'ac' ? ACP : OPP)[cnt[b]++ % 6]; }
+          groups.push({ w: om, idx: [], col }); g = groups.length - 1;
+        }
+        groups[g].idx.push(i); gi.push(g);
+      });
+      groups.forEach(G => {
+        const a = G.idx[0], b = G.idx[1], l0 = lab[a];
+        G.br = br[a]; G.brWord = di ? (br[a] === 'ac' ? 'acoustic ' : 'optical ') : '';
+        G.trav = per && G.idx.length === 2 && ph[a] === 'cos' && ph[b] === 'sin' && qv[a] === qv[b] && br[a] === br[b];
+        if (!per) G.label = longL(l0);
+        else if (G.w === 0) G.label = G.brWord + 'n = 0 (uniform shift)';
+        else if (G.trav) G.label = G.brWord + 'n = ' + qv[a] + ' (cos + sin)';
+        else G.label = di ? longL(l0) : l0 + ' (alternating)';
+        G.q = qv[a];
+        G.x = xk[a];                                        // reduced k a / pi, a = distance between neighbouring masses
+        G.lam = G.x > 1e-12 ? 2 / G.x : Infinity;           // wavelength / a
+      });
+      return { w, phi, lab, groups, gi, qv, mass, amp, br, ph, env, xk };
+    }
+
+
+    const freeEnds = () => !S.per && (S.lb === 'free' || S.rb === 'free');
+    const bcName = () => S.per ? 'periodic' : (S.lb === 'free' && S.rb === 'free' ? 'free ends' : (S.lb === 'free' || S.rb === 'free' ? 'one fixed end, one free end' : 'fixed ends'));
+    /* ---------- general chain: alternating masses (m, r m) and/or alternating springs (K, kr K) ----------
+       Spring i joins site i-1 and site i (i = 0 ... N, or 0 ... N-1 on the ring); K_i = 1 for even i and kr for odd i.
+       Ring: Bloch waves of the two-site cell.  Fixed ends: numerical diagonalisation (Jacobi) of the mass-weighted matrix. */
+    function eigSym(Ain) {
+      const n = Ain.length, a = Ain.map(r => r.slice()), V = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 1 : 0)));
+      for (let sweep = 0; sweep < 80; sweep++) {
+        let off = 0; for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) off += a[i][j] * a[i][j];
+        if (off < 1e-26) break;
+        for (let p = 0; p < n - 1; p++) for (let q = p + 1; q < n; q++) {
+          const apq = a[p][q]; if (Math.abs(apq) < 1e-300) continue;
+          const th = (a[q][q] - a[p][p]) / (2 * apq), t = (th >= 0 ? 1 : -1) / (Math.abs(th) + Math.sqrt(th * th + 1)), c = 1 / Math.sqrt(t * t + 1), sn = t * c;
+          for (let k = 0; k < n; k++) { const x = a[k][p], y = a[k][q]; a[k][p] = c * x - sn * y; a[k][q] = sn * x + c * y; }
+          for (let k = 0; k < n; k++) { const x = a[p][k], y = a[q][k]; a[p][k] = c * x - sn * y; a[q][k] = sn * x + c * y; }
+          for (let k = 0; k < n; k++) { const x = V[k][p], y = V[k][q]; V[k][p] = c * x - sn * y; V[k][q] = sn * x + c * y; }
+        }
+      }
+      return { val: a.map((r, i) => r[i]), vec: V }; // column k of vec belongs to val[k]
+    }
+    function spline(xs, ys) { // cubic Hermite through the points (xs increasing)
+      return s => {
+        let i = 0; while (i < xs.length - 2 && s > xs[i + 1]) i++;
+        const x0 = xs[i], x1 = xs[i + 1], h = x1 - x0, t = (s - x0) / h, y0 = ys[i], y1 = ys[i + 1], t2 = t * t, t3 = t2 * t,
+          m0 = i > 0 ? (ys[i + 1] - ys[i - 1]) / (xs[i + 1] - xs[i - 1]) : (y1 - y0) / h, m1 = i + 2 < xs.length ? (ys[i + 2] - ys[i]) / (xs[i + 2] - xs[i]) : (y1 - y0) / h;
+        return (2 * t3 - 3 * t2 + 1) * y0 + (t3 - 2 * t2 + t) * h * m0 + (-2 * t3 + 3 * t2) * y1 + (t3 - t2) * h * m1;
+      };
+    }
+    function buildModesGen(N, per, di, r, kr, lf, rf, mono) {
+      r = di ? (r || 2) : 1; kr = kr || 1;
+      const mass = Array.from({ length: N }, (_, j) => (j % 2 ? r : 1)), Kb = i => (i % 2 ? kr : 1), Sg = (1 + kr) * (1 + 1 / r), arr = f => Array.from({ length: N }, (_, j) => f(j));
+      const root = th => { const sq = Math.sqrt(Math.max(0, Sg * Sg - 16 * kr * Math.sin(th / 2) ** 2 / r)); return [Math.max(0, (Sg - sq) / 2), (Sg + sq) / 2]; };
+      const edge = root(Math.PI);
+      let w = [], phi = [], lab = [], qv = [], br = [], ph = [], xk = [], amp = [], env = [], loc = [];
+      const add = (om, vec, l, q, b, p, x, a, e, lc) => { w.push(om); phi.push(vec); lab.push(l); qv.push(q); br.push(b); ph.push(p); xk.push(x); amp.push(a); env.push(e); loc.push(!!lc); };
+      if (per) {
+        const L = N / 2;
+        for (let q = 0; 2 * q <= L; q++) {
+          const th = TWO_PI * q / L;
+          ['ac', 'op'].forEach(b => {
+            const w2 = root(th)[b === 'ac' ? 0 : 1], gr = kr + Math.cos(th), gi = Math.sin(th);
+            let A = [gr, -gi], B = [1 + kr - w2, 0];                      // (conj g, (1+kr) - mA w2)
+            const A2 = [1 + kr - r * w2, 0], B2 = [gr, gi];                // ((1+kr) - mB w2, g)
+            const n1 = Math.hypot(A[0], A[1], B[0], B[1]), n2 = Math.hypot(A2[0], A2[1], B2[0], B2[1]);
+            if (Math.max(n1, n2) < 1e-9) { A = b === 'ac' ? [1, 0] : [0, 0]; B = b === 'ac' ? [0, 0] : [1, 0]; }
+            else if (n2 > n1) { A = A2; B = B2; }
+            const nn = Math.hypot(A[0], A[1], B[0], B[1]); A = A.map(x => x / nn); B = B.map(x => x / nn);
+            const cf = j => { const c = j % 2 ? B : A, l = Math.floor(j / 2), cs = Math.cos(th * l), sn = Math.sin(th * l); return [c[0] * cs - c[1] * sn, c[0] * sn + c[1] * cs]; };
+            const surv = [];
+            [['cos', 0], ['sin', 1]].forEach(([f, k]) => { const p = arr(j => cf(j)[k]), nm = p.reduce((t, x, j) => t + mass[j] * x * x, 0); if (nm > 1e-9) surv.push({ f, p, sc: 1 / Math.sqrt(nm) }); });
+            const E = (c, off, f, sc) => s => { const a = th * (s - off) / 2, cs = Math.cos(a), sn = Math.sin(a), re = c[0] * cs - c[1] * sn, im = c[0] * sn + c[1] * cs; return sc * (f === 'cos' ? re : im); };
+            surv.forEach(m => {
+              const two = surv.length === 2;
+              add(Math.sqrt(w2), m.p.map(x => x * m.sc), b + ' n = ' + q + (two ? ' ' + m.f : ''), q, b, two ? m.f : null, 2 * q / N, m.sc * Math.max(Math.hypot(A[0], A[1]), Math.hypot(B[0], B[1])),
+                  { fA: E(A, 1, m.f, m.sc), fB: E(B, 2, m.f, m.sc) });
+            });
+          });
+        }
+      } else {
+        const Km = Array.from({ length: N }, () => new Array(N).fill(0));
+        for (let j = 0; j < N; j++) { Km[j][j] = (j > 0 || !lf ? Kb(j) : 0) + (j < N - 1 || !rf ? Kb(j + 1) : 0); if (j < N - 1) { Km[j][j + 1] = Km[j + 1][j] = -Kb(j + 1); } }
+        const Am = Km.map((row, i) => row.map((v, j) => v / Math.sqrt(mass[i] * mass[j])));
+        const E = eigSym(Am), ord = E.val.map((_, k) => k).sort((a, b) => E.val[a] - E.val[b]);
+        ord.forEach((k, n0) => {
+          let w2 = Math.max(0, E.val[k]); if (w2 < 1e-12) w2 = 0; const v = arr(j => E.vec[j][k]);
+          let big = 0; v.forEach((x, j) => { if (Math.abs(x) > Math.abs(v[big]) + 1e-12) big = j; });
+          if (v[big] < 0) for (let j = 0; j < N; j++) v[j] = -v[j];
+          const p = v.map((x, j) => x / Math.sqrt(mass[j])), b = mono ? 'ac' : (w2 <= edge[0] + 1e-9 ? 'ac' : (w2 >= edge[1] - 1e-9 ? 'op' : 'ed'));
+          const val = (Sg * w2 - w2 * w2) * r / (2 * kr), x = mono ? Math.asin(Math.min(1, Math.sqrt(w2) / 2)) * 2 / Math.PI : (b === 'ed' ? 0.5 : Math.acos(Math.max(-1, Math.min(1, 1 - val))) / TWO_PI);
+          const ext = j => { if (j >= 0 && j < N) return p[j]; if (j === -1) return lf ? p[0] : 0; if (j === -2) return lf ? p[Math.min(1, N - 1)] : -p[0]; if (j === N) return rf ? p[N - 1] : 0; if (j === N + 1) return rf ? p[Math.max(0, N - 2)] : -p[N - 1]; return 0; };
+          const sub = par => { const xs = [], ys = []; for (let j = -2; j <= N + 1; j++) if (par === null || ((j % 2) + 2) % 2 === par) { xs.push(j + 1); ys.push(ext(j)); } return spline(xs, ys); };
+          const nm = w2 === 0 ? 'translation' : 'n = ' + (n0 + 1);
+          add(Math.sqrt(w2), p, mono ? nm : b + ' ' + nm, n0 + 1, b, null, x, maxAbs(p), mono ? { fA: sub(null), fB: sub(null) } : { fA: sub(0), fB: sub(1) }, b === 'ed');
+        });
+      }
+      const ord = w.map((_, k) => k).sort((a, b) => w[a] - w[b] || a - b), P = a => ord.map(k => a[k]);
+      w = P(w); phi = P(phi); lab = P(lab); qv = P(qv); br = P(br); ph = P(ph); xk = P(xk); amp = P(amp); env = P(env); loc = P(loc);
+      const groups = [], gi = [], cnt = { ac: 0, op: 0, ed: 0 };
+      w.forEach((om, i) => {
+        let g = groups.findIndex(G => Math.abs(G.w - om) < 1e-9 && G.br === br[i]);
+        if (g < 0) { const b = br[i]; groups.push({ w: om, idx: [], br: b, col: b === 'ed' ? '#34d399' : (b === 'ac' ? ACP : OPP)[cnt[b]++ % 6] }); g = groups.length - 1; }
+        groups[g].idx.push(i); gi.push(g);
+      });
+      groups.forEach(G => {
+        const a = G.idx[0], b = G.idx[1], l0 = lab[a];
+        G.brWord = mono ? '' : (G.br === 'ac' ? 'acoustic ' : (G.br === 'op' ? 'optical ' : 'edge '));
+        G.loc = loc[a];
+        G.trav = per && G.idx.length === 2 && ph[a] === 'cos' && ph[b] === 'sin' && qv[a] === qv[b] && br[a] === br[b];
+        if (!per) G.label = longL(l0);
+        else if (G.w === 0) G.label = G.brWord + 'n = 0 (uniform shift)';
+        else if (G.trav) G.label = G.brWord + 'n = ' + qv[a] + ' (cos + sin)';
+        else G.label = longL(l0);
+        G.q = qv[a]; G.x = xk[a]; G.lam = G.loc ? NaN : (G.x > 1e-12 ? 2 / G.x : Infinity);
+      });
+      return { w, phi, lab, groups, gi, qv, mass, amp, br, ph, env, xk, loc, Kb };
+    }
+
+    /* ---------- exact evolution of one damped mode ---------- */
+    function evolve(q, p, w, b, dt) {
+      const e = Math.exp(-b * dt), d = w * w - b * b;
+      if (d > 1e-12) {
+        const wd = Math.sqrt(d), c = Math.cos(wd * dt), s = Math.sin(wd * dt);
+        return [e * (q * c + ((p + b * q) / wd) * s), e * (p * c - ((w * w * q + b * p) / wd) * s)];
+      }
+      const sg = Math.sqrt(Math.max(-d, 0));
+      let ch = 1, sh = dt;
+      if (sg > 1e-6) { ch = Math.cosh(sg * dt); sh = Math.sinh(sg * dt) / sg; }
+      return [e * (q * ch + (p + b * q) * sh), e * (p * ch - (w * w * q + b * p) * sh)];
+    }
+
+    function uOf(q) { const M = S.M; return Array.from({ length: S.N }, (_, j) => M.phi.reduce((s, ph, i) => s + ph[j] * q[i], 0)); }
+    function qOf(u) { const m = S.M.mass; return S.M.phi.map(ph => ph.reduce((s, v, j) => s + m[j] * v * u[j], 0)); }
+    function clearHist() { S.t = 0; S.hist = [{ t: 0, q: Float64Array.from(S.q) }]; S.scale = 0.4; S.rs = []; }
+
+    function setU(u) { S.q = qOf(u); S.p = S.q.map(() => 0); clearHist(); }
+    function maxAbs(a) { return a.reduce((m, v) => Math.max(m, Math.abs(v)), 0); }
+
+    function advance(dt) {
+      const M = S.M; let left = dt;
+      while (left > 1e-12) {
+        const h = Math.min(0.05, left);
+        for (let i = 0; i < S.q.length; i++) { const r = evolve(S.q[i], S.p[i], M.w[i], S.beta, h); S.q[i] = r[0]; S.p[i] = r[1]; }
+        S.t += h; left -= h;
+        S.hist.push({ t: S.t, q: Float64Array.from(S.q) });
+      }
+      const cut = S.t - S.win - 1;
+      let k = 0; while (k < S.hist.length - 2 && S.hist[k + 1].t < cut) k++;
+      if (k > 0) S.hist.splice(0, k);
+    }
+
+    /* ---------- set-up ---------- */
+    function say(t) { S.now = t; }
+    function setRef(j) { S.ref = j; S.rs = []; $('refSel').value = j; const o = $('startSel').querySelector('option[value="pluck"]'); if (o) o.textContent = 'Pluck the reference mass (mass ' + (j + 1) + ')'; }
+    function fillSelects() {
+      const rs = $('refSel'); rs.innerHTML = '';
+      for (let j = 0; j < S.N; j++) rs.add(new Option('Mass ' + (j + 1), j));
+      rs.value = S.ref;
+      const M = S.M, ss = $('startSel'); ss.innerHTML = '';
+      const grp = label => { const o = document.createElement('optgroup'); o.label = label; ss.appendChild(o); return o; };
+      let o = grp('Whole-chain starts (a sum of many modes)');
+      o.appendChild(new Option('Pluck the reference mass (mass ' + (S.ref + 1) + ')', 'pluck'));
+      o.appendChild(new Option('Random shape', 'rand'));
+      o = grp('One normal mode only (a standing wave)');
+      M.w.forEach((om, i) => o.appendChild(new Option(longL(M.lab[i]) + '   ω = ' + om.toFixed(3) + ', λ = ' + fmtLam(M.groups[M.gi[i]].lam), 'm:' + i)));
+      if (S.per) {
+        o = grp('Travelling wave (one direction only)');
+        M.groups.forEach((G, g) => { if (G.trav) [1, -1].forEach(sx => o.appendChild(new Option(G.brWord + 'n = ' + sx * G.q + ', moving ' + (sx > 0 ? 'right' : 'left') + '   ω = ' + G.w.toFixed(3) + ', λ = ' + fmtLam(G.lam), 't:' + g + ':' + sx))); });
+      }
+      const hand = new Option('Set by hand (drag, mode bars or dispersion dots)', 'hand'); hand.disabled = true; hand.hidden = true; ss.add(hand);
+      const eq = new Option('Equilibrium (nothing moving)', 'eq'); eq.disabled = true; eq.hidden = true; ss.add(eq);
+    }
+    function applyStart(val) {
+      const M = S.M, N = S.N, zero = () => { S.q = S.q.map(() => 0); S.p = S.p.map(() => 0); };
+      if (val === 'pluck') {
+        const u = new Array(N).fill(0); u[S.ref] = 1; setU(u);
+        say('Plucked mass ' + (S.ref + 1) + ': displaced by one unit and released from rest. This is a sum of all ' + N + ' normal modes, so the reference trace is not a single sinusoid.');
+      } else if (val === 'rand') {
+        setU(Array.from({ length: N }, () => (Math.random() * 2 - 1) * 0.9));
+        say('A random shape, released from rest. It is a sum of all ' + N + ' normal modes with random amplitudes.');
+      } else if (val === 'eq') {
+        setU(new Array(N).fill(0));
+        say('Nothing is moving: every mass is at its equilibrium position. Drag a mass, set a mode bar, or choose another starting condition.');
+      } else if (val.startsWith('m:')) {
+        const i = +val.slice(2), G = M.groups[M.gi[i]]; zero(); S.q[i] = 1 / maxAbs(M.phi[i]); clearHist();
+        say(M.w[i] === 0
+          ? 'One normal mode only: ' + longL(M.lab[i]) + ', the uniform shift. Every mass is displaced by the same amount and nothing oscillates (ω = 0).'
+          : 'One normal mode only: ' + longL(M.lab[i]) + ' (ω = ' + M.w[i].toFixed(3) + ' ω₀, λ = ' + fmtLam(G.lam) + '). Every mass moves at this single frequency, so the reference trace is one sinusoid.');
+      } else if (val.startsWith('t:')) {
+        const [, g, sx] = val.split(':'), G = M.groups[+g]; zero(); const a = 1 / M.amp[G.idx[0]];
+        S.q[G.idx[0]] = a; S.p[G.idx[1]] = +sx * G.w * a; clearHist();
+        say('A wave travelling to the ' + (+sx > 0 ? 'right' : 'left') + ' round the ring: ' + G.brWord + 'n = ' + (+sx * G.q) + ' (ω = ' + G.w.toFixed(3) + ' ω₀, λ = ' + fmtLam(G.lam) + '). Every mass oscillates at this single frequency, and the crests move along the chain.');
+      }
+      $('startSel').value = val; S.lastStart = val;
+    }
+    function byHand(text) { say(text); $('startSel').value = 'hand'; }
+    function rebuild() {
+      S.M = (S.sp || freeEnds()) ? buildModesGen(S.N, S.per, S.di, S.ratio, S.sp ? S.kr : 1, S.lb === 'free', S.rb === 'free', !(S.di || S.sp)) : buildModes(S.N, S.per, S.di, S.ratio);
+      S.ref = Math.min(S.ref, S.N - 1);
+      fillSelects(); buildTable(); applyStart('pluck');
+      $('chainNote').textContent = S.per ? 'periodic: the faded masses are copies of mass ' + S.N + ' (left) and mass 1 (right)' : (S.lb === 'free' || S.rb === 'free' ? bcName() + ': a free end has no wall, so the end mass is joined to one spring only' : 'fixed ends: the end masses are tied to walls');
+    }
+
+    /* ---------- canvas helpers ---------- */
+    function fit(cv, h) {
+      const dpr = window.devicePixelRatio || 1;
+      cv.style.width = '100%'; cv.style.height = h + 'px';
+      const w = Math.max(200, cv.clientWidth);
+      if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+      const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+      return { g, w, h };
+    }
+    function txt(g, s, x, y, col, size, align, weight) {
+      g.fillStyle = col; g.font = (weight || '') + ' ' + (size || 11) + 'px "Segoe UI", Tahoma, Geneva, Verdana, sans-serif';
+      g.textAlign = align || 'left'; g.textBaseline = 'middle'; g.fillText(s, x, y);
+    }
+
+    /* ---------- chain ---------- */
+    const CH = { PPU: 46, pad: 60, r: 12 };
+    let CHs = 80; // spacing of neighbouring masses in pixels (set when the chain is drawn)
+    const chainH = () => S.dir === 'long' ? 262 : 210;
+    const chainCy = () => S.dir === 'long' ? 66 : chainH() / 2 + 6;
+    function chainGeom(w) { const step = (w - 2 * CH.pad) / (S.N + 1); return j => CH.pad + (j + 1) * step; }
+    const clampU = v => Math.max(-2.2, Math.min(2.2, v));
+    function pxPerUnitLong(w) { return Math.min(34, (w - 2 * CH.pad) / (S.N + 1) * (S.N > 12 ? 0.32 : 0.22)); }
+    function chainPos(w, j, v) { // screen position of the mass with rest index j and displacement v
+      const X = chainGeom(w), cy = chainCy();
+      return S.dir === 'long' ? { x: X(j) + clampU(v) * pxPerUnitLong(w), y: cy } : { x: X(j), y: cy - clampU(v) * CH.PPU };
+    }
+    function chainInv(w, j, P) { // displacement implied by a mouse position
+      const X = chainGeom(w), cy = chainCy();
+      return S.dir === 'long' ? clampU((P.x - X(j)) / pxPerUnitLong(w)) : clampU((cy - P.y) / CH.PPU);
+    }
+    function spring(g, x1, y1, x2, y2, col, amp, coils, lw) {
+      const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy); if (L < 4) return;
+      const ux = dx / L, uy = dy / L, nx = -uy, ny = ux, lead = Math.min(12, L * 0.15), n = coils || 9;
+      g.beginPath(); g.moveTo(x1, y1); g.lineTo(x1 + ux * lead, y1 + uy * lead);
+      const span = L - 2 * lead;
+      for (let k = 1; k < 2 * n; k++) {
+        const s = lead + span * k / (2 * n), o = (k % 2 ? 1 : -1) * amp;
+        g.lineTo(x1 + ux * s + nx * o, y1 + uy * s + ny * o);
+      }
+      g.lineTo(x2 - ux * lead, y2 - uy * lead); g.lineTo(x2, y2);
+      g.strokeStyle = col; g.lineWidth = lw || 1.8; g.stroke();
+    }
+    function mixCol(s, signed) { // grey towards red (stretched) or, for longitudinal motion, towards blue (compressed)
+      const t = Math.min(1, Math.abs(s) / 1.6), a = [139, 148, 158], b = (signed && s < 0) ? [96, 165, 250] : [248, 113, 113];
+      return 'rgb(' + a.map((v, i) => Math.round(v + (b[i] - v) * t)).join(',') + ')';
+    }
+    function modeCurveFn(i) { // continuous shape of mode i; s is the position in units of a, measured from the left wall
+      const M = S.M, N = S.N, q = M.qv[i], lab = M.lab[i];
+      if (!S.per) { const c = Math.sqrt(2 / (N + 1)); return s => c * Math.sin(q * Math.PI * s / (N + 1)); }
+      if (q === 0) return () => 1 / Math.sqrt(N);
+      if (lab.endsWith('cos')) { const c = Math.sqrt(2 / N); return s => c * Math.cos(TWO_PI * q * (s - 1) / N); }
+      if (lab.endsWith('sin')) { const c = Math.sqrt(2 / N); return s => c * Math.sin(TWO_PI * q * (s - 1) / N); }
+      return s => Math.cos(Math.PI * (s - 1)) / Math.sqrt(N);
+    }
+    function envFns(i) { const e = S.M.env[i]; if (e) return e; const f = modeCurveFn(i); return { fA: f, fB: f }; }
+    const radOf = j => { const rb = Math.max(2.5, Math.min(CH.r, CHs * 0.32)), lt = S.di ? rb * 11 / 12 : rb; return S.di && j % 2 ? Math.min(22, CHs * 0.47, lt * Math.sqrt(S.ratio)) : lt; };
+    function drawChain() {
+      const H = chainH(), { g, w, h } = fit($('chain'), H), N = S.N, X = chainGeom(w), cy = chainCy(), long = S.dir === 'long', yc = 168;
+      const u = uOf(S.q), P = (j, v) => chainPos(w, j, v); CHs = (w - 2 * CH.pad) / (N + 1);
+      if (long) { // rest positions
+        g.setLineDash([2, 4]); g.strokeStyle = '#2a313a'; g.lineWidth = 1;
+        for (let j = 0; j < N; j++) { g.beginPath(); g.moveTo(X(j), cy - 30); g.lineTo(X(j), yc + 58); g.stroke(); }
+        g.setLineDash([]);
+      } else {
+        g.setLineDash([4, 5]); g.strokeStyle = '#2a313a'; g.lineWidth = 1; g.beginPath(); g.moveTo(CH.pad - 25, cy); g.lineTo(w - CH.pad + 25, cy); g.stroke(); g.setLineDash([]);
+      }
+      const pts = []; // all objects including walls / ghosts
+      if (!S.per) {
+        for (const x of [X(-1), X(N)]) {
+          if ((x === X(-1) && S.lb === 'free') || (x === X(N) && S.rb === 'free')) continue;
+          g.strokeStyle = C.axis; g.lineWidth = 3; g.beginPath(); g.moveTo(x, cy - 50); g.lineTo(x, cy + 50); g.stroke();
+          g.lineWidth = 1; for (let y = cy - 46; y <= cy + 50; y += 9) { g.beginPath(); g.moveTo(x, y); g.lineTo(x + (x < w / 2 ? -9 : 9), y + 8); g.stroke(); }
+        }
+        pts.push({ ...P(-1, 0), u: 0 });
+        for (let j = 0; j < N; j++) pts.push({ ...P(j, u[j]), u: u[j] });
+        pts.push({ ...P(N, 0), u: 0 });
+      } else {
+        pts.push({ ...P(-1, u[N - 1]), u: u[N - 1], ghost: N });
+        for (let j = 0; j < N; j++) pts.push({ ...P(j, u[j]), u: u[j] });
+        pts.push({ ...P(N, u[0]), u: u[0], ghost: 1 });
+      }
+      const coils = CHs > 70 ? 9 : Math.max(2, Math.round(CHs / 8)), sAmp = Math.min(6, CHs * 0.2);
+      for (let k = 0; k < pts.length - 1; k++) {
+        if (!S.per && ((k === 0 && S.lb === 'free') || (k === pts.length - 2 && S.rb === 'free'))) continue;
+        const stretch = pts[k + 1].u - pts[k].u, Ks = S.sp ? (((S.per ? k % N : k) % 2) ? S.kr : 1) : 1;
+        spring(g, pts[k].x, pts[k].y, pts[k + 1].x, pts[k + 1].y, mixCol(stretch, long), sAmp, coils, S.sp ? Math.max(0.8, Math.min(5.5, 1.8 * Math.pow(Ks, 0.7))) : 1.8);
+      }
+      // hovered mode: its shape in real space and its wavelength
+      const yBase = long ? yc : cy, ppu = long ? 30 : CH.PPU, lim = long ? 1.7 : 2.2, yArr = long ? 246 : h - 14;
+      if (long && S.hover < 0) txt(g, 'Hover a mode (bar, dot or table row) to see its shape and wavelength here', w / 2, yc, '#6e7681', 12, 'center');
+      if (S.hover >= 0) {
+        const i = S.hover, E = envFns(i), fA = E.fA, fB = E.fB, di = S.di || S.sp, Mo = S.M, step = (w - 2 * CH.pad) / (N + 1), x0 = X(-1), Gr = Mo.groups[Mo.gi[i]], ns = 400, span = N + 1;
+        const sLo = !S.per && S.lb === 'free' ? 1 : 0, sHi = !S.per && S.rb === 'free' ? N : N + 1, sAt = k => sLo + (sHi - sLo) * k / ns, sAt4 = k => sLo + (sHi - sLo) * k / 400;
+        const pkOf = f => Math.max(...Array.from({ length: 401 }, (_, k) => Math.abs(f(sAt4(k))))), pkA = pkOf(fA), pkB = di ? pkOf(fB) : 0;
+        const pk = long ? 1 : 0.8, amp = pk / Math.max(pkA, pkB, 1e-9), clampV = v => Math.max(-lim, Math.min(lim, v));
+        const xs = s => x0 + s * step, main = (!di || pkA >= pkB) ? fA : fB, ys = s => yBase - clampV(main(s) * amp) * ppu;
+        if (long) {
+          g.strokeStyle = '#30363d'; g.lineWidth = 1; g.beginPath(); g.moveTo(x0, yBase); g.lineTo(X(N), yBase); g.stroke();
+          txt(g, 'shape of the mode (fixed size): displacement against position' + (S.di ? '.  Blue curve: light masses, orange curve: heavy masses' : (S.sp ? '.  Sky-blue curve: odd-numbered masses, pink curve: even-numbered masses' : '')), 12, yc - 62, C.amber, 11, 'left');
+        }
+        const curve = (f, col) => { g.beginPath(); for (let k = 0; k <= ns; k++) { const s = sAt(k), y = yBase - clampV(f(s) * amp) * ppu; k ? g.lineTo(xs(s), y) : g.moveTo(xs(s), y); } g.strokeStyle = col; g.lineWidth = 2; g.stroke(); };
+        const dA = S.di ? C.blue : '#38bdf8', dB = S.di ? C.orange : '#f472b6';
+        if (di) { curve(fA, S.di ? 'rgba(96,165,250,0.9)' : 'rgba(56,189,248,0.9)'); curve(fB, S.di ? 'rgba(251,146,60,0.9)' : 'rgba(244,114,182,0.9)'); } else curve(fA, 'rgba(234,179,8,0.85)');
+        for (let j = 0; j < N; j++) { g.beginPath(); g.arc(xs(j + 1), yBase - clampV(Mo.phi[i][j] * amp) * ppu, N > 16 ? 3 : 5, 0, TWO_PI); g.fillStyle = di ? (j % 2 ? dB : dA) : C.amber; g.fill(); }
+        if (Gr.loc) txt(g, 'edge mode: large at an end of the chain and dying away inside, so it has no wavelength', w / 2, yArr - 6, C.amber, 12, 'center', '600');
+        else if (!isFinite(Gr.lam)) txt(g, Mo.w[i] === 0 ? 'λ = ∞: every mass moves together' : 'λ = ∞: the pattern repeats in every cell, and neighbouring masses move against each other', w / 2, yArr - 6, C.amber, 12, 'center', '600');
+        else {
+          const v = k => main(sAt(k)) * amp, mx = Math.max(...Array.from({ length: ns + 1 }, (_, k) => v(k))), crests = [];
+          if (v(0) > v(1) && v(0) > 0.5 * mx) crests.push(sAt(0));
+          for (let k = 1; k < ns; k++) if (v(k) >= v(k - 1) && v(k) > v(k + 1) && v(k) > 0.5 * mx) crests.push(sAt(k));
+          if (!crests.length) { let kb = 0; for (let k = 1; k <= ns; k++) if (v(k) > v(kb)) kb = k; crests.push(sAt(kb)); }
+          const lamPx = Gr.lam * step, lim2 = w - 10, c = crests.find(s => xs(s) + lamPx <= lim2), cs = c === undefined ? crests[0] : c;
+          const xa = xs(cs), clipped = c === undefined, xb = clipped ? lim2 : xa + lamPx, yTop = ys(cs);
+          g.setLineDash([3, 4]); g.strokeStyle = 'rgba(234,179,8,0.7)'; g.lineWidth = 1;
+          g.beginPath(); g.moveTo(xa, yArr); g.lineTo(xa, yTop); if (!clipped) { g.moveTo(xb, yArr); g.lineTo(xb, yTop); } g.stroke(); g.setLineDash([]);
+          g.strokeStyle = C.amber; g.fillStyle = C.amber; g.lineWidth = 1.8;
+          g.beginPath(); g.moveTo(xa, yArr); g.lineTo(xb, yArr); g.stroke();
+          const head = (x, d) => { g.beginPath(); g.moveTo(x, yArr); g.lineTo(x - d * 8, yArr - 4); g.lineTo(x - d * 8, yArr + 4); g.closePath(); g.fill(); };
+          head(xa, -1); if (!clipped) head(xb, 1);
+          const longer = Gr.lam > N + 1 + 1e-9;
+          const label = 'λ = ' + fmtLam(Gr.lam) + (clipped ? '  (continues off the right)' : '') + (longer && !S.per ? '  (longer than the chain)' : '');
+          txt(g, label, clipped ? lim2 : (xa + xb) / 2, yArr - 10, C.amber, 12, clipped ? 'right' : 'center', '600');
+        }
+      }
+      // masses
+      for (let k = 0; k < pts.length; k++) {
+        const Q = pts[k], isMass = k > 0 && k < pts.length - 1;
+        if (!isMass && !Q.ghost) continue;
+        const jj = Q.ghost ? Q.ghost - 1 : k - 1, isRef = isMass && jj === S.ref, rr = radOf(jj);
+        g.beginPath(); g.arc(Q.x, Q.y, rr, 0, TWO_PI);
+        if (Q.ghost) {
+          g.setLineDash([3, 3]); g.strokeStyle = S.di && jj % 2 ? 'rgba(251,146,60,0.7)' : 'rgba(96,165,250,0.6)'; g.fillStyle = S.di && jj % 2 ? 'rgba(251,146,60,0.15)' : 'rgba(96,165,250,0.15)'; g.fill(); g.lineWidth = 1.4; g.stroke(); g.setLineDash([]);
+          if (rr >= 8) txt(g, String(Q.ghost), Q.x, Q.y, 'rgba(201,209,217,0.8)', 11, 'center', '600');
+        } else {
+          g.fillStyle = S.di ? (jj % 2 ? C.orange : C.blue) : (isRef ? C.amber : C.blue); g.fill();
+          if (isRef) { g.strokeStyle = S.di ? C.amber : '#fde68a'; g.lineWidth = S.di ? 3.5 : 2; g.stroke(); }
+          if (rr >= 8) txt(g, String(jj + 1), Q.x, Q.y + 0.5, (isRef && !S.di) ? '#111' : '#fff', 12, 'center', '700');
+        }
+      }
+      const rp = P(S.ref, u[S.ref]);
+      txt(g, 'reference mass', rp.x, long ? rp.y - radOf(S.ref) - 12 : Math.min(h - 10, rp.y + radOf(S.ref) + 14), C.amber, 11, 'center');
+      txt(g, (S.per ? 'Periodic: a ring of ' + N + ' masses' : (S.lb === 'free' && S.rb === 'free' ? 'Free ends: ' + N + ' masses, no walls' : (S.lb === 'free' || S.rb === 'free' ? (S.lb === 'free' ? 'Left end free, right end fixed' : 'Left end fixed, right end free') + ': ' + N + ' masses' : 'Fixed ends: ' + N + ' masses between two walls'))) + (long ? '.  Red = stretched spring, blue = compressed' : ''), 12, 14, C.muted, 12, 'left');
+      const lg = []; if (S.di) lg.push('Blue: light mass m.  Orange: heavy mass M = ' + S.ratio + ' m (area proportional to mass)'); if (S.sp) lg.push('Springs alternate K and K\u2032 = ' + S.kr + ' K; the stiffer one is drawn thicker');
+      if (lg.length) txt(g, lg.join('   |   '), 12, long ? h - 7 : 32, C.muted, 11, 'left');
+      if (w > 760) txt(g, long ? 'drag a mass left or right' : 'drag a mass up or down', w - 12, 14, '#6e7681', 11, 'right');
+    }
+
+    /* ---------- mode bars ---------- */
+    const MD = { H: 216, top: 20, bar: 92, base: 112, dialY: 142, dialR: 16 };
+    function modeSlots(w) { const n = S.N, pad = 16, slot = (w - 2 * pad) / n; return { slot, pad, cx: i => pad + (i + 0.5) * slot }; }
+    const mdH = () => S.N > 16 ? 150 : MD.H;
+    function drawModes() {
+      const { g, w, h } = fit($('modes'), mdH()), n = S.N, M = S.M, Sl = modeSlots(w), compact = n > 16;
+      const amps = M.w.map((om, i) => om > 0 ? Math.hypot(S.q[i], S.p[i] / om) : Math.abs(S.q[i]));
+      if (!S.drag) S.barMax = Math.max(n > 16 ? 0.35 : 1.5, 1.15 * Math.max(...amps));
+      g.strokeStyle = '#30363d'; g.lineWidth = 1; g.beginPath(); g.moveTo(Sl.pad, MD.base + 0.5); g.lineTo(w - Sl.pad, MD.base + 0.5); g.stroke();
+      for (let i = 0; i < n; i++) {
+        const cx = Sl.cx(i), bw = Math.min(46, Sl.slot * 0.55), G = M.groups[M.gi[i]];
+        const bh = Math.min(MD.bar, amps[i] / S.barMax * MD.bar);
+        if (S.hover === i) { g.fillStyle = 'rgba(234,179,8,0.10)'; g.fillRect(cx - Sl.slot / 2 + 2, 4, Sl.slot - 4, h - 8); }
+        g.fillStyle = G.col; g.globalAlpha = 0.85; g.fillRect(cx - bw / 2, MD.base - bh, bw, bh); g.globalAlpha = 1;
+        if (S.hover === i) { g.strokeStyle = C.amber; g.lineWidth = 1.5; g.strokeRect(cx - bw / 2, MD.base - bh, bw, Math.max(bh, 1)); }
+        if (Sl.slot >= 34) txt(g, amps[i].toFixed(2), cx, MD.base - bh - 8, C.text, 11, 'center');
+        if (compact) { if (n <= 20 || i % 5 === 4 || i === 0) txt(g, String(i + 1), cx, MD.base + 12, C.muted, 10, 'center'); continue; }
+        // phasor
+        const r = MD.dialR, cyD = MD.dialY;
+        g.strokeStyle = '#30363d'; g.lineWidth = 1; g.beginPath(); g.arc(cx, cyD, r, 0, TWO_PI); g.stroke();
+        g.beginPath(); g.moveTo(cx - r, cyD); g.lineTo(cx + r, cyD); g.moveTo(cx, cyD - r); g.lineTo(cx, cyD + r); g.strokeStyle = '#21262d'; g.stroke();
+        if (M.w[i] > 0 && amps[i] > 1e-6) {
+          const px = S.q[i] / amps[i], py = -(S.p[i] / M.w[i]) / amps[i];
+          g.beginPath(); g.moveTo(cx, cyD); g.lineTo(cx + px * r, cyD + py * r); g.strokeStyle = G.col; g.lineWidth = 2; g.stroke();
+          g.beginPath(); g.arc(cx + px * r, cyD + py * r, 2.8, 0, TWO_PI); g.fillStyle = G.col; g.fill();
+        }
+        txt(g, 'ω = ' + M.w[i].toFixed(3), cx, 172, G.col, 11, 'center', '600');
+        txt(g, M.lab[i], cx, 187, C.muted, 11, 'center');
+        txt(g, '\u03BB = ' + fmtLam(G.lam), cx, 203, C.text, 11, 'center');
+      }
+      txt(g, 'amplitude', 4, 9, C.muted, 11, 'left');
+      if (compact) {
+        txt(g, 'modes in order of increasing frequency (mode number below each bar)', w / 2, MD.base + 28, C.muted, 11, 'center');
+        if (S.hover >= 0) { const G = M.groups[M.gi[S.hover]]; txt(g, 'mode ' + (S.hover + 1) + ':  ' + longL(M.lab[S.hover]) + ',  ω = ' + M.w[S.hover].toFixed(3) + ' ω₀,  λ = ' + fmtLam(G.lam) + ',  amplitude ' + amps[S.hover].toFixed(2), w / 2, MD.base + 46, G.col, 12, 'center', '600'); }
+        else txt(g, 'Hover a bar for its frequency and wavelength', w / 2, MD.base + 46, '#6e7681', 12, 'center');
+      }
+    }
+
+    /* ---------- dispersion ---------- */
+    function fmtLam(l) { return isNaN(l) ? '\u2013' : isFinite(l) ? (Math.abs(l - Math.round(l)) < 0.005 ? String(Math.round(l)) : l.toFixed(2)) + ' a' : '\u221E'; }
+    function dispPoints() { // one entry per allowed wavevector
+      const pts = [];
+      S.M.groups.forEach((G, g) => {
+        if (G.trav) { pts.push({ g, sx: 1, x: G.x, w: G.w, q: G.q }); pts.push({ g, sx: -1, x: -G.x, w: G.w, q: -G.q }); }
+        else pts.push({ g, sx: 1, x: G.x, w: G.w, q: G.q });
+      });
+      return pts.sort((a, b) => a.x - b.x);
+    }
+    const twoB = () => S.di || S.sp;
+    function chainPar() { const r = S.di ? S.ratio : 1, kr = S.sp ? S.kr : 1; return { r, kr, Sg: (1 + kr) * (1 + 1 / r) }; }
+    function omGen(x) { // acoustic and optical frequency at k a / pi = x, for the two-site cell
+      const P = chainPar(), sq = Math.sqrt(Math.max(0, P.Sg * P.Sg - 16 * P.kr * Math.pow(Math.sin(Math.PI * x), 2) / P.r));
+      return [Math.sqrt(Math.max(0, (P.Sg - sq) / 2)), Math.sqrt((P.Sg + sq) / 2)];
+    }
+    function yMax() { return twoB() ? Math.max(2.15, Math.ceil(Math.sqrt(chainPar().Sg) * 1.07 * 20) / 20) : 2.15; }
+    function buildTable() {
+      const M = S.M, N = S.N, fr = x => (Math.abs(x - Math.round(x)) < 0.005 ? String(Math.round(x)) : x.toFixed(2));
+      let h = '<thead><tr><th>Wavevector</th><th>k a / π</th><th>λ / a</th><th>ω / ω₀</th></tr></thead><tbody>';
+      dispPoints().forEach(pt => {
+        const G = M.groups[pt.g], lam = G.loc ? '–' : (isFinite(G.lam) ? fr(G.lam) : '∞');
+        const kx = G.loc ? 'in the gap' : (S.per ? (pt.x === 0 ? '0' : pt.x.toFixed(3)) : (S.sp || freeEnds() ? pt.x.toFixed(3) : Math.round(pt.x * (N + 1)) + '/' + (N + 1) + ' = ' + pt.x.toFixed(3)));
+        h += '<tr data-g="' + pt.g + '" data-s="' + pt.sx + '"><td><span class="co-sw" style="background:' + G.col + '"></span>' + (twoB() ? G.brWord : '') + 'n = ' + pt.q + '</td><td>' + kx + '</td><td>' + lam + '</td><td>' + pt.w.toFixed(3) + '</td></tr>';
+      });
+      $('modeTbl').innerHTML = h + '</tbody>';
+      const qmax = Math.floor(N / 2), qmin = -(Math.ceil(N / 2) - 1);
+      if (!twoB()) {
+        $('dispNote').innerHTML = N + ' masses give ' + N + ' modes, one for each allowed wavevector. ' + (S.per
+          ? 'Periodic ring: ω = 2ω₀|sin(ka/2)| with k = 2πn/(Na) and n = ' + qmin + ', …, ' + qmax + '. A wave travelling to the right (+k) and one travelling to the left (−k) have the same frequency, so the dots come in pairs at equal height. The cosine and sine standing waves in the mode bars are the sum and difference of these two. The mode at k = 0 is the uniform shift, with ω = 0.'
+          : (!freeEnds() ? 'Fixed ends: ω = 2ω₀ sin(ka/2) with k = nπ/((N+1)a), so the wavelength is λ = 2(N+1)a/n. The wavevectors are spread evenly in k and stop short of the zone boundary k = π/a, which would need n = N+1.'
+          : (S.lb === S.rb ? 'Free ends: ω = 2ω₀ sin(ka/2) with k = (n−1)π/(Na), so λ = 2Na/(n−1). The first mode has k = 0 and ω = 0: nothing holds the chain, so the whole chain translates. The others are cosine standing waves with the slope of the displacement zero at both ends.'
+            : 'One fixed end and one free end: ω = 2ω₀ sin(ka/2) with k = (2n−1)π/((2N+1)a), so λ = 2(2N+1)a/(2n−1). The wall holds the chain, so there is no zero-frequency mode. The displacement is zero at the wall and its slope is zero at the free end.')));
+      } else {
+        const cnt = b => M.br.filter(x => x === b).length, nAc = cnt('ac'), nOp = cnt('op'), nEd = cnt('ed'), e = omGen(0.5), lo = e[0], hi = e[1], top = Math.sqrt(chainPar().Sg), closed = hi - lo < 1e-6;
+        let t = N + ' masses give ' + N + ' modes: ' + nAc + ' acoustic, ' + nOp + ' optical' + (nEd ? ' and ' + nEd + (nEd === 1 ? ' edge mode' : ' edge modes') : '') + '. The repeat length is 2a, so the zone is half as wide, with k running only to π/(2a). ';
+        t += closed ? 'With these values the gap has closed: the two branches are the one-mass curve folded at k = π/(2a). ' : 'The branches are separated by a gap in frequency, from ω = ' + lo.toFixed(3) + ' to ' + hi.toFixed(3) + ' ω₀, where no wave can travel. ';
+        t += 'At k = 0 the acoustic mode is a uniform shift (ω → 0, and exactly 0 on the ring) and in the optical mode neighbouring masses move against each other at ω = ' + top.toFixed(3) + ' ω₀. ';
+        t += S.per ? 'On the ring, k = 2πq/(Na), and each non-zero k appears twice (+k and −k) in each branch.'
+          : ((S.sp || freeEnds()) ? 'With ' + bcName() + ' the dots sit at the effective wavevector that gives their frequency on the curve; unlike the simple fixed chain these wavevectors need not be spaced evenly.' : 'With fixed ends the allowed wavevectors are k = nπ/((N+1)a); those above π/(2a) are the optical branch, drawn at the equivalent reduced wavevector π/a − k.');
+        if (nEd) t += ' The green dot' + (nEd > 1 ? 's' : '') + ' in the gap ' + (nEd > 1 ? 'are' : 'is an') + ' edge mode' + (nEd > 1 ? 's' : '') + ': large at the ends of the chain and dying away into the interior, so no wavelength can be assigned. They sit at an end of the chain. With walls on both ends and an even number of masses they appear when the wall spring is stiffer than the next one (K greater than K′); other end conditions can give one too, so try changing K′/K and the ends.';
+        $('dispNote').innerHTML = t;
+      }
+    }
+    const DP = { H: 330, L: 58, R: 22, T: 36, B: 50 };
+    function dispGeom(w) { const pw = w - DP.L - DP.R, ph = DP.H - DP.T - DP.B, xm = twoB() ? 0.5 : 1, x0 = S.per ? -xm : 0, ym = yMax(); return { pw, ph, x0, xm, ym, X: x => DP.L + (x - x0) / (xm - x0) * pw, Y: om => DP.T + ph - om / ym * ph }; }
+    function dispHit(x, y) { const w = $('disp').clientWidth, Gm = dispGeom(w); let best = null, bd = 1e9;
+      dispPoints().forEach(pt => { const d = Math.hypot(x - Gm.X(pt.x), y - Gm.Y(pt.w)); if (d < bd && d < 16) { bd = d; best = pt; } }); return best; }
+    function drawDisp() {
+      const { g, w } = fit($('disp'), DP.H), Gm = dispGeom(w), M = S.M, hg = S.hover >= 0 ? M.gi[S.hover] : -1;
+      const X = Gm.X, Y = Gm.Y, x0 = Gm.x0, xm = Gm.xm, di = twoB(), big = S.N > 16;
+      const ticks = di ? (S.per ? [-0.5, -0.25, 0, 0.25, 0.5] : [0, 0.125, 0.25, 0.375, 0.5]) : (S.per ? [-1, -0.5, 0, 0.5, 1] : [0, 0.25, 0.5, 0.75, 1]);
+      if (di) { // frequency gap
+        const e = omGen(0.5);
+        if (e[1] - e[0] > 1e-6) { g.fillStyle = 'rgba(139,148,158,0.10)'; g.fillRect(DP.L, Y(e[1]), Gm.pw, Y(e[0]) - Y(e[1])); txt(g, 'gap', DP.L + Gm.pw - 6, (Y(e[0]) + Y(e[1])) / 2, C.muted, 11, 'right'); }
+      }
+      if (S.dosHover >= 0) { const b = dosBins(); g.fillStyle = 'rgba(234,179,8,0.12)'; g.fillRect(DP.L, Y((S.dosHover + 1) * b.dw), Gm.pw, Y(S.dosHover * b.dw) - Y((S.dosHover + 1) * b.dw)); }
+      g.lineWidth = 1; g.strokeStyle = '#21262d';
+      const st = Gm.ym > 3 ? 1 : 0.5; for (let v = 0; v <= Gm.ym + 1e-9; v += st) { g.beginPath(); g.moveTo(DP.L, Y(v)); g.lineTo(DP.L + Gm.pw, Y(v)); g.stroke(); txt(g, v.toString(), DP.L - 8, Y(v), C.muted, 11, 'right'); }
+      ticks.forEach(v => {
+        g.beginPath(); g.moveTo(X(v), DP.T); g.lineTo(X(v), DP.T + Gm.ph); g.stroke();
+        txt(g, v.toString(), X(v), DP.T + Gm.ph + 14, C.muted, 11, 'center');
+        const lm = v === 0 ? Infinity : 2 / Math.abs(v);
+        txt(g, 'λ = ' + (isFinite(lm) ? (Math.abs(lm - Math.round(lm)) < 0.005 ? Math.round(lm) : lm.toFixed(2)) + ' a' : '∞'), X(v), DP.T - 14, C.muted, 11, 'center');
+      });
+      g.strokeStyle = C.axis; g.beginPath(); g.moveTo(DP.L, DP.T); g.lineTo(DP.L, DP.T + Gm.ph); g.lineTo(DP.L + Gm.pw, DP.T + Gm.ph); g.stroke();
+      const zb = di ? (S.per ? '±0.5' : '0.5') : (S.per ? '±1' : '1');
+      txt(g, 'wavevector  k a / π   (zone edge at ' + zb + ';  a = mass spacing)', DP.L + Gm.pw / 2, DP.H - 12, C.muted, 11, 'center');
+      g.save(); g.translate(14, DP.T + Gm.ph / 2); g.rotate(-Math.PI / 2); txt(g, 'frequency  ω / ω₀', 0, 0, C.muted, 11, 'center'); g.restore();
+      const curve = (fn, col) => { g.beginPath(); for (let i = 0; i <= 300; i++) { const x = x0 + (xm - x0) * i / 300, y = Y(fn(x)); i ? g.lineTo(X(x), y) : g.moveTo(X(x), y); } g.strokeStyle = col; g.lineWidth = 2; g.stroke(); };
+      if (!di) {
+        curve(x => 2 * Math.abs(Math.sin(Math.PI * x / 2)), '#6b7684');
+        if (S.per) txt(g, 'ω = 2ω₀ |sin(ka/2)|', X(0), Y(1.15), C.text, 12, 'center', '600');
+        else txt(g, 'ω = 2ω₀ |sin(ka/2)|', X(0.5) + 24, Y(0.45), C.text, 12, 'left', '600');
+      } else {
+        curve(x => omGen(Math.abs(x))[0], C.blue); curve(x => omGen(Math.abs(x))[1], C.orange);
+        const xa = S.per ? 0.28 : 0.3;
+        txt(g, 'acoustic branch', X(xa) + 6, Y(omGen(xa)[0]) + 20, C.blue, 12, 'left', '600');
+        txt(g, 'optical branch', X(0.14), Y(omGen(0.14)[1]) + 26, C.orange, 12, 'left', '600');
+      }
+      dispPoints().forEach(pt => {
+        const Gr = M.groups[pt.g], x = X(pt.x), y = Y(pt.w), hot = pt.g === hg || (S.dosHover >= 0 && pt.w >= S.dosHover * S.dosW - 1e-9 && pt.w < (S.dosHover + 1) * S.dosW - 1e-9);
+        g.setLineDash([3, 4]); g.strokeStyle = Gr.col; g.globalAlpha = big ? 0.3 : 0.6; g.lineWidth = 1;
+        g.beginPath(); g.moveTo(x, DP.T + Gm.ph); g.lineTo(x, y); g.stroke(); g.setLineDash([]); g.globalAlpha = 1;
+        g.beginPath(); g.arc(x, y, big ? 3.5 : 6, 0, TWO_PI); g.fillStyle = Gr.col; g.fill();
+        if (hot) { g.beginPath(); g.arc(x, y, big ? 8 : 12, 0, TWO_PI); g.strokeStyle = C.amber; g.lineWidth = 2; g.stroke(); }
+        if (!big || hot) txt(g, 'n=' + pt.q, x, y - (big ? 14 : 18), Gr.col, 11, 'center', '600');
+      });
+      const cnt = b => M.br.filter(x => x === b).length, np = dispPoints().length;
+      txt(g, di ? S.N + ' modes: ' + cnt('ac') + ' acoustic + ' + cnt('op') + ' optical' + (cnt('ed') ? ' + ' + cnt('ed') + ' edge' : '') : (np === S.N ? S.N + ' wavevectors, ' + S.N + ' modes' : S.N + ' modes'), DP.L + Gm.pw - 4, DP.T + Gm.ph - 10, C.muted, 11, 'right');
+    }
+    let dosCache = null;
+    function dosBins() { // counts of this chain's modes per frequency bin, and the same count for a very long chain
+      const key = [S.N, S.per, S.lb, S.rb, S.di, S.sp, S.ratio, S.kr, S.dosW].join('|');
+      if (dosCache && dosCache.key === key) return dosCache;
+      const dw = S.dosW, nb = Math.ceil(yMax() / dw), cnt = new Array(nb).fill(0), inf = new Array(nb).fill(0), brc = Array.from({ length: nb }, () => ({ ac: 0, op: 0, ed: 0 }));
+      S.M.w.forEach((om, i) => { const b = Math.min(nb - 1, Math.floor((om + 1e-9) / dw)); cnt[b]++; if (S.M.br[i]) brc[b][S.M.br[i]]++; });
+      const two = twoB(), ns = 6000, wgt = (two ? S.N / 2 : S.N) / ns;
+      for (let k = 0; k < ns; k++) { const x = (k + 0.5) / ns * (two ? 0.5 : 1), oms = two ? omGen(x) : [2 * Math.sin(Math.PI * x / 2)]; oms.forEach(om => { inf[Math.min(nb - 1, Math.floor(om / dw))] += wgt; }); }
+      dosCache = { key, dw, nb, cnt, inf, brc }; return dosCache;
+    }
+    function dosGeom(w) { const L = 12, R = 14, pw = w - L - R; return { L, R, pw }; }
+    function drawDos() {
+      const { g, w } = fit($('dos'), DP.H), Gm = dispGeom(w), D = dosBins(), G = dosGeom(w), Y = Gm.Y, ph = Gm.ph;
+      const gmax = Math.max(1e-9, ...D.cnt.map(c => c / D.dw), ...D.inf.map(c => c / D.dw)) * 1.12;
+      const X = v => G.L + v / gmax * G.pw;
+      g.lineWidth = 1; g.strokeStyle = '#21262d';
+      const st = Gm.ym > 3 ? 1 : 0.5; for (let v = 0; v <= Gm.ym + 1e-9; v += st) { g.beginPath(); g.moveTo(G.L, Y(v)); g.lineTo(G.L + G.pw, Y(v)); g.stroke(); }
+      for (let b = 0; b < D.nb; b++) {
+        const y1 = Y(b * D.dw), y2 = Y(Math.min((b + 1) * D.dw, Gm.ym)), c = D.brc[b], col = c.ed && !c.ac && !c.op ? '#34d399' : (c.op > c.ac ? C.orange : C.blue);
+        if (S.dosHover === b) { g.fillStyle = 'rgba(234,179,8,0.12)'; g.fillRect(G.L, y2, G.pw, y1 - y2); }
+        if (D.cnt[b] > 0) {
+          const len = D.cnt[b] / D.dw / gmax * G.pw;
+          g.fillStyle = col; g.globalAlpha = 0.85; g.fillRect(G.L, y2 + 0.5, len, Math.max(1, y1 - y2 - 1)); g.globalAlpha = 1;
+          if (S.dosHover === b) { g.strokeStyle = C.amber; g.lineWidth = 1.5; g.strokeRect(G.L, y2 + 0.5, len, Math.max(1, y1 - y2 - 1)); }
+          if (y1 - y2 > 11) txt(g, String(D.cnt[b]), G.L + len + 4, (y1 + y2) / 2, C.text, 10, 'left');
+        }
+      }
+      g.beginPath(); let first = true; // long-chain limit as a stepped line
+      for (let b = 0; b < D.nb; b++) { const x = X(D.inf[b] / D.dw), y1 = Y(b * D.dw), y2 = Y(Math.min((b + 1) * D.dw, Gm.ym)); if (first) { g.moveTo(x, y1); first = false; } else g.lineTo(x, y1); g.lineTo(x, y2); }
+      g.strokeStyle = '#c9d1d9'; g.lineWidth = 1.4; g.setLineDash([4, 3]); g.stroke(); g.setLineDash([]);
+      g.strokeStyle = C.axis; g.lineWidth = 1; g.beginPath(); g.moveTo(G.L, DP.T); g.lineTo(G.L, DP.T + ph); g.lineTo(G.L + G.pw, DP.T + ph); g.stroke();
+      const stp = niceStepG(gmax); for (let v = 0; v <= gmax; v += stp) { txt(g, String(Math.round(v * 100) / 100), X(v), DP.T + ph + 14, C.muted, 11, 'center'); g.beginPath(); g.moveTo(X(v), DP.T + ph); g.lineTo(X(v), DP.T + ph + 4); g.stroke(); }
+      txt(g, 'g(ω) = modes per ω₀', G.L + G.pw / 2, DP.H - 12, C.muted, 11, 'center');
+      txt(g, 'bars: this chain', G.L + 2, DP.T - 22, C.text, 11, 'left'); txt(g, 'dashed: very long chain', G.L + 2, DP.T - 8, '#c9d1d9', 11, 'left');
+    }
+    function niceStepG(m) { for (const s of [0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500]) if (s >= m / 5) return s; return 1000; }
+    (function dosEvents() {
+      const cv = $('dos');
+      cv.addEventListener('pointermove', ev => { const P = pos(ev, cv), Gm = dispGeom(cv.clientWidth), om = (DP.T + Gm.ph - P.y) / Gm.ph * Gm.ym, D = dosBins(), b = Math.floor(om / D.dw); S.dosHover = (P.y >= DP.T && P.y <= DP.T + Gm.ph && b >= 0 && b < D.nb) ? b : -1; });
+      cv.addEventListener('pointerleave', () => { S.dosHover = -1; });
+    })();
+    function updDos() {
+      const D = dosBins(), N = S.N, b = S.dosHover, two = twoB();
+      let t;
+      if (b >= 0) {
+        const lo = b * D.dw, c = D.cnt[b];
+        t = 'Bin ' + lo.toFixed(2) + ' to ' + (lo + D.dw).toFixed(2) + ' ω₀:  ' + c + (c === 1 ? ' mode' : ' modes') + ',  g = ' + (c / D.dw).toFixed(1) + ' per ω₀.  A very long chain would have ' + D.inf[b].toFixed(1) + ' modes here.';
+      } else t = 'Δω = ' + D.dw.toFixed(2) + ' ω₀:  the bars add up to ' + D.cnt.reduce((a, c) => a + c, 0) + ' modes (N = ' + N + '),  g = count / Δω.  Hover a bar.';
+      if ($('dosRead').textContent !== t) $('dosRead').textContent = t;
+    }
+    function startFromPoint(pt) { const G = S.M.groups[pt.g]; applyStart(G.trav ? 't:' + pt.g + ':' + pt.sx : 'm:' + G.idx[0]); }
+    (function dispEvents() {
+      const cv = $('disp');
+      cv.addEventListener('pointermove', ev => { const P = pos(ev, cv), pt = dispHit(P.x, P.y); S.hover = pt ? S.M.groups[pt.g].idx[0] : -1; cv.style.cursor = pt ? 'pointer' : 'default'; });
+      cv.addEventListener('pointerleave', () => { S.hover = -1; });
+      cv.addEventListener('pointerdown', ev => { const P = pos(ev, cv), pt = dispHit(P.x, P.y); if (pt) startFromPoint(pt); });
+      const tb = $('modeTbl');
+      tb.addEventListener('pointerover', ev => { const tr = ev.target.closest('tr[data-g]'); S.hover = tr ? S.M.groups[+tr.dataset.g].idx[0] : -1; });
+      tb.addEventListener('pointerleave', () => { S.hover = -1; });
+      tb.addEventListener('click', ev => { const tr = ev.target.closest('tr[data-g]'); if (tr) startFromPoint({ g: +tr.dataset.g, sx: +tr.dataset.s }); });
+    })();
+    function markTable() { const hg = S.hover >= 0 ? S.M.gi[S.hover] : -1; document.querySelectorAll('#modeTbl tr[data-g]').forEach(tr => tr.classList.toggle('hov', +tr.dataset.g === hg)); }
+
+    /* ---------- time plots ---------- */
+    function niceStep(win) { for (const s of [1, 2, 5, 10, 20, 50]) if (s >= win / 7) return s; return 50; }
+    function drawTrace() {
+      const M = S.M, G = M.groups, rows = G.length, topH = 150, rowH = rows > 12 ? 30 : 58, axisH = 40, cmp = rows > 12;
+      const H = 8 + topH + rows * rowH + axisH;
+      const { g, w } = fit($('trace'), H), L = w < 560 ? 116 : 138, R = 12, pw = w - L - R;
+      const win = S.win, a = S.t < win ? 0 : S.t - win, X = t => L + (t - a) / win * pw;
+      const ref = S.ref, hs = S.hist.filter(s => s.t >= a - 0.1);
+      const tot = hs.map(s => M.phi.reduce((acc, ph, i) => acc + ph[ref] * s.q[i], 0));
+      const comp = G.map(Gr => hs.map(s => Gr.idx.reduce((acc, i) => acc + M.phi[i][ref] * s.q[i], 0)));
+      // scales
+      const tgt = Math.max(0.3, 1.12 * maxAbs(tot), ...comp.map(c => 1.12 * maxAbs(c)));
+      S.scale = tgt > S.scale ? tgt : S.scale + (tgt - S.scale) * 0.04;
+      const rowTgt = comp.map(c => Math.max(0.05, 1.12 * maxAbs(c)));
+      rowTgt.forEach((v, k) => { S.rs[k] = (S.rs[k] === undefined || v > S.rs[k]) ? v : S.rs[k] + (v - S.rs[k]) * 0.04; });
+      const step = niceStep(win);
+      const plot = (y0, h, vals, col, sc, lw) => {
+        g.strokeStyle = '#21262d'; g.lineWidth = 1; g.strokeRect(L + 0.5, y0 + 0.5, pw, h);
+        for (let t = Math.ceil(a / step) * step; t <= a + win + 1e-9; t += step) { const x = X(t); g.beginPath(); g.moveTo(x, y0); g.lineTo(x, y0 + h); g.stroke(); }
+        const yc = y0 + h / 2; g.strokeStyle = '#3b434d'; g.beginPath(); g.moveTo(L, yc); g.lineTo(L + pw, yc); g.stroke();
+        g.save(); g.beginPath(); g.rect(L, y0, pw, h); g.clip();
+        g.beginPath(); vals.forEach((v, k) => { const x = X(hs[k].t), y = yc - v / sc * (h / 2 - 2); k ? g.lineTo(x, y) : g.moveTo(x, y); });
+        g.strokeStyle = col; g.lineWidth = lw || 1.8; g.lineJoin = 'round'; g.stroke(); g.restore();
+        if (h > 40) { txt(g, '+' + sc.toFixed(2), L + 4, y0 + 8, '#6e7681', 10, 'left'); txt(g, '−' + sc.toFixed(2), L + 4, y0 + h - 8, '#6e7681', 10, 'left'); }
+      };
+      // top
+      const y0 = 8;
+      plot(y0, topH, tot, C.amber, S.scale, 2.2);
+      txt(g, 'Mass ' + (ref + 1), L - 10, y0 + topH / 2 - 16, C.amber, 14, 'right', '700');
+      txt(g, 'total motion', L - 10, y0 + topH / 2 + 2, C.text, 11, 'right');
+      txt(g, '= sum of the rows below', L - 10, y0 + topH / 2 + 17, C.muted, 11, 'right');
+      // components
+      G.forEach((Gr, k) => {
+        const yy = y0 + topH + k * rowH + 4, h = rowH - 6, sc = S.sep ? S.rs[k] : S.scale;
+        const node = Gr.idx.every(i => Math.abs(M.phi[i][ref]) < 1e-9);
+        plot(yy, h, comp[k], Gr.col, sc, 1.8);
+        const lb = Gr.label.replace('acoustic ', 'ac. ').replace('optical ', 'opt. ').replace(' (uniform shift)', ' (shift)').replace(' (cos + sin)', '');
+        if (cmp) { txt(g, 'ω = ' + Gr.w.toFixed(3), L - 10, yy + 8, Gr.col, 11, 'right', '700'); txt(g, node ? lb + ': node' : lb, L - 10, yy + 20, node ? C.red : C.muted, 10, 'right'); }
+        else {
+          txt(g, 'ω = ' + Gr.w.toFixed(3) + ' ω₀', L - 10, yy + 12, Gr.col, 12, 'right', '700');
+          txt(g, Gr.w > 0 ? 'T = ' + (TWO_PI / Gr.w).toFixed(2) : 'no oscillation', L - 10, yy + 27, C.text, 11, 'right');
+          txt(g, node ? lb + ': node' : lb, L - 10, yy + 42, node ? C.red : C.muted, 11, 'right');
+        }
+      });
+      // axis
+      const yb = y0 + topH + rows * rowH + 6;
+      g.strokeStyle = C.axis; g.lineWidth = 1; g.beginPath(); g.moveTo(L, yb); g.lineTo(L + pw, yb); g.stroke();
+      for (let t = Math.ceil(a / step) * step; t <= a + win + 1e-9; t += step) {
+        const x = X(t); g.beginPath(); g.moveTo(x, yb); g.lineTo(x, yb + 4); g.stroke();
+        txt(g, String(Math.round(t * 100) / 100), x, yb + 14, C.muted, 11, 'center');
+      }
+      txt(g, 'time t  (units of 1/ω₀)', L + pw / 2, yb + 26, C.muted, 11, 'center');
+      $('readout').textContent = 't = ' + S.t.toFixed(1) + '   |   ' + bcName() + ', N = ' + S.N + '   |   ' + S.N + ' modes, ' + G.length + ' distinct frequencies (one row each)   |   highest frequency ' + Math.max(...M.w).toFixed(3) + ' ω₀, lowest ' + Math.min(...M.w).toFixed(3) + ' ω₀';
+    }
+
+    /* ---------- interaction ---------- */
+    function pos(ev, cv) { const r = cv.getBoundingClientRect(); return { x: ev.clientX - r.left, y: ev.clientY - r.top }; }
+    function freeze() { S.p = S.p.map(() => 0); }
+
+    (function chainEvents() {
+      const cv = $('chain');
+      const hit = (x, y) => { const w = cv.clientWidth, u = uOf(S.q); let best = -1, bd = 1e9;
+        for (let j = 0; j < S.N; j++) { const q = chainPos(w, j, u[j]), d = Math.hypot(x - q.x, y - q.y); if (d < bd && d < 22) { bd = d; best = j; } } return best; };
+      cv.addEventListener('pointerdown', ev => {
+        const P = pos(ev, cv), j = hit(P.x, P.y); if (j < 0) return;
+        setRef(j); freeze(); clearHist(); S.drag = { type: 'mass', j }; cv.setPointerCapture(ev.pointerId); cv.style.cursor = 'grabbing';
+      });
+      cv.addEventListener('pointermove', ev => {
+        const P = pos(ev, cv);
+        if (S.drag && S.drag.type === 'mass') {
+          const u = uOf(S.q); u[S.drag.j] = chainInv(cv.clientWidth, S.drag.j, P);
+          S.q = qOf(u); S.p = S.q.map(() => 0); S.hist = [{ t: 0, q: Float64Array.from(S.q) }];
+        } else cv.style.cursor = hit(P.x, P.y) >= 0 ? 'grab' : 'default';
+      });
+      const up = ev => { if (S.drag && S.drag.type === 'mass') { byHand('Shape set by hand: you moved mass ' + (S.drag.j + 1) + ' and let go, so the chain was released from rest. It is a sum of normal modes.'); S.drag = null; S.hist = [{ t: 0, q: Float64Array.from(S.q) }]; S.t = 0; S.scale = 0.4; S.rs = []; cv.style.cursor = 'grab'; } };
+      cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+    })();
+
+    (function modeEvents() {
+      const cv = $('modes');
+      const slotOf = x => { const Sl = modeSlots(cv.clientWidth), i = Math.floor((x - Sl.pad) / Sl.slot); return i >= 0 && i < S.N ? i : -1; };
+      const setAmp = (i, y) => { const A = Math.max(0, Math.min(1, (MD.base - y) / MD.bar)) * S.barMax; S.q[i] = A; S.p[i] = 0; };
+      cv.addEventListener('pointerdown', ev => {
+        const P = pos(ev, cv), i = slotOf(P.x); if (i < 0) return;
+        freeze(); S.drag = { type: 'mode', i }; cv.setPointerCapture(ev.pointerId); setAmp(i, P.y); S.hist = [{ t: 0, q: Float64Array.from(S.q) }];
+      });
+      cv.addEventListener('pointermove', ev => {
+        const P = pos(ev, cv);
+        if (S.drag && S.drag.type === 'mode') { setAmp(S.drag.i, P.y); S.hist = [{ t: 0, q: Float64Array.from(S.q) }]; }
+        else S.hover = slotOf(P.x);
+      });
+      const up = () => { if (S.drag && S.drag.type === 'mode') { byHand('Mode amplitude set by hand: you set ' + longL(S.M.lab[S.drag.i]) + ' to ' + S.q[S.drag.i].toFixed(2) + ' and let go, so the chain was released from rest with the other modes as they were.'); S.drag = null; S.t = 0; S.hist = [{ t: 0, q: Float64Array.from(S.q) }]; S.scale = 0.4; S.rs = []; } };
+      cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+      cv.addEventListener('pointerleave', () => { if (!S.drag) S.hover = -1; });
+    })();
+
+    $('dirSel').onchange = e => { S.dir = e.target.value; };
+    $('nSel').onchange = e => { S.N = +e.target.value; rebuild(); };
+    function syncOpt() {
+      const two = S.di || S.sp, nS = $('nSel');
+      $('bcBox').style.display = S.per ? 'none' : 'inline'; $('rSl').disabled = !S.di; $('ratioBox').style.opacity = S.di ? 1 : 0.45;
+      $('kSl').disabled = !S.sp; $('kBox').style.opacity = S.sp ? 1 : 0.45;
+      Array.from(nS.options).forEach(o => { o.disabled = S.per && two && (+o.value % 2 === 1); });
+      if (S.per && two && S.N % 2) S.N += 1;   // a ring of two-site cells needs an even N
+      nS.value = S.N;
+    }
+    $('perChk').onchange = e => { S.per = e.target.checked; syncOpt(); rebuild(); };
+    $('lSel').onchange = e => { S.lb = e.target.value; rebuild(); };
+    $('rSel').onchange = e => { S.rb = e.target.value; rebuild(); };
+    $('diChk').onchange = e => { S.di = e.target.checked; syncOpt(); rebuild(); };
+    $('spChk').onchange = e => { S.sp = e.target.checked; syncOpt(); rebuild(); };
+    $('rSl').oninput = e => { S.ratio = +e.target.value; $('rOut').textContent = S.ratio; if (S.di) rebuild(); };
+    $('kSl').oninput = e => { S.kr = +e.target.value; $('kOut').textContent = S.kr; if (S.sp) rebuild(); };
+    $('bReset').onclick = () => applyStart('eq');
+    $('dwSl').oninput = e => { S.dosW = +e.target.value; $('dwOut').textContent = S.dosW.toFixed(2); };
+    $('refSel').onchange = e => setRef(+e.target.value);
+    $('startSel').onchange = e => applyStart(e.target.value);
+    $('bStart').onclick = () => applyStart($('startSel').value === 'hand' ? (S.lastStart || 'pluck') : $('startSel').value);
+    $('bPause').onclick = () => { S.run = !S.run; };
+    $('spSl').oninput = e => { S.speed = +e.target.value; $('spOut').textContent = S.speed; };
+    $('dpSl').oninput = e => { S.beta = +e.target.value; $('dpOut').textContent = S.beta.toFixed(2).replace(/0$/, '').replace(/\.$/, '') || '0'; };
+    $('wnSl').oninput = e => { S.win = +e.target.value; $('wnOut').textContent = S.win; };
+    $('sepChk').onchange = e => { S.sep = e.target.checked; };
+
+    function updStatus() {
+      const state = S.drag ? 'Frozen while you drag' : (S.run ? 'Running' : 'Paused'), cls = S.drag ? 'drag' : (S.run ? 'run' : 'pause');
+      const pill = $('runPill'); if (pill.textContent !== state) { pill.textContent = state; pill.className = 'co-pill ' + cls; }
+      const lbl = S.run ? '\u275A\u275A Pause' : '\u25B6 Play'; if ($('bPause').textContent !== lbl) $('bPause').textContent = lbl;
+      const txt = S.drag ? 'You are dragging, so time is frozen. Let go to release the chain from rest.' : S.now;
+      if ($('nowTxt').textContent !== txt) $('nowTxt').textContent = txt;
+    }
+    /* ---------- loop ---------- */
+    let last = performance.now();
+    function frame(now) {
+      const dt = Math.min(0.05, (now - last) / 1000); last = now;
+      if (S.run && !S.drag) advance(dt * S.speed);
+      updStatus();
+      drawChain(); drawModes(); drawDisp(); drawDos(); updDos(); markTable(); drawTrace();
+      requestAnimationFrame(frame);
+    }
+    window.__cm = { S, buildModes, buildModesGen, evolve, uOf, qOf, advance, rebuild, applyStart };
+    syncOpt(); rebuild();
+    requestAnimationFrame(frame);
+  })();
+  </script>
+</body>
+</html>

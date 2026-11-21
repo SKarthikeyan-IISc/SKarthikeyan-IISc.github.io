@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Shear Modulus of a Cubic Crystal on (001), (011) and (111) Planes | Teaching Tools</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .sm { --text: #e6edf3; --text2: #a9b3bf; --muted: #6e7681; --near: #8b949e; --voigt: #7d8590; --accent: #fb923c; --plane: #8b7cf0; --plane-edge: #b4a9f5;
+          width: 100%; max-width: 1000px; display: flex; flex-direction: column; gap: 14px; }
+    .sm-panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; box-sizing: border-box; min-width: 0; }
+    .sm-row { display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; font-size: 0.88rem; color: var(--ink-soft); }
+    .sm-seg { display: flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+    .sm-seg button { background: transparent; color: var(--ink-soft); border: 0; border-radius: 0; padding: 6px 14px; font-size: 0.84rem; font-weight: 500; }
+    .sm-seg button + button { border-left: 1px solid var(--line); }
+    .sm-seg button:hover { background: var(--panel-2); }
+    .sm-seg button[aria-pressed="true"] { background: #14304f; color: var(--blue-soft); }
+    .sm-info { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.8rem; color: var(--ink-soft); line-height: 1.6; }
+    .sm-custom { display: none; align-items: center; gap: 8px 12px; flex-wrap: wrap; font-size: 0.86rem; color: var(--ink-soft); margin-top: 10px; }
+    .sm-custom input[type=number] { width: 84px; background: var(--page); color: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; font: inherit; }
+    .sm-err { color: var(--red); font-size: 0.82rem; }
+    svg#sv { width: 100%; max-width: 920px; height: auto; display: block; margin: 8px auto; }
+    svg#sv text { font-family: inherit; }
+    .sm-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    .sm-card { background: var(--panel-2); border-radius: 8px; padding: 10px 14px; font-size: 0.84rem; color: var(--ink-soft); line-height: 1.7; }
+    .sm-card b { color: #fff; font-weight: 600; }
+    .sm-card .nm { font-size: 0.95rem; margin-bottom: 2px; }
+    .sm-note { font-size: 0.8rem; color: var(--muted); line-height: 1.55; margin: 6px 0 0; }
+    .sm-ang { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--panel-2); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; color: var(--ink-soft); }
+    .sm-ang input[type=range] { flex: 1; min-width: 160px; }
+    .sm-ang output { color: #fff; font-weight: 700; min-width: 3.2em; text-align: right; font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Shear Modulus of a Cubic Crystal on (001), (011) and (111) Planes</h1>
+  <p class="subtitle">How the shear modulus depends on the plane and on the direction of shear in a cubic single crystal, from the three independent elastic constants C<sub>11</sub>, C<sub>12</sub> and C<sub>44</sub>.</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>Material:</strong> choose Cu, Nb, Na, W or V, or <em>Custom</em> to enter your own C<sub>11</sub>, C<sub>12</sub> and C<sub>44</sub> (in GPa). Custom values must describe a mechanically stable crystal, and the tool says if they do not.</li>
+        <li><strong>Angle &theta;:</strong> drag the slider (or press <em>Play</em>) to turn the direction of shear within each plane. The top row shows the unit cell, the shear plane (purple), its normal (dashed purple) and the shear: the coral pair of arrows shows the material above the plane sliding along +<i>m</i> and the material below sliding along &minus;<i>m</i>.</li>
+        <li><strong>Polar plots:</strong> the radius is the shear modulus <i>G</i>(&theta;) for that direction. The solid orange curve is the part traced so far, the dotted orange curve is the full curve, and the grey circle is the Voigt average. All three plots share one scale, so they can be compared directly.</li>
+        <li><strong>Save image:</strong> <em>Save image (PNG)</em> downloads the three views exactly as shown at the current angle, with the material, its constants and the angle written above them. Choose a light background for slides and printing.</li>
+        <li><strong>Cards:</strong> give <i>G</i> at the current angle, the range of <i>G</i> in that plane, the nearest low-index direction [<i>uvw</i>] (indices up to 3, dashed grey in the cell) and <i>G</i> along it.</li>
+        <li><strong>Things to try:</strong> look at the (001) and (111) planes for every material, where <i>G</i> does not depend on direction, and at the (011) plane, where it does. Then compare Cu (<i>A</i> &gt; 1) with Nb (<i>A</i> &lt; 1), and then with W, which is nearly isotropic. In the (011) plane, find the directions where <i>G</i> equals <i>C</i><sub>44</sub> and where it equals <i>C</i>&prime;.</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="sm">
+    <div class="sm-panel">
+      <div class="sm-row">
+        <div class="sm-seg" role="group" aria-label="Material">
+          <button type="button" id="bCu">Cu</button><button type="button" id="bNb">Nb</button><button type="button" id="bNa">Na</button><button type="button" id="bW">W</button><button type="button" id="bV">V</button><button type="button" id="bCustom">Custom</button>
+        </div>
+        <div class="sm-row" style="margin-left:auto">
+          <label for="imgBg" style="font-size:0.82rem">Image background</label>
+          <select id="imgBg"><option value="dark">Dark</option><option value="light">Light (slides, print)</option></select>
+          <button type="button" id="savePng" class="secondary">Save image (PNG)</button>
+          <button type="button" id="play">&#9654; Play</button>
+        </div>
+      </div>
+      <div class="sm-custom" id="customBox">
+        <span>C<sub>11</sub> <input id="c11" type="number" step="any" value="168.4"></span>
+        <span>C<sub>12</sub> <input id="c12" type="number" step="any" value="121.4"></span>
+        <span>C<sub>44</sub> <input id="c44" type="number" step="any" value="75.4"></span>
+        <span>GPa</span>
+        <button type="button" id="apply" class="secondary">Apply</button><span class="sm-err" id="cerr"></span>
+      </div>
+      <p class="sm-info" id="ainfo" style="margin:10px 0 0"></p>
+
+      <svg id="sv" viewBox="0 0 680 470" role="img" aria-label="Shear on three planes of a cubic cell, with polar plots of the shear modulus against direction"></svg>
+
+      <div class="sm-ang">
+        <span>Angle &theta; in the plane</span>
+        <input type="range" id="th" min="0" max="360" step="1" value="0" aria-label="Angle in the shear plane">
+        <output id="tho">0&deg;</output>
+      </div>
+    </div>
+
+    <div class="sm-cards" id="cards"></div>
+    <p class="sm-note">&theta; = 0&deg; is the horizontal axis of each polar plot and &theta; = 90&deg; the vertical axis. Elastic constants (GPa): Cu 168.4 / 121.4 / 75.4; Nb 246.5 / 133.3 / 28.7; Na 8.13 / 6.80 / 5.10 (Martinson, Phys. Rev. 178, 902 (1969), at 195 K); W 522.4 / 204.4 / 160.6 and V 228.0 / 118.7 / 42.6 (room temperature). Sodium&rsquo;s anisotropy depends strongly on temperature, so use Custom for other data sets.</p>
+  </div>
+
+  <details class="note" style="margin-top:16px">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <h4>Shear modulus in a chosen plane and direction</h4>
+      <p>A cubic crystal has three independent elastic constants, \(C_{11}\), \(C_{12}\) and \(C_{44}\), or equivalently the compliances \(S_{11}\), \(S_{12}\) and \(S_{44}\), found by inverting the stiffness matrix:</p>
+      <div class="eq">\( S_{11}=\dfrac{C_{11}+C_{12}}{(C_{11}-C_{12})(C_{11}+2C_{12})},\qquad S_{12}=\dfrac{-C_{12}}{(C_{11}-C_{12})(C_{11}+2C_{12})},\qquad S_{44}=\dfrac{1}{C_{44}} \)</div>
+      <p>If a shear stress acts on a plane with unit normal \(\mathbf n\) in a direction \(\mathbf m\) lying in that plane, the shear modulus \(G=\tau/\gamma\) for that plane and direction follows by transforming the compliance tensor to axes along \(\mathbf n\) and \(\mathbf m\):</p>
+      <div class="eq">\( \dfrac{1}{G}=S_{44}+4\left(S_{11}-S_{12}-\dfrac{S_{44}}{2}\right)\left(n_1^2m_1^2+n_2^2m_2^2+n_3^2m_3^2\right) \)</div>
+      <p>The direction dependence is carried by the single number \(\Sigma=n_1^2m_1^2+n_2^2m_2^2+n_3^2m_3^2\). For perpendicular unit vectors \(\Sigma\) lies between 0 and \(\tfrac12\), so \(G\) always lies between two values:</p>
+      <div class="eq">\( \Sigma=0:\;\; G=C_{44}\qquad\qquad \Sigma=\tfrac12:\;\; G=C'=\dfrac{C_{11}-C_{12}}{2} \)</div>
+      <p>On a {100} plane \(\mathbf n\) has a single non-zero component, so \(\Sigma=0\) for every direction in the plane: shear on any {100} plane, in any direction, gives \(C_{44}\). Shear on a {110} plane along \(\langle1\bar10\rangle\) gives \(\Sigma=\tfrac12\) and so \(C'\), and along \(\langle100\rangle\) it gives \(C_{44}\). The (011) plot is the only one of the three in which \(G\) varies with direction.</p>
+
+      <h4>The (001) and (111) planes are isotropic in the plane</h4>
+      <p>On a {111} plane \(n_i^2=\tfrac13\) for every component, so \(\Sigma=\tfrac13\sum m_i^2=\tfrac13\) for every direction in the plane. The shear modulus is therefore the same in all directions of a (111) plane, in every cubic crystal:</p>
+      <div class="eq">\( G_{(111)}=\dfrac{3\,C'\,C_{44}}{C'+2C_{44}} \)</div>
+      <p>This is why its polar plot is a circle, whatever the material, just as it is for (001), where the circle has radius \(C_{44}\).</p>
+
+      <h4>Anisotropy and the Voigt average</h4>
+      <p>The Zener ratio \(A=2C_{44}/(C_{11}-C_{12})=C_{44}/C'\) measures how far the crystal is from isotropy. For \(A=1\), \(C_{44}=C'\) and \(G\) is the same for every plane and direction. For \(A\gt1\) (Cu, Na) the stiffest shear is on the {100} planes (\(G=C_{44}\)) and the softest is {110}&lang;1&#772;10&rang; (\(G=C'\)); for \(A\lt1\) (Nb, V) it is the other way round. The grey circle is the Voigt average, which is what a polycrystal with a uniform strain in every grain would give:</p>
+      <div class="eq">\( G_V=\dfrac{C_{11}-C_{12}+3C_{44}}{5}=\dfrac{2C'+3C_{44}}{5} \)</div>
+      <p>It is the same for every plane and direction and lies between the smallest and largest single-crystal values. It is an upper bound for a polycrystal.</p>
+
+      <h4>Link to bonding</h4>
+      <p>If the atoms interact only through central pair forces, the Cauchy relation \(C_{12}=C_{44}\) holds, and for the three cubic lattices the shear modulus averaged in this way is \(G_V=\tfrac{3}{5}K\), where \(K\) is the bulk modulus. The Cauchy pressure \(C_{12}-C_{44}\), shown above the plots, measures how far a real crystal departs from this. A positive value (Cu, Nb, W, V) points to a volume-dependent energy such as the electron gas in a metal, which stiffens the bulk modulus but not the shear modulus. A negative value points to directional bonding, as in covalent solids. Sodium, with a value close to zero, is the closest to a central-force solid among the metals shown.</p>
+      <p>The tool treats the crystal as linear elastic, with the elastic constants as the only input. They vary with temperature, and the polycrystalline moduli of real materials also depend on texture and grain shape.</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt>Stiffness, <i>C</i><sub>ij</sub></dt><dd>The elastic constants relating stress to strain. A cubic crystal has three independent values.</dd>
+        <dt>Compliance, <i>S</i><sub>ij</sub></dt><dd>The inverse relation, strain in terms of stress. The compliance matrix is the inverse of the stiffness matrix.</dd>
+        <dt>Shear plane and direction</dt><dd>The plane (with unit normal <b>n</b>) across which the shear acts, and the direction <b>m</b> in that plane along which one side slides over the other.</dd>
+        <dt><i>C</i>&prime;</dt><dd>(<i>C</i><sub>11</sub> &minus; <i>C</i><sub>12</sub>)/2, the shear modulus for shear on a {110} plane along &lang;1&#772;10&rang;. It is also the stiffness against a tetragonal distortion at constant volume.</dd>
+        <dt>Zener ratio, <i>A</i></dt><dd>2<i>C</i><sub>44</sub>/(<i>C</i><sub>11</sub> &minus; <i>C</i><sub>12</sub>). It equals 1 for an isotropic crystal.</dd>
+        <dt>Voigt average, <i>G</i><sub>V</sub></dt><dd>The shear modulus of a polycrystal found by assuming that every grain has the same strain. It is an upper bound.</dd>
+        <dt>Cauchy relation</dt><dd><i>C</i><sub>12</sub> = <i>C</i><sub>44</sub>, which holds for central pair forces when each atom sits on a centre of symmetry. The Cauchy pressure is <i>C</i><sub>12</sub> &minus; <i>C</i><sub>44</sub>.</dd>
+        <dt>Low-index direction [<i>uvw</i>]</dt><dd>A crystallographic direction with small integer indices. A bar over an index means a negative value.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /* Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved. */
+    const presets = { Cu: [168.4, 121.4, 75.4], Nb: [246.5, 133.3, 28.7], Na: [8.13, 6.80, 5.10], W: [522.4, 204.4, 160.6], V: [228.0, 118.7, 42.6] };
+    let C = presets.Cu.slice(), matName = 'Cu';
+
+    function compliances(c) { const [C11, C12, C44] = c; const d = (C11 - C12) * (C11 + 2 * C12); return [(C11 + C12) / d, -C12 / d, 1 / C44]; }
+    function nrm(v) { const l = Math.hypot(...v); return v.map(x => x / l); }
+    function G(c, n, m) { const [S11, S12, S44] = compliances(c); let g = 0; for (let i = 0; i < 3; i++) g += n[i] * n[i] * m[i] * m[i]; return 1 / (S44 + 4 * (S11 - S12 - S44 / 2) * g); }
+
+    const r2 = Math.SQRT1_2, OB = '̅';
+    const planes = [
+      { name: '(001)', ni: [0, 0, 1], a: [0, 1, 0], al: '[010]', b: [1, 0, 0], bl: '[100]', poly: [[0, 0, .5], [1, 0, .5], [1, 1, .5], [0, 1, .5]] },
+      { name: '(011)', ni: [0, 1, 1], a: [0, r2, -r2], al: '[01' + OB + '1]', b: [1, 0, 0], bl: '[100]', poly: [[0, 1, 0], [1, 1, 0], [1, 0, 1], [0, 0, 1]] },
+      { name: '(111)', ni: [1, 1, 1], a: [0, r2, -r2], al: '[01' + OB + '1]', b: nrm([2, -1, -1]), bl: '[21' + OB + '1' + OB + ']', poly: [[1, .5, 0], [1, 0, .5], [.5, 0, 1], [0, .5, 1], [0, 1, .5], [.5, 1, 0]] }];
+    planes.forEach(p => p.n = nrm(p.ni));
+
+    function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { [a, b] = [b, a % b]; } return a; }
+    function fmt(v) { return '[' + v.map(x => x < 0 ? (-x) + OB : '' + x).join('') + ']'; }
+    planes.forEach(p => {
+      p.cands = [];
+      for (let u = -3; u <= 3; u++) for (let v = -3; v <= 3; v++) for (let w = -3; w <= 3; w++) {
+        if (!u && !v && !w) continue; if (gcd(gcd(u, v), w) !== 1) continue;
+        if (u * p.ni[0] + v * p.ni[1] + w * p.ni[2] !== 0) continue;
+        p.cands.push({ i: [u, v, w], d: nrm([u, v, w]), s: Math.abs(u) + Math.abs(v) + Math.abs(w) });
+      }
+    });
+
+    const cxs = [113, 340, 567], cyc = 105, s = 78, cyp = 330, R = 92;
+    function P(p, k) { const [x, y, z] = p; return [cxs[k] + s * (y - x) * 0.866, cyc + s * ((x + y) / 2 - z)]; }
+    const V = [[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 0], [1, 0, 1], [0, 1, 1], [1, 1, 1]];
+    const E = [[0, 1], [0, 2], [0, 3], [1, 4], [1, 5], [2, 4], [2, 6], [3, 5], [3, 6], [4, 7], [5, 7], [6, 7]];
+    const NS = 'http://www.w3.org/2000/svg', sv = document.getElementById('sv');
+    sv.innerHTML = '<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>';
+    const T = 'style="font-size:12px;fill:var(--text2)"';
+
+    planes.forEach((pl, k) => {
+      let h = '';
+      E.forEach(([i, j]) => {
+        const a = P(V[i], k), b = P(V[j], k), bk = i === 0;
+        h += `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="var(--text2)" stroke-width="${bk ? 0.6 : 1}" ${bk ? 'stroke-dasharray="3 3" opacity="0.6"' : ''}/>`;
+      });
+      h += `<line id="cd${k}" stroke="var(--accent)" stroke-width="2.5" marker-end="url(#ah)" opacity="0.65"/>`;
+      h += `<polygon points="${pl.poly.map(p => P(p, k).join(',')).join(' ')}" fill="var(--plane)" fill-opacity="0.28" stroke="var(--plane-edge)" stroke-width="1"/>`;
+      const c = [.5, .5, .5], ne = c.map((v, i) => v + 0.42 * pl.n[i]), p0 = P(c, k), p1 = P(ne, k);
+      h += `<line x1="${p0[0]}" y1="${p0[1]}" x2="${p1[0]}" y2="${p1[1]}" stroke="var(--plane-edge)" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ah)"/>`;
+      h += `<line id="cn${k}" stroke="var(--near)" stroke-width="1.5" stroke-dasharray="3 2"/><line id="cu${k}" stroke="var(--accent)" stroke-width="2.5" marker-end="url(#ah)"/>`;
+      h += `<text x="${cxs[k]}" y="210" text-anchor="middle" style="font-size:14px;font-weight:500;fill:var(--text)">${pl.name} plane</text>`;
+      const cx = cxs[k];
+      h += `<line x1="${cx - R - 6}" y1="${cyp}" x2="${cx + R + 6}" y2="${cyp}" stroke="var(--muted)" stroke-width="0.5"/><line x1="${cx}" y1="${cyp - R - 6}" x2="${cx}" y2="${cyp + R + 6}" stroke="var(--muted)" stroke-width="0.5"/>`;
+      h += `<text x="${cx + R + 2}" y="${cyp - 6}" text-anchor="end" ${T}>${pl.al}</text><text x="${cx + 5}" y="${cyp - R + 4}" ${T}>${pl.bl}</text>`;
+      h += `<circle id="vg${k}" cx="${cx}" cy="${cyp}" fill="none" stroke="var(--voigt)" stroke-width="1.5"/>`;
+      h += `<path id="full${k}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="0.1 5" stroke-linecap="round"/><path id="tr${k}" fill="none" stroke="var(--accent)" stroke-width="3"/>`;
+      h += `<line id="pn${k}" stroke="var(--near)" stroke-width="1.2" stroke-dasharray="4 3"/><line id="pv${k}" stroke="var(--accent)" stroke-width="2" marker-end="url(#ah)"/><circle id="pd${k}" r="4" fill="var(--accent)"/>`;
+      const g = document.createElementNS(NS, 'g'); g.innerHTML = h; sv.appendChild(g);
+    });
+    const leg = document.createElementNS(NS, 'g');
+    leg.innerHTML = `<line x1="40" y1="455" x2="65" y2="455" stroke="var(--accent)" stroke-width="2"/><text x="71" y="459" ${T}>G(θ); dotted = full curve</text><line x1="262" y1="455" x2="287" y2="455" stroke="var(--near)" stroke-width="1.5" stroke-dasharray="4 3"/><text x="293" y="459" ${T}>Nearest low-index [uvw]</text><line x1="470" y1="455" x2="495" y2="455" stroke="var(--voigt)" stroke-width="1.5"/><text x="501" y="459" ${T}>Voigt average G<tspan baseline-shift="sub" style="font-size:10px">V</tspan></text>`;
+    sv.appendChild(leg);
+
+    const cards = document.getElementById('cards');
+    planes.forEach((pl, k) => {
+      const d = document.createElement('div'); d.className = 'sm-card';
+      d.innerHTML = `<div class="nm"><b>${pl.name}</b></div><div>G(&theta;): <b id="g${k}"></b> GPa</div><div>Range in plane: <span id="rg${k}" style="color:#fff"></span> GPa</div><div>Nearest: <b id="nd${k}"></b> <span id="na${k}"></span></div><div>G there: <span id="ng${k}" style="color:#fff"></span> GPa</div><div>Voigt G<sub>V</sub>: <span id="gv${k}" style="color:#fff"></span> GPa</div>`;
+      cards.appendChild(d);
+    });
+
+    function mdir(pl, r) { return pl.a.map((v, i) => Math.cos(r) * v + Math.sin(r) * pl.b[i]); }
+    function L(id, a, b) { const e = document.getElementById(id); e.setAttribute('x1', a[0]); e.setAttribute('y1', a[1]); e.setAttribute('x2', b[0]); e.setAttribute('y2', b[1]); }
+    let Gmax = 1;
+
+    function redrawMaterial() {
+      const [C11, C12, C44] = C, A = 2 * C44 / (C11 - C12), Cp = (C11 - C12) / 2, GV = (C11 - C12 + 3 * C44) / 5;
+      document.getElementById('ainfo').innerHTML = `<i>A</i> = ${A.toFixed(2)} &nbsp;|&nbsp; <i>C</i>&prime; = ${Cp.toFixed(1)} GPa &nbsp;|&nbsp; <i>C</i><sub>44</sub> = ${C44.toFixed(1)} GPa &nbsp;|&nbsp; <i>G</i><sub>V</sub> = ${GV.toFixed(1)} GPa &nbsp;|&nbsp; Cauchy pressure <i>C</i><sub>12</sub> &minus; <i>C</i><sub>44</sub> = ${(C12 - C44).toFixed(1)} GPa`;
+      ['Cu', 'Nb', 'Na', 'W', 'V', 'Custom'].forEach(n => document.getElementById('b' + n).setAttribute('aria-pressed', String(n === matName)));
+      Gmax = 0; planes.forEach(pl => { for (let t = 0; t < 360; t += 2) Gmax = Math.max(Gmax, G(C, pl.n, mdir(pl, t * Math.PI / 180))); });
+      planes.forEach((pl, k) => {
+        let d = '', gmin = Infinity, gmx = 0;
+        for (let t = 0; t <= 360; t += 2) {
+          const r = t * Math.PI / 180, gv = G(C, pl.n, mdir(pl, r)), g = gv / Gmax * R;
+          gmin = Math.min(gmin, gv); gmx = Math.max(gmx, gv);
+          d += (t ? 'L' : 'M') + (cxs[k] + g * Math.cos(r)).toFixed(1) + ' ' + (cyp - g * Math.sin(r)).toFixed(1);
+        }
+        document.getElementById('full' + k).setAttribute('d', d);
+        document.getElementById('vg' + k).setAttribute('r', (GV / Gmax * R).toFixed(2));
+        document.getElementById('gv' + k).textContent = GV.toFixed(1);
+        document.getElementById('rg' + k).textContent = Math.abs(gmx - gmin) < 0.05 ? gmx.toFixed(1) + ' (isotropic in plane)' : gmin.toFixed(1) + ' to ' + gmx.toFixed(1);
+      });
+      upd();
+    }
+
+    function upd() {
+      const t = +document.getElementById('th').value; document.getElementById('tho').textContent = t + '°'; const r = t * Math.PI / 180;
+      planes.forEach((pl, k) => {
+        const m = mdir(pl, r), cc = [.5, .5, .5], off = 0.17, h = 0.2;
+        const up = cc.map((v, i) => v + off * pl.n[i]), dn = cc.map((v, i) => v - off * pl.n[i]);
+        L('cu' + k, P(up.map((v, i) => v - h * m[i]), k), P(up.map((v, i) => v + h * m[i]), k));
+        L('cd' + k, P(dn.map((v, i) => v + h * m[i]), k), P(dn.map((v, i) => v - h * m[i]), k));
+        let best = null;
+        pl.cands.forEach(q => {
+          const dt = q.d[0] * m[0] + q.d[1] * m[1] + q.d[2] * m[2]; const ang = Math.acos(Math.max(-1, Math.min(1, dt)));
+          if (!best || ang < best.ang - 1e-9 || (Math.abs(ang - best.ang) < 1e-9 && q.s < best.q.s)) best = { q, ang };
+        });
+        const qd = best.q.d; L('cn' + k, P(cc, k), P(cc.map((v, i) => v + 0.45 * qd[i]), k));
+        const g = G(C, pl.n, m), gr = g / Gmax * R, cx = cxs[k], tip = [cx + gr * Math.cos(r), cyp - gr * Math.sin(r)];
+        L('pv' + k, [cx, cyp], tip); const pd = document.getElementById('pd' + k); pd.setAttribute('cx', tip[0]); pd.setAttribute('cy', tip[1]);
+        let d = ''; for (let u = 0; u <= t; u++) { const rr = u * Math.PI / 180, gg = G(C, pl.n, mdir(pl, rr)) / Gmax * R; d += (u ? 'L' : 'M') + (cx + gg * Math.cos(rr)).toFixed(1) + ' ' + (cyp - gg * Math.sin(rr)).toFixed(1); }
+        document.getElementById('tr' + k).setAttribute('d', d);
+        const qa = Math.atan2(qd[0] * pl.b[0] + qd[1] * pl.b[1] + qd[2] * pl.b[2], qd[0] * pl.a[0] + qd[1] * pl.a[1] + qd[2] * pl.a[2]);
+        L('pn' + k, [cx, cyp], [cx + (R + 4) * Math.cos(qa), cyp - (R + 4) * Math.sin(qa)]);
+        document.getElementById('g' + k).textContent = g.toFixed(1);
+        document.getElementById('nd' + k).textContent = fmt(best.q.i);
+        document.getElementById('na' + k).textContent = '(Δ = ' + (best.ang * 180 / Math.PI).toFixed(1) + '°)';
+        document.getElementById('ng' + k).textContent = G(C, pl.n, qd).toFixed(1);
+      });
+    }
+
+    function setPreset(n) { matName = n; C = presets[n].slice(); document.getElementById('customBox').style.display = 'none'; redrawMaterial(); }
+    ['Cu', 'Nb', 'Na', 'W', 'V'].forEach(n => document.getElementById('b' + n).onclick = () => setPreset(n));
+    document.getElementById('bCustom').onclick = () => { document.getElementById('customBox').style.display = 'flex'; };
+    document.getElementById('apply').onclick = () => {
+      const c = ['c11', 'c12', 'c44'].map(id => parseFloat(document.getElementById(id).value)); const err = document.getElementById('cerr');
+      if (c.some(x => !isFinite(x))) { err.textContent = 'Enter all three constants.'; return; }
+      const [C11, C12, C44] = c;
+      if (!(C44 > 0 && C11 > Math.abs(C12) && C11 + 2 * C12 > 0)) { err.textContent = 'Not mechanically stable: need C44 > 0, C11 > |C12|, C11 + 2C12 > 0.'; return; }
+      err.textContent = ''; matName = 'Custom'; C = c; redrawMaterial();
+    };
+    ['c11', 'c12', 'c44'].forEach(id => document.getElementById(id).addEventListener('input', () => { document.getElementById('cerr').textContent = ''; }));
+    document.getElementById('th').addEventListener('input', upd);
+
+    let run = false, last = 0; const pb = document.getElementById('play');
+    function step(ts) { if (!run) return; if (ts - last > 30) { last = ts; const sl = document.getElementById('th'); sl.value = (+sl.value + 1) % 361; upd(); } requestAnimationFrame(step); }
+    pb.onclick = () => { run = !run; pb.innerHTML = run ? '&#10074;&#10074; Pause' : '&#9654; Play'; if (run) requestAnimationFrame(step); };
+
+    /* ---- save the current view as a PNG ---- */
+    const PAL = {
+      dark:  { bg: '#0d1117', ink: '#e6edf3', sub: '#9aa4af', vars: { '--text': '#e6edf3', '--text2': '#a9b3bf', '--muted': '#6e7681', '--near': '#8b949e', '--voigt': '#7d8590', '--accent': '#fb923c', '--plane': '#8b7cf0', '--plane-edge': '#b4a9f5' } },
+      light: { bg: '#ffffff', ink: '#1f2328', sub: '#57606a', vars: { '--text': '#1f2328', '--text2': '#57606a', '--muted': '#8c959f', '--near': '#6e7781', '--voigt': '#8c959f', '--accent': '#d9480f', '--plane': '#6f5fe0', '--plane-edge': '#4c3fc0' } } };
+    function savePNG() {
+      const pal = PAL[document.getElementById('imgBg').value], scale = 3, W = 680, H = 470, head = 78;
+      const c = sv.cloneNode(true);
+      c.setAttribute('width', W); c.setAttribute('height', H); c.setAttribute('xmlns', NS);
+      c.setAttribute('style', 'font-family:Inter,"Segoe UI",Helvetica,Arial,sans-serif');
+      let str = new XMLSerializer().serializeToString(c).replace(/var\((--[a-z0-9-]+)\)/g, (m, v) => pal.vars[v] || pal.ink);
+      const [C11, C12, C44] = C, A = 2 * C44 / (C11 - C12), GV = (C11 - C12 + 3 * C44) / 5, th = document.getElementById('th').value;
+      const img = new Image();
+      img.onload = () => {
+        const cv = document.createElement('canvas'); cv.width = W * scale; cv.height = (H + head) * scale;
+        const g = cv.getContext('2d'); g.scale(scale, scale);
+        g.fillStyle = pal.bg; g.fillRect(0, 0, W, H + head);
+        g.fillStyle = pal.ink; g.font = '600 17px Inter, "Segoe UI", Arial, sans-serif'; g.textAlign = 'left';
+        g.fillText('Shear modulus of a cubic crystal: ' + (matName === 'Custom' ? 'custom constants' : matName), 20, 30);
+        g.fillStyle = pal.sub; g.font = '13px Inter, "Segoe UI", Arial, sans-serif';
+        g.fillText('C\u2081\u2081 = ' + C11 + ', C\u2081\u2082 = ' + C12 + ', C\u2084\u2084 = ' + C44 + ' GPa;  A = ' + A.toFixed(2) + ';  Voigt G = ' + GV.toFixed(1) + ' GPa;  \u03B8 = ' + th + '\u00B0', 20, 54);
+        g.drawImage(img, 0, head, W, H);
+        cv.toBlob(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'shear_modulus_' + matName + '_theta' + th + '.png'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }, 'image/png');
+      };
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(str);
+    }
+    document.getElementById('savePng').onclick = savePNG;
+
+    setPreset('Cu');
+  </script>
+</body>
+</html>

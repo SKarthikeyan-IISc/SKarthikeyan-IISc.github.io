@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Lennard-Jones Potential Explorer | Teaching Tools</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    #plot-panel { flex: 1 1 520px; aspect-ratio: 4 / 3; }
+    #plot { width: 100%; height: 100%; }
+    #info-panel { flex: 0 0 350px; min-width: 300px; box-sizing: border-box; }
+    .taylor-box { margin-top: 15px; padding-top: 12px; border-top: 1px dashed var(--line); font-size: 0.82rem; color: var(--ink-soft); line-height: 1.5; width: 100%; }
+    #extra-plots { display: none; flex-wrap: wrap; gap: 16px; }
+    #extra-plots .panel { flex: 1 1 360px; aspect-ratio: 4 / 3; }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Lennard-Jones Potential Explorer</h1>
+  <p class="subtitle">How the interatomic potential between two atoms depends on &epsilon; and &sigma;, and how the bottom of the well is approximated by a parabola.</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>Well depth (&epsilon;):</strong> the &epsilon; slider sets the energy scale, that is, how strongly the two atoms bind.</li>
+        <li><strong>Atomic diameter (&sigma;):</strong> the &sigma; slider shifts the distance at which the potential crosses zero, and with it the equilibrium bond length.</li>
+        <li><strong>Harmonic fit:</strong> the red dashed parabola touches the potential at its minimum (<i>r</i><sub>0</sub>). Its curvature is the stiffness <i>k</i>, shown in the panel on the right.</li>
+        <li><strong>Curvature plots:</strong> tick <em>Show curvature plots</em> to see how <i>k</i> varies with &epsilon; and with &sigma;.</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="tool">
+    <div class="panel wide" style="padding: 12px 20px;">
+      <div class="ctl-grid">
+        <div class="ctl">
+          <label for="epsilonSlider">&epsilon;</label>
+          <input id="epsilonSlider" type="range" min="1" max="4" step="0.1" value="1">
+          <span id="epsilonVal" class="val">1</span>
+        </div>
+        <div class="ctl">
+          <label for="sigmaSlider">&sigma;</label>
+          <input id="sigmaSlider" type="range" min="1" max="4" step="0.01" value="1.782">
+          <span id="sigmaVal" class="val">1.782</span>
+        </div>
+        <div class="ctl">
+          <label class="toggle-group"><input id="toggleCurvature" type="checkbox"> Show curvature plots</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div id="plot-panel" class="panel"><div id="plot"></div></div>
+
+      <div id="info-panel" class="panel">
+        <h3>Values at the potential minimum</h3>
+        <div class="metrics">
+          <div class="metric"><span>Equilibrium distance (r<sub>0</sub>)</span><b id="r0Val"></b></div>
+          <div class="metric"><span>Minimum potential V(r<sub>0</sub>)</span><b id="V0Val"></b></div>
+          <div class="metric"><span>Curvature (k)</span><b id="kVal"></b></div>
+        </div>
+        <div class="taylor-box">
+          <strong style="color: var(--amber);">Taylor expansion about \(r_0\):</strong>
+          <div class="eq">\( V(r) = V_0 + V'_0(r-r_0) + \tfrac{1}{2}V''_0(r-r_0)^2 + \dots \)</div>
+          Since \(V'(r_0) = 0\), truncating at second order gives
+          <div class="eq">\( V(r) \approx V(r_0) + \tfrac{1}{2}k(r - r_0)^2 \)</div>
+          where the curvature is
+          <div class="eq" style="color: var(--green);">\( k = V''(r_0) = \dfrac{72\epsilon}{r_0^2} \)</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="extra-plots">
+      <div class="panel"><div id="plot-epsilon" style="width:100%; height:100%;"></div></div>
+      <div class="panel"><div id="plot-sigma" style="width:100%; height:100%;"></div></div>
+    </div>
+  </div>
+
+  <details class="note">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <p>Two neutral atoms attract each other at long range, through fluctuating dipoles (van der Waals attraction, varying as \(r^{-6}\)), and repel each other at short range because their electron clouds cannot overlap (Pauli repulsion). The Lennard-Jones potential models both with two terms:</p>
+      <div class="eq">\( V(r) = 4\epsilon\left[\left(\dfrac{\sigma}{r}\right)^{12} - \left(\dfrac{\sigma}{r}\right)^{6}\right] \)</div>
+      <p>The \(r^{-12}\) form of the repulsion is chosen for convenience, since it is the square of the attractive term. It is not derived from first principles.</p>
+      <p>The force is \(F = -dV/dr\). It vanishes at the minimum of the potential, which gives the equilibrium separation and the binding energy:</p>
+      <div class="eq">\( r_0 = 2^{1/6}\sigma \approx 1.122\,\sigma, \qquad V(r_0) = -\epsilon \)</div>
+      <p>Close to \(r_0\) the potential is nearly a parabola, so the bond behaves like a linear spring of stiffness \(k = V''(r_0) = 72\epsilon/r_0^2\). This is the origin of Hooke's law and of the elastic modulus: stiffer bonds, from a deeper well or a smaller atom, give a stiffer solid. The parabola is symmetric, but the real potential is not. It rises steeply on the compressive side and flattens on the tensile side, which is the origin of thermal expansion. The harmonic approximation is good only for small displacements about \(r_0\).</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt>&epsilon;</dt><dd>Depth of the potential well. The energy needed to separate the pair from the equilibrium distance to infinity.</dd>
+        <dt>&sigma;</dt><dd>Distance at which the potential is zero. It sets the effective size of the atom.</dd>
+        <dt><i>r</i><sub>0</sub></dt><dd>Equilibrium separation, the position of the minimum of V(r).</dd>
+        <dt><i>V</i>(<i>r</i><sub>0</sub>)</dt><dd>Value of the potential at the minimum, equal to &minus;&epsilon;.</dd>
+        <dt><i>k</i></dt><dd>Curvature of the potential at the minimum, V&Prime;(<i>r</i><sub>0</sub>). It is the bond stiffness in the harmonic approximation.</dd>
+        <dt>Harmonic approximation</dt><dd>Replacing the potential near its minimum by a parabola, the first non-trivial term of a Taylor series.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /**
+     * ==========================================================================
+     * Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+     * All Rights Reserved.
+     *
+     * This script and its underlying algorithms are owned solely by
+     * Prof. S. Karthikeyan. Any unauthorized reproduction or distribution
+     * of this code without explicit written consent is strictly forbidden.
+     * ==========================================================================
+     */
+
+    const epsilonSlider = document.getElementById('epsilonSlider');
+    const sigmaSlider = document.getElementById('sigmaSlider');
+    const epsilonVal = document.getElementById('epsilonVal');
+    const sigmaVal = document.getElementById('sigmaVal');
+    const plotDiv = document.getElementById('plot');
+
+    const r0Span = document.getElementById('r0Val');
+    const V0Span = document.getElementById('V0Val');
+    const kSpan = document.getElementById('kVal');
+    const toggleCurvature = document.getElementById('toggleCurvature');
+    const extraPlots = document.getElementById('extra-plots');
+
+    function ljPotential(r, epsilon, sigma) {
+      const sr6 = Math.pow(sigma / r, 6);
+      return 4 * epsilon * (sr6 * sr6 - sr6);
+    }
+
+    function updatePlot() {
+      const epsilon = parseFloat(epsilonSlider.value);
+      const sigma = parseFloat(sigmaSlider.value);
+      epsilonVal.textContent = epsilon;
+      sigmaVal.textContent = sigma;
+
+      const r = [];
+      const V = [];
+      for (let i = 0; i <= 500; i++) {
+        const ri = 1 + i * (5 - 1) / 500;
+        r.push(ri);
+        V.push(ljPotential(ri, epsilon, sigma));
+      }
+
+      const r0 = Math.pow(2, 1 / 6) * sigma;
+      const V0 = ljPotential(r0, epsilon, sigma);
+      const k = 72 * epsilon / (r0 * r0);
+
+      r0Span.textContent = r0.toFixed(3);
+      V0Span.textContent = V0.toFixed(3);
+      kSpan.textContent = k.toFixed(3);
+
+      const parabolaR = [];
+      const parabolaV = [];
+      const rMin = Math.max(1, r0 - 0.5 * sigma);
+      const rMax = Math.min(5, r0 + 0.5 * sigma);
+      for (let i = 0; i <= 200; i++) {
+        const ri = rMin + i * (rMax - rMin) / 200;
+        parabolaR.push(ri);
+        parabolaV.push(V0 + 0.5 * k * Math.pow(ri - r0, 2));
+      }
+
+      const traceLJ = { x: r, y: V, mode: 'lines', name: 'LJ potential', line: { color: '#60a5fa', width: 2.5 } };
+      const traceParabola = { x: parabolaR, y: parabolaV, mode: 'lines', name: 'Parabolic fit', line: { dash: 'dash', color: '#f87171', width: 2 } };
+      const tracePoint = {
+        x: [r0], y: [V0], mode: 'markers+text', text: ['k = ' + k.toFixed(3)], textposition: 'bottom center',
+        name: 'Minimum', marker: { color: '#eab308', size: 9 }
+      };
+
+      const layout = TOOL.plotLayout({
+        title: { text: 'Lennard-Jones potential with parabolic fit', font: { size: 14 } },
+        xaxis: { title: 'r', range: [1, 5] },
+        yaxis: { title: 'V(r)', range: [-4.5, 1] },
+        legend: { orientation: 'h', y: -0.2 }
+      });
+
+      Plotly.newPlot(plotDiv, [traceLJ, traceParabola, tracePoint], layout, { responsive: true, displayModeBar: false });
+
+      if (toggleCurvature.checked) updateCurvaturePlots(sigma, epsilon);
+    }
+
+    function updateCurvaturePlots(sigma, epsilon) {
+      const r0 = Math.pow(2, 1 / 6) * sigma;
+      const currentK = 72 * epsilon / (r0 * r0);
+
+      const epsVals = [], kEps = [];
+      for (let e = 1; e <= 4.0001; e += 0.05) {
+        epsVals.push(e);
+        kEps.push(72 * e / (r0 * r0));
+      }
+      const markerEps = {
+        x: [epsilon], y: [currentK], mode: 'markers+text', text: ['k = ' + currentK.toFixed(2)],
+        textposition: 'top center', marker: { color: '#f87171', size: 8 }, name: 'Current'
+      };
+      Plotly.newPlot('plot-epsilon',
+        [{ x: epsVals, y: kEps, mode: 'lines', name: 'k vs epsilon', line: { color: '#34d399' } }, markerEps],
+        TOOL.plotLayout({ title: { text: 'Curvature vs ε', font: { size: 13 } }, xaxis: { title: 'ε' }, yaxis: { title: 'k', range: [0, 300] }, showlegend: false }),
+        { responsive: true, displayModeBar: false });
+
+      const sigVals = [], kSig = [];
+      for (let s = 1; s <= 4.0001; s += 0.05) {
+        const rr = Math.pow(2, 1 / 6) * s;
+        sigVals.push(s);
+        kSig.push(72 * epsilon / (rr * rr));
+      }
+      const markerSig = {
+        x: [sigma], y: [currentK], mode: 'markers+text', text: ['k = ' + currentK.toFixed(2)],
+        textposition: 'top center', marker: { color: '#f87171', size: 8 }, name: 'Current'
+      };
+      Plotly.newPlot('plot-sigma',
+        [{ x: sigVals, y: kSig, mode: 'lines', name: 'k vs sigma', line: { color: '#c084fc' } }, markerSig],
+        TOOL.plotLayout({ title: { text: 'Curvature vs σ', font: { size: 13 } }, xaxis: { title: 'σ' }, yaxis: { title: 'k', range: [0, 300] }, showlegend: false }),
+        { responsive: true, displayModeBar: false });
+    }
+
+    toggleCurvature.addEventListener('change', () => {
+      if (toggleCurvature.checked) {
+        extraPlots.style.display = 'flex';
+        updateCurvaturePlots(parseFloat(sigmaSlider.value), parseFloat(epsilonSlider.value));
+      } else {
+        extraPlots.style.display = 'none';
+      }
+    });
+
+    epsilonSlider.addEventListener('input', updatePlot);
+    sigmaSlider.addEventListener('input', updatePlot);
+
+    updatePlot();
+  </script>
+</body>
+</html>

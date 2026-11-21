@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Free Volume in Amorphous and Crystalline Packings | Teaching Tools</title>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    #canvas, #histCanvas { cursor: default; max-width: 100%; height: auto; }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Free Volume in Amorphous and Crystalline Packings</h1>
+  <p class="subtitle">A two-dimensional model: the Voronoi cell of each atom, minus the area of the atom, is its free volume. Compare a random (amorphous) arrangement with square and hexagonal crystals.</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>Structure:</strong> choose <em>Amorphous</em>, <em>Square</em> or <em>Hexagonal</em>, then press <em>Generate</em>. Each press of Generate on Amorphous makes a new random packing.</li>
+        <li><strong>Average distance:</strong> sets the mean spacing of the atoms in the amorphous packing (a larger value means fewer atoms and more free volume). It does not affect the two crystals.</li>
+        <li><strong>Show Voronoi cells:</strong> colours each cell from blue (smallest cell) to red (largest cell).</li>
+        <li><strong>Histogram:</strong> the distribution of free volume per atom. A crystal gives a single spike; the amorphous packing gives a broad distribution.</li>
+        <li>The atomic density N/A and the number of atoms are printed below the plots.</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="tool">
+    <div class="panel wide" style="padding: 12px 20px;">
+      <div class="ctl-grid">
+        <div class="ctl"><label for="structure">Structure</label>
+          <select id="structure">
+            <option value="amorphous">Amorphous</option>
+            <option value="square">Square</option>
+            <option value="hex">Hexagonal</option>
+          </select>
+          <button type="button" id="genBtn">Generate</button>
+        </div>
+        <div class="ctl"><label for="avgDist">Average distance (amorphous)</label><input type="range" id="avgDist" min="30" max="50" step="1" value="30"><span id="avgVal" class="val">30</span></div>
+        <div class="ctl"><label class="toggle-group"><input type="checkbox" id="showVoronoi"> Show Voronoi cells</label></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="panel"><h3>Atoms and Voronoi cells</h3><canvas id="canvas" width="600" height="600"></canvas></div>
+      <div class="panel"><h3>Free volume per atom</h3><canvas id="histCanvas" width="600" height="300"></canvas>
+        <div class="status" id="density" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="note">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <p>In a crystal every atom has the same environment, so every atom has the same share of space. In a glass the atoms are packed at random, so some atoms have more room than others. The <em>Voronoi cell</em> of an atom is the region of space that is closer to that atom than to any other, and it divides the whole volume (here, the area) among the atoms with no gaps. The free volume of an atom is the part of its cell that its own hard core does not occupy:</p>
+      <div class="eq">\( v_f = A_\text{Voronoi} - \pi r^2 \)</div>
+      <p>where \(r\) is the radius of the atom (fixed at 15 pixel units here). The sum of all Voronoi areas is the area of the box, so the average free volume is set by the density alone; what differs between structures is the <em>spread</em>. A hexagonal arrangement is the densest packing of discs in two dimensions, and its cells are regular hexagons with the smallest possible area, \(2\sqrt{3}\,r^2\).</p>
+      <p>The spread of free volume matters because atoms in the larger cells can move more easily. In theories of the glass transition and of viscous flow (the free-volume models of Cohen and Turnbull, and of Spaepen), plastic flow in a metallic glass takes place by atomic jumps into regions where the local free volume exceeds a critical value. The tail of the histogram is the population of such sites.</p>
+      <p>The cells are computed on a periodic box by tiling the packing 5&times;5 times, so atoms at the edge are not given artificially large cells.</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt>Amorphous</dt><dd>A structure with no long-range order.</dd>
+        <dt>Voronoi cell</dt><dd>The set of points closer to a given atom than to any other atom.</dd>
+        <dt>Free volume</dt><dd>The area (in 2D) of the Voronoi cell not occupied by the atom itself.</dd>
+        <dt>Periodic boundary</dt><dd>The box is repeated in all directions, so an atom leaving one side re-enters from the opposite side.</dd>
+        <dt>Atomic density</dt><dd>Number of atoms per unit area, N/A.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /* Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved. */
+    const W = 600, H = 600;
+    const r = 15;
+
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const histCanvas = document.getElementById("histCanvas");
+    const histCtx = histCanvas.getContext("2d");
+
+    let basePoints = [], vorAreas = [], allPoints = [], cells = [], freeVolumes = [];
+
+    function generate() {
+      const type = document.getElementById("structure").value;
+      basePoints = [];
+      const spacing = 2 * r;
+
+      if (type === "square") {
+        const nx = Math.floor(W / spacing), ny = Math.floor(H / spacing);
+        for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) basePoints.push([i * spacing, j * spacing]);
+      } else if (type === "hex") {
+        const dx = spacing, dy = Math.sqrt(3) / 2 * dx;
+        const nx = Math.floor(W / dx), ny = Math.floor(H / dy);
+        for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) basePoints.push([i * dx + (j % 2) * dx / 2, j * dy]);
+      } else {
+        const avg = parseFloat(document.getElementById("avgDist").value);
+        const targetN = Math.floor(W * H / (avg * avg * 0.9));
+        let attempts = 0;
+        while (basePoints.length < targetN && attempts < targetN * 500) {
+          const x = Math.random() * W, y = Math.random() * H;
+          let ok = true;
+          for (const p of basePoints) {
+            if (Math.hypot(x - p[0], y - p[1]) < 0.9 * avg) { ok = false; break; }
+          }
+          if (ok) basePoints.push([x, y]);
+          attempts++;
+        }
+      }
+
+      // 5x5 tiling of the box, so the central tile has periodic neighbours
+      allPoints = [];
+      const shifts = [-2, -1, 0, 1, 2];
+      for (const sx of shifts) for (const sy of shifts) for (const p of basePoints) allPoints.push([p[0] + sx * W, p[1] + sy * H]);
+
+      const delaunay = d3.Delaunay.from(allPoints);
+      const vor = delaunay.voronoi([-2 * W, -2 * H, 3 * W, 3 * H]);
+
+      cells = []; freeVolumes = []; vorAreas = [];
+      const n = basePoints.length;
+      const offset = 12 * n; // index of the central tile (2,2)
+      for (let i = 0; i < n; i++) {
+        const poly = vor.cellPolygon(offset + i);
+        if (!poly) continue;
+        cells.push(poly);
+        const area = polygonArea(poly);
+        vorAreas.push(area);
+        freeVolumes.push(area - Math.PI * r * r);
+      }
+      drawHistogram();
+      updateDensity();
+      render();
+    }
+
+    function render() {
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, W, H);
+      if (document.getElementById("showVoronoi").checked && vorAreas.length) {
+        const minA = Math.min(...vorAreas), maxA = Math.max(...vorAreas);
+        for (let i = 0; i < cells.length; i++) {
+          const poly = cells[i];
+          const t = (vorAreas[i] - minA) / (maxA - minA + 1e-6);
+          ctx.beginPath();
+          ctx.moveTo(poly[0][0], poly[0][1]);
+          for (let j = 1; j < poly.length; j++) ctx.lineTo(poly[j][0], poly[j][1]);
+          ctx.closePath();
+          ctx.fillStyle = "rgb(" + Math.floor(255 * t) + ",0," + Math.floor(255 * (1 - t)) + ")";
+          ctx.fill();
+          ctx.strokeStyle = "#ffffff";
+          ctx.stroke();
+        }
+      }
+      for (const p of basePoints) {
+        ctx.beginPath();
+        ctx.arc(p[0], p[1], r, 0, 2 * Math.PI);
+        ctx.fillStyle = "#f1f5f9";
+        ctx.fill();
+      }
+    }
+
+    function drawHistogram() {
+      const w = histCanvas.width, h = histCanvas.height;
+      histCtx.clearRect(0, 0, w, h);
+      const binSize = 25, maxRange = 3000, bins = Math.floor(maxRange / binSize);
+      const hist = new Array(bins).fill(0);
+      for (const v of freeVolumes) {
+        const i = Math.floor(v / binSize);
+        if (i >= 0 && i < bins) hist[i]++;
+      }
+      const max = Math.max(1, ...hist);
+      const x0 = 50, x1 = 580, y0 = 250, plotW = x1 - x0;
+      histCtx.strokeStyle = "#8b949e"; histCtx.fillStyle = "#c9d1d9"; histCtx.font = "12px sans-serif";
+      histCtx.beginPath(); histCtx.moveTo(x0, 20); histCtx.lineTo(x0, y0); histCtx.lineTo(x1, y0); histCtx.stroke();
+      // x ticks every 500 area units
+      histCtx.textAlign = "center";
+      for (let v = 0; v <= maxRange; v += 500) {
+        const x = x0 + (v / maxRange) * plotW;
+        histCtx.beginPath(); histCtx.moveTo(x, y0); histCtx.lineTo(x, y0 + 4); histCtx.stroke();
+        histCtx.fillText(v, x, y0 + 18);
+      }
+      histCtx.fillText("Free volume per atom (area units)", (x0 + x1) / 2, y0 + 38);
+      histCtx.textAlign = "right";
+      histCtx.fillText(max, x0 - 6, 30); histCtx.fillText("0", x0 - 6, y0 + 4);
+      histCtx.save(); histCtx.translate(14, 140); histCtx.rotate(-Math.PI / 2); histCtx.textAlign = "center";
+      histCtx.fillText("Number of atoms", 0, 0); histCtx.restore();
+      histCtx.fillStyle = "#60a5fa";
+      const bw = plotW / bins;
+      for (let i = 0; i < bins; i++) {
+        const bh = (y0 - 25) * hist[i] / max;
+        histCtx.fillRect(x0 + i * bw, y0 - bh, Math.max(bw - 1, 1), bh);
+      }
+    }
+
+    function updateAvg() { document.getElementById("avgVal").textContent = document.getElementById("avgDist").value; }
+    function updateDensity() {
+      const N = basePoints.length, rho = N / (W * H);
+      document.getElementById("density").textContent = "Atomic density (N/A): " + rho.toExponential(3) + "   |   N = " + N;
+    }
+    function polygonArea(poly) {
+      let a = 0;
+      for (let i = 0; i < poly.length; i++) {
+        const j = (i + 1) % poly.length;
+        a += poly[i][0] * poly[j][1] - poly[j][0] * poly[i][1];
+      }
+      return Math.abs(a / 2);
+    }
+
+    document.getElementById("genBtn").addEventListener("click", generate);
+    document.getElementById("avgDist").addEventListener("input", updateAvg);
+    document.getElementById("showVoronoi").addEventListener("change", render);
+    generate();
+  </script>
+</body>
+</html>

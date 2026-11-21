@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Radius Ratio and Coordination Number: Discs Packed around a Central Atom | Teaching Tools</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    #rrCanvas { width: 100%; max-width: 500px; aspect-ratio: 1 / 1; height: auto; background: #000; border: 1px solid var(--line); border-radius: 6px; }
+    .lab-blue { color: #60a5fa; font-weight: 700; }
+    .lab-orange { color: #fb923c; font-weight: 700; }
+    .ctl label.wide { min-width: 11.5em; }
+    .toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.9rem; color: #ddd; }
+    .toggle input { width: 18px; height: 18px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Radius Ratio and Coordination Number: Discs Packed around a Central Atom</h1>
+  <p class="subtitle">How many neighbouring atoms of radius <i>R</i><sub>s</sub> can touch a central atom of radius <i>R</i><sub>c</sub>? The answer depends only on the ratio of the radii, and it sets the coordination number.</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>Radius sliders.</strong> Change the radius of the central atom (blue) and of the satellite atoms (orange). The radii are relative values, and the drawing is scaled to fit. The satellites are packed around the central atom in a ring, each touching it, as many as will fit without overlapping.</li>
+        <li><strong>Readouts.</strong> The radius ratio is <i>R</i><sub>c</sub>/<i>R</i><sub>s</sub>. The coordination number is the number of satellites in the ring. The panel also gives the smallest ratio at which that number fits, and the ratio at which one more satellite fits.</li>
+        <li><strong>Crystallographic restriction.</strong> Tick the box to allow only rings of 2, 3, 4 or 6 satellites, the only ones that a periodic crystal can have (see the physics note). The number is rounded down to the nearest allowed value, and gaps open up in the ring.</li>
+        <li><strong>Plot.</strong> The green staircase is the coordination number against the radius ratio on a logarithmic axis. The dashed amber staircase is the same when only 2, 3, 4 and 6 are allowed. The red cross is the present setting, and the dashed vertical line marks equal radii.</li>
+        <li>Start with equal radii: six satellites fit exactly. Then move the satellite radius up and down, and watch the number step down through 5, 4, 3 and 2, or up through 7, 8, 9 and beyond.</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="tool">
+    <div class="row">
+      <div class="panel">
+        <h3>Satellites packed around a central atom</h3>
+        <canvas id="rrCanvas" width="500" height="500" role="img" aria-label="A central disc surrounded by a ring of touching satellite discs"></canvas>
+      </div>
+
+      <div class="panel plain">
+        <h3>Radii</h3>
+        <div class="ctl-stack">
+          <div class="ctl"><label class="wide lab-blue" for="rc">Central atom, <i>R</i><sub>c</sub></label><input type="range" id="rc" min="5" max="100" step="1" value="60"><span class="val" id="rcV">60</span></div>
+          <div class="ctl"><label class="wide lab-orange" for="rs">Satellite atom, <i>R</i><sub>s</sub></label><input type="range" id="rs" min="5" max="100" step="1" value="60"><span class="val" id="rsV">60</span></div>
+          <label class="toggle"><input type="checkbox" id="cryst"><span><strong>Crystallographic restriction</strong> (2, 3, 4 or 6 only)</span></label>
+        </div>
+        <div class="metrics" style="margin-top:14px">
+          <div class="metric"><span>Radius ratio, <i>R</i><sub>c</sub> / <i>R</i><sub>s</sub></span><b id="mRatio">1.000</b></div>
+          <div class="metric"><span>Most satellites that fit</span><b id="mFit">6</b></div>
+          <div class="metric"><span>Coordination number shown</span><b id="mCN">6</b></div>
+          <div class="metric"><span>This number fits from a ratio of</span><b id="mLow">1.000</b></div>
+          <div class="metric"><span>One more fits from a ratio of</span><b id="mNext">1.305</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel wide">
+      <h3>Coordination number against radius ratio</h3>
+      <div class="plotbox" style="height:420px"><canvas id="rrChart"></canvas></div>
+    </div>
+  </div>
+
+  <details class="note">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <p>In a crystal, the coordination number of an atom is the number of its nearest neighbours. A first estimate of it comes from geometry alone, by treating the atoms as hard spheres, here as discs in two dimensions. Take a central atom of radius \(R_c\) and neighbours (satellites) of radius \(R_s\), all touching the central atom. Their centres then lie on a circle of radius \(R_c + R_s\). Two neighbouring satellites touch when their centres are \(2R_s\) apart, which fixes the angle \(\theta\) that each satellite takes at the centre:</p>
+      <div class="eq">\( \sin\dfrac{\theta}{2} = \dfrac{R_s}{R_c + R_s} = \dfrac{1}{1+\rho}, \qquad \rho = \dfrac{R_c}{R_s} \)</div>
+      <p>The number of satellites that fit around the circle without overlapping is the whole number of angles \(\theta\) in a full turn:</p>
+      <div class="eq">\( N_\text{max} = \left\lfloor \dfrac{2\pi}{\theta} \right\rfloor = \left\lfloor \dfrac{\pi}{\arcsin\!\big(1/(1+\rho)\big)} \right\rfloor \)</div>
+      <p>So \(N\) satellites just fit when the ratio reaches a critical value, found by setting \(\theta = 2\pi/N\):</p>
+      <div class="eq">\( \rho_N = \dfrac{1}{\sin(\pi/N)} - 1 \)</div>
+      <table class="data">
+        <thead><tr><th>\(N\)</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>12</th></tr></thead>
+        <tbody><tr><td>\(\rho_N\)</td><td>0</td><td>0.155</td><td>0.414</td><td>0.701</td><td>1.000</td><td>1.305</td><td>1.613</td><td>2.864</td></tr></tbody>
+      </table>
+      <p>For equal discs, \(\rho = 1\) and six fit exactly: this is the close-packed (hexagonal) arrangement in two dimensions. Below \(\rho_N\), the central atom is too small for \(N\) satellites to touch it all at once, and the coordination drops to the next lower number. This is the idea behind Pauling's first rule for ionic crystals: a cation takes the highest coordination for which its anion neighbours can still touch it. Because the radius of a cation is usually smaller than that of an anion, the useful range for ionic crystals is \(\rho < 1\).</p>
+      <p><strong>Three dimensions.</strong> This tool packs discs in a plane. For spheres the thresholds are different, because the neighbours are arranged on a sphere, and Pauling's values are 0.155 for coordination 3 (triangle), 0.225 for 4 (tetrahedron), 0.414 for 6 (octahedron), 0.732 for 8 (cube) and 1.0 for 12. The two cases agree at 0.155 because a planar triangle of touching neighbours is the same in both. The ratio also gives only the geometric limit. The coordination number that a real crystal takes also depends on the bonding, and on the charge and the polarizability of the ions.</p>
+      <p><strong>The crystallographic restriction.</strong> A crystal is periodic, and this limits the rotational symmetries that it can have. A rotation by \(\varphi\) that maps a lattice onto itself has a matrix of integers in the basis of the lattice, so its trace, \(2\cos\varphi\), must be an integer. Then \(\cos\varphi = 0, \pm\tfrac12, \pm 1\), which allows only 2-, 3-, 4- and 6-fold axes (and the trivial 1-fold axis). A ring of \(N\) equivalent neighbours around a site with \(N\)-fold symmetry therefore fits a periodic crystal only for \(N = 2, 3, 4\) or 6. A five-fold ring is not allowed, nor is any ring of 7 or more. The tickbox rounds \(N\) down to the largest allowed number, which is 2 below \(\rho_3\), 3 up to \(\rho_4\), 4 up to \(\rho_6 = 1\), and 6 above. Quasicrystals, which are ordered but not periodic, do have five-, eight-, ten- and twelve-fold symmetry.</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt>Coordination number</dt><dd>The number of nearest neighbours of an atom or ion.</dd>
+        <dt>Radius ratio, &rho;</dt><dd>The radius of the central atom divided by the radius of its neighbours, <i>R</i><sub>c</sub>/<i>R</i><sub>s</sub>.</dd>
+        <dt>Satellite</dt><dd>One of the neighbouring atoms in the ring around the central atom.</dd>
+        <dt>Pauling's first rule</dt><dd>The coordination polyhedron of anions around a cation is set by the radius ratio, and is stable when the anions touch the cation.</dd>
+        <dt>Close packing</dt><dd>The densest arrangement of equal spheres (or, in two dimensions, discs), with six (in 2D) or twelve (in 3D) neighbours.</dd>
+        <dt>Crystallographic restriction</dt><dd>The rule that a periodic lattice can have only 1-, 2-, 3-, 4- and 6-fold rotation axes.</dd>
+        <dt>Quasicrystal</dt><dd>An ordered but non-periodic solid, which can have rotation symmetries that a periodic crystal cannot, such as five-fold.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /* Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved. */
+    const c = TOOL.c;
+    const EPS = 1e-9;
+    const $ = id => document.getElementById(id);
+    const ALLOWED = [2, 3, 4, 6];
+    const RMIN = 0.05, RMAX = 20;                   // ratio range of the sliders (5/100 to 100/5)
+
+    // largest number of touching satellites for a radius ratio rho = Rc / Rs
+    function maxFit(rho) { return Math.floor(Math.PI / Math.asin(1 / (1 + rho)) + EPS); }
+    // smallest ratio at which N satellites fit: 1/sin(pi/N) - 1
+    function rhoN(n) { return 1 / Math.sin(Math.PI / n) - 1; }
+    // largest allowed number (2, 3, 4, 6) not above n
+    function restrict(n) { let v = 2; ALLOWED.forEach(a => { if (a <= n) v = a; }); return v; }
+
+    // staircases for the plot
+    function stairs() {
+      const pts = [];
+      for (let n = 2; ; n++) {
+        const x0 = Math.max(n === 2 ? RMIN : rhoN(n), RMIN), x1 = Math.min(rhoN(n + 1), RMAX);
+        if (x0 >= RMAX) break;
+        pts.push({ x: x0, y: n }, { x: x1, y: n });
+        if (x1 >= RMAX) break;
+      }
+      return pts;
+    }
+    function stairsRestricted() {
+      const e = [rhoN(3), rhoN(4), rhoN(6)];
+      return [{ x: RMIN, y: 2 }, { x: e[0], y: 2 }, { x: e[0], y: 3 }, { x: e[1], y: 3 }, { x: e[1], y: 4 },
+              { x: e[2], y: 4 }, { x: e[2], y: 6 }, { x: RMAX, y: 6 }];
+    }
+
+    let chart;
+    function initChart() {
+      chart = new Chart($('rrChart'), {
+        type: 'scatter',
+        data: { datasets: [
+          { label: 'All numbers that fit', data: stairs(), showLine: true, borderColor: c.green, borderWidth: 2.5, pointRadius: 0 },
+          { label: 'Only 2, 3, 4 or 6 allowed', data: stairsRestricted(), showLine: true, borderColor: c.amber, borderDash: [6, 5], borderWidth: 2.5, pointRadius: 0, hidden: true },
+          { label: 'Present setting', data: [{ x: 1, y: 6 }], borderColor: c.red, backgroundColor: c.red, pointStyle: 'crossRot', pointRadius: 9, pointBorderWidth: 3, showLine: false },
+          { label: 'Equal radii', data: [{ x: 1, y: 0 }, { x: 1, y: 70 }], showLine: true, borderColor: c.blue, borderDash: [4, 4], borderWidth: 1.5, pointRadius: 0 }
+        ] },
+        options: {
+          responsive: true, maintainAspectRatio: false, animation: false, parsing: false,
+          plugins: { legend: { labels: { color: c.text } } },
+          scales: {
+            x: { type: 'logarithmic', min: RMIN, max: RMAX, title: { display: true, text: 'Radius ratio, Rc / Rs (log scale)' },
+                 ticks: { callback: v => [0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20].includes(v) ? v : '' } },
+            y: { min: 0, max: 70, title: { display: true, text: 'Coordination number' } }
+          }
+        }
+      });
+    }
+
+    // ---- drawing ----
+    const cv = $('rrCanvas'), ctx = cv.getContext('2d');
+    function draw() {
+      const Rc = parseInt($('rc').value), Rs = parseInt($('rs').value);
+      const restricted = $('cryst').checked;
+      const rho = Rc / Rs;
+      const fit = maxFit(rho);
+      const n = restricted ? restrict(fit) : fit;
+
+      const W = cv.width, H = cv.height, cx = W / 2, cy = H / 2;
+      const sc = Math.min(1, (W / 2 - 12) / (Rc + 2 * Rs));       // scale so that everything fits
+      const rc = Rc * sc, rs = Rs * sc, orbit = rc + rs;
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = c.bg; ctx.fillRect(0, 0, W, H);
+      // orbit of the satellite centres
+      ctx.strokeStyle = c.grid; ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(cx, cy, orbit, 0, 2 * Math.PI); ctx.stroke(); ctx.setLineDash([]);
+      // central atom
+      ctx.lineWidth = 1.5; ctx.strokeStyle = c.white;
+      ctx.beginPath(); ctx.arc(cx, cy, rc, 0, 2 * Math.PI);
+      ctx.fillStyle = 'rgba(96,165,250,0.85)'; ctx.fill(); ctx.stroke();
+      // satellites
+      for (let i = 0; i < n; i++) {
+        const a = 2 * Math.PI * i / n;
+        ctx.beginPath(); ctx.arc(cx + orbit * Math.cos(a), cy + orbit * Math.sin(a), rs, 0, 2 * Math.PI);
+        ctx.fillStyle = 'rgba(251,146,60,0.85)'; ctx.fill(); ctx.stroke();
+      }
+      ctx.fillStyle = c.text; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('N = ' + n, 12, 22);
+
+      $('rcV').textContent = Rc; $('rsV').textContent = Rs;
+      $('mRatio').textContent = rho.toFixed(3);
+      $('mFit').textContent = fit;
+      $('mCN').textContent = n + (restricted && n !== fit ? ' (restricted)' : '');
+      $('mLow').textContent = rhoN(n).toFixed(3);
+      const nextN = restricted ? (ALLOWED.find(a => a > n) || null) : n + 1;
+      $('mNext').textContent = nextN ? rhoN(nextN).toFixed(3) + ' (N = ' + nextN + ')' : 'none: 6 is the largest';
+
+      chart.data.datasets[1].hidden = !restricted;
+      chart.data.datasets[2].data = [{ x: rho, y: n }];
+      chart.update('none');
+    }
+
+    ['rc', 'rs'].forEach(id => $(id).addEventListener('input', draw));
+    $('cryst').addEventListener('change', draw);
+    initChart();
+    draw();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Affine and Non-Affine Deformation of a 2D Lattice | Teaching Tools</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    canvas.shape-canvas { cursor: default; width: 100%; max-width: 360px; height: auto; }
+    .canvases { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; width: 100%; }
+    .canvases .blk { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .canvases .lbl { font-size: 0.85rem; font-weight: 600; color: var(--ink-soft); }
+    .eqrow { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; width: 100%; }
+    .eqrow label { font-family: ui-monospace, Menlo, Consolas, monospace; color: var(--blue-soft); min-width: 2.2em; }
+    .eqrow input { flex: 1; min-width: 0; font-family: ui-monospace, Menlo, Consolas, monospace; background: var(--page); color: #fff; border: 1px solid var(--line); border-radius: 4px; padding: 7px 9px; width: auto; text-align: left; font-weight: 400; }
+    .pretty { background: var(--page); border: 1px solid var(--panel-2); border-radius: 6px; padding: 8px 12px; margin: 4px 0 12px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.88rem; color: var(--ink-soft); line-height: 1.7; width: 100%; box-sizing: border-box; overflow-x: auto; }
+    .strain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; width: 100%; }
+    .strain-box { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }
+    .strain-label { font-size: 0.78rem; color: var(--muted); }
+    .strain-value { font-family: ui-monospace, Menlo, Consolas, monospace; color: #fff; font-size: 0.9rem; word-break: break-word; margin-top: 2px; }
+    #equationHelp { font-size: 0.78rem; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+    #equationError { display: none; margin-top: 8px; color: var(--red); font-size: 0.85rem; font-weight: 600; }
+    .fld { display: flex; flex-direction: column; gap: 4px; }
+    .fld > label { font-size: 0.8rem; color: var(--muted); }
+    .fld select, .fld input[type=number] { width: 100%; box-sizing: border-box; }
+    .ctl-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Affine and Non-Affine Deformation of a 2D Lattice</h1>
+  <p class="subtitle">Type the displacement (u, v) of every point as a function of position, or choose a preset, and see how a lattice, a square and a circle deform. When the gradient of the displacement is the same everywhere the deformation is affine; when it varies from place to place it is non-affine.</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>Affine preset:</strong> loads a stretch, a shear or a rotation, in which the displacement is a linear function of position.</li>
+        <li><strong>Non-affine preset:</strong> loads a quadratic bend, a swirl, a radial bulge or a sine wave, in which the displacement is not linear in position.</li>
+        <li><strong>u and v boxes:</strong> edit the displacement components yourself. You can use the variables <code>X</code>, <code>Y</code>, <code>L</code> (a fixed half-width of 250), <code>k1</code> and <code>k2</code>; the functions sin, cos, tan, asin, acos, atan, atan2, sqrt, abs, exp, log, log10, pow, min, max, floor, ceil, round; the constants <code>pi</code> and <code>e</code>; and <code>^</code> for powers. The formatted equation and the four displacement gradients are shown under the boxes.</li>
+        <li><strong>k1, k2 sliders:</strong> two parameters that you can use in the equations, from &minus;1 to 1. <em>Reset k1, k2</em> sets both to zero.</li>
+        <li><strong>Lattice, square and circle:</strong> grey is the original, white is the deformed shape. For the square and circle, <em>n</em> points on the perimeter are moved by the same field and reconnected. Use <em>Boundary points</em> and <em>Shape size</em> to change them, and un-tick the shapes box to hide them.</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="tool">
+    <div class="panel wide plain">
+      <h3>Displacement field</h3>
+      <div class="eqrow"><label for="uEquation">u =</label><input type="text" id="uEquation" spellcheck="false" value="0"></div>
+      <div class="eqrow"><label for="vEquation">v =</label><input type="text" id="vEquation" spellcheck="false" value="0"></div>
+      <div class="pretty">
+        <div><span>u&nbsp;=&nbsp;</span><span id="pretty-u"></span></div>
+        <div><span>v&nbsp;=&nbsp;</span><span id="pretty-v"></span></div>
+      </div>
+      <div class="strain-grid">
+        <div class="strain-box"><div class="strain-label">e<sub>xx</sub> = &part;u/&part;X</div><div id="strain-exx" class="strain-value">0</div></div>
+        <div class="strain-box"><div class="strain-label">e<sub>xy</sub> = &part;u/&part;Y</div><div id="strain-exy" class="strain-value">0</div></div>
+        <div class="strain-box"><div class="strain-label">e<sub>yx</sub> = &part;v/&part;X</div><div id="strain-eyx" class="strain-value">0</div></div>
+        <div class="strain-box"><div class="strain-label">e<sub>yy</sub> = &part;v/&part;Y</div><div id="strain-eyy" class="strain-value">0</div></div>
+      </div>
+      <div id="equationHelp">Variables: X, Y, L (= 250, a fixed world half-width shared by every canvas below), k1, k2. Functions: sin cos tan asin acos atan atan2 sqrt abs exp log log10 pow min max floor ceil round. Constants: pi, e. Use ^ or ** for powers.</div>
+      <div id="equationError"></div>
+    </div>
+
+    <div class="panel wide plain">
+      <h3>Controls</h3>
+      <div class="ctl-grid" style="align-items:end">
+        <div class="fld"><label for="affinePresetSelect">Affine preset</label>
+          <select id="affinePresetSelect">
+            <option value="">Choose&hellip;</option>
+            <option value="identity">Identity (u=0, v=0)</option>
+            <option value="stretchX">X stretch</option>
+            <option value="stretchY">Y stretch</option>
+            <option value="stretchXY">XY stretch</option>
+            <option value="shearX">X shear</option>
+            <option value="shearY">Y shear</option>
+            <option value="shearXY">XY shear</option>
+            <option value="rotate">Rotation</option>
+          </select></div>
+        <div class="fld"><label for="nonAffinePresetSelect">Non-affine preset</label>
+          <select id="nonAffinePresetSelect">
+            <option value="">Choose&hellip;</option>
+            <option value="quadraticBend">Quadratic bend</option>
+            <option value="curl">Curl field (swirl-like)</option>
+            <option value="bulge">Radial bulge</option>
+            <option value="wave">Sine wave</option>
+          </select></div>
+        <div class="fld"><label for="pointsPerSide">Points per side</label>
+          <select id="pointsPerSide"><option value="5">5</option><option value="7">7</option><option value="9" selected>9</option><option value="11">11</option><option value="15">15</option></select></div>
+        <div class="fld"><label for="pointSize">Point size</label><input type="number" id="pointSize" value="5" min="1" step="0.5"></div>
+        <div class="fld"><label for="numBoundaryPoints">Boundary points (n)</label><input type="number" id="numBoundaryPoints" value="32" min="4" max="300" step="1"></div>
+        <div class="fld"><label for="shapeSize">Shape size</label><input type="number" id="shapeSize" value="100" min="10" max="200" step="5"></div>
+        <div class="ctl"><label for="k1">k1</label><input type="range" id="k1" min="-1" max="1" value="0" step="0.001"><span id="value-k1" class="val">0.000</span></div>
+        <div class="ctl"><label for="k2">k2</label><input type="range" id="k2" min="-1" max="1" value="0" step="0.001"><span id="value-k2" class="val">0.000</span></div>
+        <div class="ctl-stack">
+          <label class="toggle-group"><input type="checkbox" id="showOriginal" checked> Show original</label>
+          <label class="toggle-group"><input type="checkbox" id="showTransformed" checked> Show deformed</label>
+          <label class="toggle-group"><input type="checkbox" id="showShapes" checked> Show square and circle</label>
+        </div>
+        <div class="fld"><button type="button" id="resetButton">Reset k1, k2</button></div>
+      </div>
+    </div>
+
+    <div class="panel wide plain">
+      <div class="canvases">
+        <div class="blk"><div class="lbl">Lattice</div><canvas id="latticeCanvas" class="shape-canvas" width="360" height="360"></canvas></div>
+        <div class="blk" id="squareShapeBlock"><div class="lbl">Square</div><canvas id="squareCanvas" class="shape-canvas" width="360" height="360"></canvas></div>
+        <div class="blk" id="circleShapeBlock"><div class="lbl">Circle</div><canvas id="circleCanvas" class="shape-canvas" width="360" height="360"></canvas></div>
+      </div>
+      <p style="font-size:0.8rem;color:var(--muted);margin:12px 0 0">The lattice shows the raw displacement field. For the square and the circle, <i>n</i> points are sampled along the perimeter, each is moved by the same (u, v) field, and they are reconnected in order, which shows how the point-by-point deformation changes the shape of a whole object.</p>
+    </div>
+  </div>
+
+  <details class="note">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <p>A deformation is described by the displacement \(\mathbf{u}(\mathbf{X})=(u,v)\) of each point from its original position \(\mathbf{X}=(X,Y)\). The local deformation is measured by the displacement gradient:</p>
+      <div class="eq">\( e_{ij}=\dfrac{\partial u_i}{\partial X_j} = \begin{pmatrix} \partial u/\partial X & \partial u/\partial Y\\ \partial v/\partial X & \partial v/\partial Y \end{pmatrix} \)</div>
+      <p><strong>Affine deformation.</strong> If the displacement is a linear function of position, the gradient has the same value at every point. Straight lines stay straight, parallel lines stay parallel, and every part of the body, however small, is deformed in the same way as the whole. The stretches, shears and rotation in the first menu are of this kind. The stretching and shearing is the symmetric part \(\varepsilon_{ij}=\tfrac12(e_{ij}+e_{ji})\) of the gradient, and the rigid rotation is its antisymmetric part.</p>
+      <p><strong>Non-affine deformation.</strong> If the displacement is not linear, the gradient depends on position. Lattice lines bend, and the neighbourhood of one point is deformed differently from that of another. The square and circle show how this alters the overall shape of an object: a square becomes curved, and a circle is no longer an ellipse. (An affine map takes a circle to an ellipse and a square to a parallelogram.)</p>
+      <p>In a crystal, the elastic deformation of a perfect lattice is affine, to a good approximation. In an amorphous solid or a defective crystal, the atoms do not follow the macroscopic strain exactly, and each atom has an extra, <em>non-affine</em>, displacement that relaxes the local forces. These non-affine displacements are important in the elasticity and the plastic flow of glasses, and in the elastic moduli of materials with a complicated unit cell. The displacement fields here are a simple way of seeing how a displacement that is not a linear function of position distorts an arrangement of atoms.</p>
+      <p>The gradient shown in the four boxes is calculated symbolically from the equations typed in, so you can read off where it is constant (affine) and where it depends on position.</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt>Displacement, (<i>u</i>, <i>v</i>)</dt><dd>How far a point moves from its original position.</dd>
+        <dt>Displacement gradient, <i>e</i><sub><i>ij</i></sub></dt><dd>The derivatives of the displacement components with respect to position.</dd>
+        <dt>Affine deformation</dt><dd>A deformation with a displacement gradient that is the same everywhere.</dd>
+        <dt>Non-affine deformation</dt><dd>A deformation with a displacement gradient that varies with position.</dd>
+        <dt><i>k</i><sub>1</sub>, <i>k</i><sub>2</sub></dt><dd>Free parameters that can be used in the displacement equations.</dd>
+        <dt><i>L</i></dt><dd>The half-width of the region shown, fixed at 250 units.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /* Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved. */
+        /* ---------------------------------------------------------------
+         * Safe math expression parser/evaluator.
+         * Deliberately avoids eval() / new Function() so a pasted or
+         * typed expression can never reach outside this sandboxed
+         * grammar: numbers, + - * / % ^, parentheses, a fixed variable
+         * set (X, Y, L, k1, k2), and a whitelisted function/constant set.
+         * ------------------------------------------------------------- */
+        const FUNCTIONS = {
+            sin: Math.sin, cos: Math.cos, tan: Math.tan,
+            asin: Math.asin, acos: Math.acos, atan: Math.atan,
+            atan2: Math.atan2, sqrt: Math.sqrt, abs: Math.abs,
+            exp: Math.exp, log: Math.log, log10: Math.log10,
+            pow: Math.pow, min: Math.min, max: Math.max,
+            floor: Math.floor, ceil: Math.ceil, round: Math.round
+        };
+        const CONSTANTS = { pi: Math.PI, e: Math.E };
+
+        function tokenize(src) {
+            const tokens = [];
+            let i = 0;
+            while (i < src.length) {
+                const c = src[i];
+                if (/\s/.test(c)) { i++; continue; }
+                if (/[0-9.]/.test(c)) {
+                    let j = i;
+                    while (j < src.length && /[0-9.]/.test(src[j])) j++;
+                    if (src[j] === 'e' || src[j] === 'E') {
+                        let k = j + 1;
+                        if (src[k] === '+' || src[k] === '-') k++;
+                        if (/[0-9]/.test(src[k])) {
+                            j = k;
+                            while (j < src.length && /[0-9]/.test(src[j])) j++;
+                        }
+                    }
+                    const text = src.slice(i, j);
+                    if (!/^\d*\.?\d+([eE][+-]?\d+)?$/.test(text) && !/^\d+\.?\d*([eE][+-]?\d+)?$/.test(text)) {
+                        throw new Error(`Bad number near "${text}"`);
+                    }
+                    tokens.push({ type: 'NUM', value: parseFloat(text) });
+                    i = j;
+                    continue;
+                }
+                if (/[A-Za-z_]/.test(c)) {
+                    let j = i;
+                    while (j < src.length && /[A-Za-z_0-9]/.test(src[j])) j++;
+                    tokens.push({ type: 'IDENT', value: src.slice(i, j) });
+                    i = j;
+                    continue;
+                }
+                if (c === '*' && src[i + 1] === '*') { tokens.push({ type: 'OP', value: '^' }); i += 2; continue; }
+                if ('+-*/%^(),'.includes(c)) {
+                    const type = (c === '(' ) ? 'LPAREN' : (c === ')') ? 'RPAREN' : (c === ',') ? 'COMMA' : 'OP';
+                    tokens.push({ type, value: c });
+                    i++;
+                    continue;
+                }
+                throw new Error(`Unexpected character "${c}"`);
+            }
+            return tokens;
+        }
+
+        // Insert implicit multiplication, e.g. "2X", "2(X+1)", ")(" -> "2*X", "2*(X+1)", ")*("
+        function insertImplicitMultiplication(tokens) {
+            const out = [];
+            for (let i = 0; i < tokens.length; i++) {
+                const t = tokens[i];
+                out.push(t);
+                const next = tokens[i + 1];
+                if (!next) continue;
+                const endsValue = (t.type === 'NUM') || (t.type === 'RPAREN') ||
+                    (t.type === 'IDENT' && !(FUNCTIONS.hasOwnProperty(t.value)) && !(next.type === 'LPAREN' && FUNCTIONS.hasOwnProperty(t.value)));
+                const startsValue = (next.type === 'NUM') || (next.type === 'LPAREN') ||
+                    (next.type === 'IDENT');
+                if (t.type === 'NUM' && (next.type === 'IDENT' || next.type === 'LPAREN')) {
+                    out.push({ type: 'OP', value: '*' });
+                } else if (t.type === 'RPAREN' && (next.type === 'IDENT' || next.type === 'LPAREN' || next.type === 'NUM')) {
+                    out.push({ type: 'OP', value: '*' });
+                } else if (t.type === 'IDENT' && !FUNCTIONS.hasOwnProperty(t.value) && next.type === 'LPAREN') {
+                    out.push({ type: 'OP', value: '*' });
+                }
+            }
+            return out;
+        }
+
+        function parseExpression(tokens) {
+            let pos = 0;
+            function peek() { return tokens[pos]; }
+            function consume(type) {
+                const t = tokens[pos];
+                if (!t || (type && t.type !== type)) {
+                    throw new Error(`Unexpected ${t ? t.value : 'end of expression'}`);
+                }
+                pos++;
+                return t;
+            }
+            function parseAdd() {
+                let node = parseMul();
+                while (peek() && peek().type === 'OP' && (peek().value === '+' || peek().value === '-')) {
+                    const op = consume('OP').value;
+                    node = { type: 'binop', op, left: node, right: parseMul() };
+                }
+                return node;
+            }
+            function parseMul() {
+                let node = parsePow();
+                while (peek() && peek().type === 'OP' && (peek().value === '*' || peek().value === '/' || peek().value === '%')) {
+                    const op = consume('OP').value;
+                    node = { type: 'binop', op, left: node, right: parsePow() };
+                }
+                return node;
+            }
+            function parsePow() {
+                const node = parseUnary();
+                if (peek() && peek().type === 'OP' && peek().value === '^') {
+                    consume('OP');
+                    const right = parsePow(); // right-associative
+                    return { type: 'binop', op: '^', left: node, right };
+                }
+                return node;
+            }
+            function parseUnary() {
+                if (peek() && peek().type === 'OP' && (peek().value === '-' || peek().value === '+')) {
+                    const op = consume('OP').value;
+                    return { type: 'unop', op, arg: parseUnary() };
+                }
+                return parsePrimary();
+            }
+            function parsePrimary() {
+                const t = peek();
+                if (!t) throw new Error('Unexpected end of expression');
+                if (t.type === 'NUM') { consume('NUM'); return { type: 'num', value: t.value }; }
+                if (t.type === 'LPAREN') {
+                    consume('LPAREN');
+                    const node = parseAdd();
+                    consume('RPAREN');
+                    return node;
+                }
+                if (t.type === 'IDENT') {
+                    consume('IDENT');
+                    if (peek() && peek().type === 'LPAREN' && FUNCTIONS.hasOwnProperty(t.value)) {
+                        consume('LPAREN');
+                        const args = [];
+                        if (peek() && peek().type !== 'RPAREN') {
+                            args.push(parseAdd());
+                            while (peek() && peek().type === 'COMMA') { consume('COMMA'); args.push(parseAdd()); }
+                        }
+                        consume('RPAREN');
+                        return { type: 'call', name: t.value, args };
+                    }
+                    return { type: 'var', name: t.value };
+                }
+                throw new Error(`Unexpected token "${t.value}"`);
+            }
+            const result = parseAdd();
+            if (pos !== tokens.length) throw new Error(`Unexpected trailing "${tokens[pos].value}"`);
+            return result;
+        }
+
+        function compileExpression(exprStr) {
+            if (!exprStr || !exprStr.trim()) return { type: 'num', value: 0 };
+            const tokens = insertImplicitMultiplication(tokenize(exprStr));
+            return parseExpression(tokens);
+        }
+
+        function evalAst(node, scope) {
+            switch (node.type) {
+                case 'num': return node.value;
+                case 'var': {
+                    if (scope.hasOwnProperty(node.name)) return scope[node.name];
+                    if (CONSTANTS.hasOwnProperty(node.name)) return CONSTANTS[node.name];
+                    throw new Error(`Unknown variable "${node.name}"`);
+                }
+                case 'unop': {
+                    const v = evalAst(node.arg, scope);
+                    return node.op === '-' ? -v : v;
+                }
+                case 'binop': {
+                    const l = evalAst(node.left, scope);
+                    const r = evalAst(node.right, scope);
+                    switch (node.op) {
+                        case '+': return l + r;
+                        case '-': return l - r;
+                        case '*': return l * r;
+                        case '/': return l / r;
+                        case '%': return l % r;
+                        case '^': return Math.pow(l, r);
+                    }
+                    throw new Error(`Unknown operator "${node.op}"`);
+                }
+                case 'call': {
+                    if (!FUNCTIONS.hasOwnProperty(node.name)) throw new Error(`Unknown function "${node.name}"`);
+                    const args = node.args.map(a => evalAst(a, scope));
+                    return FUNCTIONS[node.name](...args);
+                }
+                default:
+                    throw new Error('Invalid expression');
+            }
+        }
+
+        /* -----------------------------------------------------------------
+         * Symbolic differentiation.
+         * Differentiates a parsed AST with respect to 'X' or 'Y', treating
+         * every other identifier (k1, k2, L, ...) as a constant. Produces a
+         * new AST (not a number), which is then algebraically simplified
+         * and printed back out as a readable expression string.
+         * ------------------------------------------------------------- */
+        const numNode = v => ({ type: 'num', value: v });
+        const mulNode = (a, b) => ({ type: 'binop', op: '*', left: a, right: b });
+        const addNode = (a, b) => ({ type: 'binop', op: '+', left: a, right: b });
+        const subNode = (a, b) => ({ type: 'binop', op: '-', left: a, right: b });
+        const divNode = (a, b) => ({ type: 'binop', op: '/', left: a, right: b });
+        const powNode = (a, b) => ({ type: 'binop', op: '^', left: a, right: b });
+        const negNode = a => ({ type: 'unop', op: '-', arg: a });
+        const callNode = (name, args) => ({ type: 'call', name, args });
+
+        function differentiate(node, v) {
+            switch (node.type) {
+                case 'num':
+                    return numNode(0);
+                case 'var':
+                    return numNode(node.name === v ? 1 : 0);
+                case 'unop':
+                    return node.op === '-' ? negNode(differentiate(node.arg, v)) : differentiate(node.arg, v);
+                case 'binop': {
+                    const { op, left, right } = node;
+                    if (op === '+') return addNode(differentiate(left, v), differentiate(right, v));
+                    if (op === '-') return subNode(differentiate(left, v), differentiate(right, v));
+                    if (op === '*') {
+                        const dl = differentiate(left, v), dr = differentiate(right, v);
+                        return addNode(mulNode(dl, right), mulNode(left, dr));
+                    }
+                    if (op === '/') {
+                        const dl = differentiate(left, v), dr = differentiate(right, v);
+                        return divNode(subNode(mulNode(dl, right), mulNode(left, dr)), powNode(right, numNode(2)));
+                    }
+                    if (op === '%') {
+                        throw new Error('Cannot symbolically differentiate the % operator');
+                    }
+                    if (op === '^') {
+                        const dl = differentiate(left, v), dr = differentiate(right, v);
+                        if (right.type === 'num') { // constant exponent: power rule
+                            const n = right.value;
+                            if (n === 0) return numNode(0);
+                            const powTerm = (n === 1) ? numNode(1) : powNode(left, numNode(n - 1));
+                            return mulNode(numNode(n), mulNode(powTerm, dl));
+                        }
+                        if (left.type === 'num') { // constant base: exponential rule
+                            return mulNode(powNode(left, right), mulNode(numNode(Math.log(left.value)), dr));
+                        }
+                        // general case: l^r = exp(r*ln(l))  =>  d = l^r * (dr*ln(l) + r*dl/l)
+                        const inner = addNode(mulNode(dr, callNode('log', [left])), mulNode(right, divNode(dl, left)));
+                        return mulNode(powNode(left, right), inner);
+                    }
+                    throw new Error(`No derivative rule for operator "${op}"`);
+                }
+                case 'call': {
+                    const [a, b] = node.args;
+                    const da = a ? differentiate(a, v) : null;
+                    switch (node.name) {
+                        case 'sin': return mulNode(callNode('cos', [a]), da);
+                        case 'cos': return negNode(mulNode(callNode('sin', [a]), da));
+                        case 'tan': return divNode(da, powNode(callNode('cos', [a]), numNode(2)));
+                        case 'asin': return divNode(da, callNode('sqrt', [subNode(numNode(1), powNode(a, numNode(2)))]));
+                        case 'acos': return negNode(divNode(da, callNode('sqrt', [subNode(numNode(1), powNode(a, numNode(2)))])));
+                        case 'atan': return divNode(da, addNode(numNode(1), powNode(a, numNode(2))));
+                        case 'sqrt': return divNode(da, mulNode(numNode(2), callNode('sqrt', [a])));
+                        case 'abs': return mulNode(divNode(a, callNode('abs', [a])), da);
+                        case 'exp': return mulNode(callNode('exp', [a]), da);
+                        case 'log': return divNode(da, a);
+                        case 'log10': return divNode(da, mulNode(a, numNode(Math.log(10))));
+                        case 'pow': return differentiate(powNode(a, b), v);
+                        case 'floor': case 'ceil': case 'round':
+                            return numNode(0); // piecewise-constant almost everywhere
+                        default:
+                            throw new Error(`No symbolic derivative rule for "${node.name}(...)"`);
+                    }
+                }
+                default:
+                    throw new Error('Cannot differentiate this expression');
+            }
+        }
+
+        function structurallyEqual(a, b) {
+            if (a.type !== b.type) return false;
+            if (a.type === 'num') return a.value === b.value;
+            if (a.type === 'var') return a.name === b.name;
+            if (a.type === 'unop') return a.op === b.op && structurallyEqual(a.arg, b.arg);
+            if (a.type === 'call') return a.name === b.name && a.args.length === b.args.length && a.args.every((x, i) => structurallyEqual(x, b.args[i]));
+            if (a.type === 'binop') return a.op === b.op && structurallyEqual(a.left, b.left) && structurallyEqual(a.right, b.right);
+            return false;
+        }
+        function flattenProduct(node) {
+            if (node.type === 'binop' && node.op === '*') return [...flattenProduct(node.left), ...flattenProduct(node.right)];
+            return [node];
+        }
+        function rebuildProduct(factors) {
+            if (factors.length === 0) return numNode(1);
+            return factors.reduce((acc, f) => acc === null ? f : mulNode(acc, f), null);
+        }
+
+        // Algebraically simplify an AST: constant-fold, drop *1, *0, +0, etc.
+        function simplify(node) {
+            if (node.type === 'num' || node.type === 'var') return node;
+            if (node.type === 'unop') {
+                const arg = simplify(node.arg);
+                if (arg.type === 'num') return numNode(-arg.value);
+                if (arg.type === 'unop' && arg.op === '-') return arg.arg;
+                return { type: 'unop', op: node.op, arg };
+            }
+            if (node.type === 'call') {
+                const args = node.args.map(simplify);
+                if (args.length && args.every(a => a.type === 'num') && FUNCTIONS.hasOwnProperty(node.name)) {
+                    const val = FUNCTIONS[node.name](...args.map(a => a.value));
+                    if (isFinite(val)) return numNode(val);
+                }
+                return { type: 'call', name: node.name, args };
+            }
+            if (node.type === 'binop') {
+                const l = simplify(node.left);
+                const r = simplify(node.right);
+                const op = node.op;
+                if (l.type === 'num' && r.type === 'num') {
+                    let val;
+                    if (op === '+') val = l.value + r.value;
+                    else if (op === '-') val = l.value - r.value;
+                    else if (op === '*') val = l.value * r.value;
+                    else if (op === '/') val = l.value / r.value;
+                    else if (op === '%') val = l.value % r.value;
+                    else if (op === '^') val = Math.pow(l.value, r.value);
+                    if (isFinite(val)) return numNode(val);
+                }
+                if (op === '+') {
+                    if (l.type === 'num' && l.value === 0) return r;
+                    if (r.type === 'num' && r.value === 0) return l;
+                }
+                if (op === '-') {
+                    if (r.type === 'num' && r.value === 0) return l;
+                    if (l.type === 'num' && l.value === 0) return simplify(negNode(r));
+                }
+                if (op === '*') {
+                    if ((l.type === 'num' && l.value === 0) || (r.type === 'num' && r.value === 0)) return numNode(0);
+                    if (l.type === 'num' && l.value === 1) return r;
+                    if (r.type === 'num' && r.value === 1) return l;
+                    if (l.type === 'num' && l.value === -1) return simplify(negNode(r));
+                    if (r.type === 'num' && r.value === -1) return simplify(negNode(l));
+                }
+                if (op === '/') {
+                    if (l.type === 'num' && l.value === 0) return numNode(0);
+                    if (r.type === 'num' && r.value === 1) return l;
+                    // Cancel a common factor between the numerator and denominator,
+                    // e.g. (2*k1*Y*L) / L^2  ->  2*k1*Y / L
+                    let denomBase = r, denomExp = 1;
+                    if (r.type === 'binop' && r.op === '^' && r.right.type === 'num') {
+                        denomBase = r.left;
+                        denomExp = r.right.value;
+                    }
+                    if (l.type === 'binop' && l.op === '*') {
+                        const factors = flattenProduct(l);
+                        const idx = factors.findIndex(f => structurallyEqual(f, denomBase));
+                        if (idx !== -1) {
+                            factors.splice(idx, 1);
+                            const newNumer = rebuildProduct(factors);
+                            const newDenomExp = denomExp - 1;
+                            if (newDenomExp <= 0) return simplify(newNumer);
+                            const newDenom = (newDenomExp === 1) ? denomBase : powNode(denomBase, numNode(newDenomExp));
+                            return simplify(divNode(newNumer, newDenom));
+                        }
+                    } else if (structurallyEqual(l, denomBase) && denomExp >= 1) {
+                        const newDenomExp = denomExp - 1;
+                        if (newDenomExp <= 0) return numNode(1);
+                        const newDenom = (newDenomExp === 1) ? denomBase : powNode(denomBase, numNode(newDenomExp));
+                        return simplify(divNode(numNode(1), newDenom));
+                    }
+                }
+                if (op === '^') {
+                    if (r.type === 'num' && r.value === 0) return numNode(1);
+                    if (r.type === 'num' && r.value === 1) return l;
+                    if (l.type === 'num' && (l.value === 0 || l.value === 1)) return numNode(l.value);
+                }
+                return { type: 'binop', op, left: l, right: r };
+            }
+            return node;
+        }
+
+        const TIER = { '+': 1, '-': 1, '*': 2, '/': 2, '%': 2, '^': 3 };
+        const RIGHT_ASSOC = { '^': true };
+
+        function needsParens(child, parentTier, isRightChild, parentOp) {
+            if (child.type !== 'binop') return false;
+            const childTier = TIER[child.op];
+            if (childTier < parentTier) return true;
+            if (childTier > parentTier) return false;
+            return RIGHT_ASSOC[parentOp] ? !isRightChild : isRightChild;
+        }
+
+        function formatNum(v) {
+            if (Object.is(v, -0)) v = 0;
+            if (Number.isInteger(v)) return String(v);
+            let s = v.toFixed(6).replace(/0+$/, '').replace(/\.$/, '');
+            return s;
+        }
+
+        function stringify(node) {
+            switch (node.type) {
+                case 'num': return formatNum(node.value);
+                case 'var': return node.name;
+                case 'unop': {
+                    const inner = stringify(node.arg);
+                    return '-' + (node.arg.type === 'binop' ? `(${inner})` : inner);
+                }
+                case 'call':
+                    return `${node.name}(${node.args.map(stringify).join(', ')})`;
+                case 'binop': {
+                    let lStr = stringify(node.left);
+                    let rStr = stringify(node.right);
+                    if (needsParens(node.left, TIER[node.op], false, node.op)) lStr = `(${lStr})`;
+                    if (needsParens(node.right, TIER[node.op], true, node.op)) rStr = `(${rStr})`;
+                    return `${lStr}${node.op}${rStr}`;
+                }
+                default:
+                    return '?';
+            }
+        }
+
+        // Differentiate + simplify + stringify in one step; throws on unsupported constructs.
+        function symbolicDerivative(ast, v) {
+            return stringify(simplify(differentiate(ast, v)));
+        }
+
+        // Render an AST as nicely formatted HTML: k1/k2 as subscripts, ^ as
+        // a superscript, sqrt as a radical, pi as the Greek letter, and a
+        // centered dot for multiplication. Safe to insert via innerHTML: all
+        // text pieces come from the fixed token grammar (identifiers can
+        // only contain [A-Za-z0-9_]), so no markup can be smuggled in.
+        function prettyVarName(name) {
+            if (name === 'k1') return 'k<sub>1</sub>';
+            if (name === 'k2') return 'k<sub>2</sub>';
+            if (name === 'pi') return '\u03c0';
+            return name;
+        }
+
+        function prettyStringify(node) {
+            switch (node.type) {
+                case 'num': return formatNum(node.value);
+                case 'var': return prettyVarName(node.name);
+                case 'unop': {
+                    const inner = prettyStringify(node.arg);
+                    return '\u2212' + (node.arg.type === 'binop' ? `(${inner})` : inner);
+                }
+                case 'call': {
+                    const args = node.args.map(prettyStringify).join(', ');
+                    if (node.name === 'sqrt') return `\u221a(${args})`;
+                    return `${node.name}(${args})`;
+                }
+                case 'binop': {
+                    let lStr = prettyStringify(node.left);
+                    let rStr = prettyStringify(node.right);
+                    if (needsParens(node.left, TIER[node.op], false, node.op)) lStr = `(${lStr})`;
+                    if (needsParens(node.right, TIER[node.op], true, node.op)) rStr = `(${rStr})`;
+                    if (node.op === '^') return `${lStr}<sup>${rStr}</sup>`;
+                    if (node.op === '*') return `${lStr}\u00b7${rStr}`;
+                    if (node.op === '-') return `${lStr} \u2212 ${rStr}`;
+                    if (node.op === '+') return `${lStr} + ${rStr}`;
+                    return `${lStr}${node.op}${rStr}`; // '/' and '%' stay compact
+                }
+                default:
+                    return '?';
+            }
+        }
+
+        /* --------------------------- App logic --------------------------- */
+        // Fixed "world" half-width used by every equation (X, Y, and L range
+        // over the same physical domain regardless of a canvas's pixel size).
+        const DOMAIN_L = 250;
+
+        const canvas = document.getElementById('latticeCanvas');
+        const ctx = canvas.getContext('2d');
+        const pointSizeInput = document.getElementById('pointSize');
+        const k1Input = document.getElementById('k1');
+        const k2Input = document.getElementById('k2');
+        const showOriginalInput = document.getElementById('showOriginal');
+        const showTransformedInput = document.getElementById('showTransformed');
+        const showShapesInput = document.getElementById('showShapes');
+        const k1Value = document.getElementById('value-k1');
+        const k2Value = document.getElementById('value-k2');
+        const uEquationInput = document.getElementById('uEquation');
+        const vEquationInput = document.getElementById('vEquation');
+        const equationError = document.getElementById('equationError');
+
+        function updateCoefficientLabels() {
+            k1Value.textContent = parseFloat(k1Input.value).toFixed(3);
+            k2Value.textContent = parseFloat(k2Input.value).toFixed(3);
+        }
+
+        // --- Points per side (native select) ---
+        const pointsPerSideEl = document.getElementById('pointsPerSide');
+        let pointsPerSide = parseInt(pointsPerSideEl.value, 10);
+        pointsPerSideEl.addEventListener('change', () => {
+            pointsPerSide = parseInt(pointsPerSideEl.value, 10);
+            redrawAll();
+        });
+
+        // --- Preset dropdown ---
+        // All presets are direct closed-form Cartesian expressions in X, Y --
+        // no polar coordinates, no rotation matrices (rotation is still just
+        // a plain formula in X, Y and an angle parameter, evaluated directly).
+        const presets = {
+            // --- Affine (linear): (u,v) = e.(X,Y), constant gradient everywhere ---
+            identity: { u: '0', v: '0', k1: 0, k2: 0 },
+            stretchX: { u: 'k1*X', v: '0', k1: 0.3, k2: 0 },
+            stretchY: { u: '0', v: 'k2*Y', k1: 0, k2: 0.3 },
+            stretchXY: { u: 'k1*X', v: 'k2*Y', k1: 0.3, k2: 0.3 },
+            shearX: { u: 'k1*Y', v: '0', k1: 0.3, k2: 0 },
+            shearY: { u: '0', v: 'k2*X', k1: 0, k2: 0.3 },
+            shearXY: { u: 'k1*Y', v: 'k2*X', k1: 0.3, k2: 0.3 },
+            rotate: { u: 'X*cos(k1) - Y*sin(k1) - X', v: 'X*sin(k1) + Y*cos(k1) - Y', k1: 0.3, k2: 0 },
+            // --- Non-affine (nonlinear): gradient varies with position ---
+            quadraticBend: { u: 'k1*Y^2/L', v: 'k2*X^2/L', k1: 0.6, k2: 0.4 },
+            curl: { u: '-(k1*sqrt(X^2+Y^2)/L + k2*(X^2+Y^2)/L^2)*Y', v: '(k1*sqrt(X^2+Y^2)/L + k2*(X^2+Y^2)/L^2)*X', k1: 0.6, k2: 0 },
+            bulge: { u: 'X*(k1*sqrt(X^2+Y^2)/L + k2*(X^2+Y^2)/L^2)', v: 'Y*(k1*sqrt(X^2+Y^2)/L + k2*(X^2+Y^2)/L^2)', k1: 0.5, k2: 0 },
+            wave: { u: 'k1*(L/2)*sin(2*pi*Y/L)', v: 'k2*(L/2)*sin(2*pi*X/L)', k1: 0.6, k2: 0.6 }
+        };
+
+        // Loads a preset into the shared equation boxes / sliders when chosen.
+        function setupPresetDropdown(selectId, otherId) {
+            const sel = document.getElementById(selectId);
+            const other = document.getElementById(otherId);
+            sel.addEventListener('change', () => {
+                const preset = presets[sel.value];
+                if (!preset) return;
+                uEquationInput.value = preset.u;
+                vEquationInput.value = preset.v;
+                k1Input.value = preset.k1;
+                k2Input.value = preset.k2;
+                other.value = '';
+                updateCoefficientLabels();
+                redrawAll();
+            });
+        }
+
+        setupPresetDropdown('affinePresetSelect', 'nonAffinePresetSelect');
+        setupPresetDropdown('nonAffinePresetSelect', 'affinePresetSelect');
+
+        function compileCurrentEquations() {
+            try {
+                return { uAst: compileExpression(uEquationInput.value), vAst: compileExpression(vEquationInput.value), error: null };
+            } catch (err) {
+                return { uAst: null, vAst: null, error: err.message };
+            }
+        }
+
+        function updateEquationErrorDisplay(error) {
+            if (error) {
+                equationError.textContent = 'Error: ' + error;
+                equationError.style.display = 'block';
+            } else {
+                equationError.style.display = 'none';
+            }
+        }
+
+        function drawLatticeCanvas(uAst, vAst, compileErr) {
+            const pointSize = parseFloat(pointSizeInput.value);
+            const k1 = parseFloat(k1Input.value);
+            const k2 = parseFloat(k2Input.value);
+            const showOriginal = showOriginalInput.checked;
+            const showTransformed = showTransformedInput.checked;
+
+            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const canvasCenterX = canvas.width / 2;
+            const canvasCenterY = canvas.height / 2;
+            const L = DOMAIN_L;
+            const scale = canvas.width / (2 * L); // pixels per world unit
+            const worldSpacingX = (2 * L) / (pointsPerSide - 1);
+            const worldSpacingY = (2 * L) / (pointsPerSide - 1);
+            const originalPoints = [];
+            const transformedPoints = [];
+
+            function toPixel(worldX, worldY) {
+                return { x: canvasCenterX + worldX * scale, y: canvasCenterY - worldY * scale };
+            }
+
+            if (showOriginal) {
+                ctx.strokeStyle = '#6b7280';
+                ctx.lineWidth = 1;
+                for (let i = -(pointsPerSide - 1) / 2; i <= (pointsPerSide - 1) / 2; i++) {
+                    for (let j = -(pointsPerSide - 1) / 2; j <= (pointsPerSide - 1) / 2; j++) {
+                        const worldX = j * worldSpacingX;
+                        const worldY = i * worldSpacingY;
+                        const { x, y } = toPixel(worldX, -worldY); // gray grid drawn top-down, no field applied
+                        originalPoints.push({ x, y });
+                        ctx.beginPath();
+                        ctx.arc(x, y, pointSize, 0, 2 * Math.PI);
+                        ctx.fillStyle = '#9ca3af';
+                        ctx.fill();
+                        ctx.closePath();
+                    }
+                }
+                for (let i = 0; i < pointsPerSide; i++) {
+                    for (let j = 0; j < pointsPerSide - 1; j++) {
+                        const currentPoint = originalPoints[i * pointsPerSide + j];
+                        const rightPoint = originalPoints[i * pointsPerSide + j + 1];
+                        ctx.beginPath();
+                        ctx.moveTo(currentPoint.x, currentPoint.y);
+                        ctx.lineTo(rightPoint.x, rightPoint.y);
+                        ctx.stroke();
+                        ctx.closePath();
+                    }
+                }
+                for (let i = 0; i < pointsPerSide - 1; i++) {
+                    for (let j = 0; j < pointsPerSide; j++) {
+                        const currentPoint = originalPoints[i * pointsPerSide + j];
+                        const bottomPoint = originalPoints[(i + 1) * pointsPerSide + j];
+                        ctx.beginPath();
+                        ctx.moveTo(currentPoint.x, currentPoint.y);
+                        ctx.lineTo(bottomPoint.x, bottomPoint.y);
+                        ctx.stroke();
+                        ctx.closePath();
+                    }
+                }
+            }
+
+            if (showTransformed && !compileErr) {
+                ctx.strokeStyle = '#e5e7eb';
+                ctx.lineWidth = 1;
+                for (let i = 0; i < pointsPerSide; i++) {
+                    for (let j = 0; j < pointsPerSide; j++) {
+                        const originalX = j * worldSpacingX - L;
+                        const originalY = L - i * worldSpacingY; // top of canvas = positive Y
+
+                        const scope = { X: originalX, Y: originalY, L, k1, k2 };
+                        let u = 0, v = 0;
+                        try {
+                            u = evalAst(uAst, scope);
+                            v = evalAst(vAst, scope);
+                            if (!isFinite(u)) u = 0;
+                            if (!isFinite(v)) v = 0;
+                        } catch (e) {
+                            u = 0; v = 0;
+                        }
+
+                        const mathX = originalX + u;
+                        const mathY = originalY + v;
+                        const { x, y } = toPixel(mathX, mathY);
+                        transformedPoints.push({ x, y });
+
+                        ctx.beginPath();
+                        ctx.arc(x, y, pointSize, 0, 2 * Math.PI);
+                        ctx.fillStyle = '#f1f5f9';
+                        ctx.fill();
+                        ctx.closePath();
+                    }
+                }
+                for (let i = 0; i < pointsPerSide; i++) {
+                    for (let j = 0; j < pointsPerSide - 1; j++) {
+                        const currentPoint = transformedPoints[i * pointsPerSide + j];
+                        const rightPoint = transformedPoints[i * pointsPerSide + j + 1];
+                        ctx.beginPath();
+                        ctx.moveTo(currentPoint.x, currentPoint.y);
+                        ctx.lineTo(rightPoint.x, rightPoint.y);
+                        ctx.stroke();
+                        ctx.closePath();
+                    }
+                }
+                for (let i = 0; i < pointsPerSide - 1; i++) {
+                    for (let j = 0; j < pointsPerSide; j++) {
+                        const currentPoint = transformedPoints[i * pointsPerSide + j];
+                        const bottomPoint = transformedPoints[(i + 1) * pointsPerSide + j];
+                        ctx.beginPath();
+                        ctx.moveTo(currentPoint.x, currentPoint.y);
+                        ctx.lineTo(bottomPoint.x, bottomPoint.y);
+                        ctx.stroke();
+                        ctx.closePath();
+                    }
+                }
+            }
+
+            ctx.fillStyle = '#eab308';
+            ctx.font = '14px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('O', canvasCenterX, canvasCenterY + 20);
+        }
+
+        /* --------------------- Macroscopic shape canvases --------------------- */
+        const numBoundaryPointsInput = document.getElementById('numBoundaryPoints');
+        const shapeSizeInput = document.getElementById('shapeSize');
+        const squareCanvas = document.getElementById('squareCanvas');
+        const squareCtx = squareCanvas.getContext('2d');
+        const circleCanvas = document.getElementById('circleCanvas');
+        const circleCtx = circleCanvas.getContext('2d');
+        const squareShapeBlock = document.getElementById('squareShapeBlock');
+        const circleShapeBlock = document.getElementById('circleShapeBlock');
+
+        // Evenly (arc-length) spaced points along a square's perimeter, in math
+        // coordinates (X right, Y up), centered on the origin.
+        function computeSquareBoundary(n, size) {
+            const side = 2 * size;
+            const perim = 4 * side;
+            const points = [];
+            for (let k = 0; k < n; k++) {
+                const d = (k / n) * perim;
+                if (d < side) {
+                    const t = d / side;
+                    points.push({ X: size - t * side, Y: size });
+                } else if (d < 2 * side) {
+                    const t = (d - side) / side;
+                    points.push({ X: -size, Y: size - t * side });
+                } else if (d < 3 * side) {
+                    const t = (d - 2 * side) / side;
+                    points.push({ X: -size + t * side, Y: -size });
+                } else {
+                    const t = (d - 3 * side) / side;
+                    points.push({ X: size, Y: -size + t * side });
+                }
+            }
+            return points;
+        }
+
+        // Evenly (angle) spaced points along a circle's perimeter.
+        function computeCircleBoundary(n, size) {
+            const points = [];
+            for (let k = 0; k < n; k++) {
+                const theta = 2 * Math.PI * k / n;
+                points.push({ X: size * Math.cos(theta), Y: size * Math.sin(theta) });
+            }
+            return points;
+        }
+
+        // Move each boundary point by (u,v) = (u(X,Y), v(X,Y)) and draw the
+        // resulting closed polygon, alongside the untransformed outline.
+        function drawShapeOutline(canvasEl, ctxEl, boundaryPoints, uAst, vAst, compileErr, k1, k2, L, showOriginal, showTransformed) {
+            ctxEl.fillStyle = '#000'; ctxEl.fillRect(0, 0, canvasEl.width, canvasEl.height);
+            const cx = canvasEl.width / 2;
+            const cy = canvasEl.height / 2;
+            const scale = canvasEl.width / (2 * L);
+            const markerRadius = 2.5;
+
+            function toPixel(X, Y) {
+                return { x: cx + X * scale, y: cy - Y * scale };
+            }
+
+            function drawPolygon(points, color) {
+                ctxEl.strokeStyle = color;
+                ctxEl.fillStyle = color;
+                ctxEl.lineWidth = 1.5;
+                ctxEl.beginPath();
+                points.forEach((p, idx) => {
+                    const px = toPixel(p.X, p.Y);
+                    if (idx === 0) ctxEl.moveTo(px.x, px.y); else ctxEl.lineTo(px.x, px.y);
+                });
+                ctxEl.closePath();
+                ctxEl.stroke();
+                points.forEach(p => {
+                    const px = toPixel(p.X, p.Y);
+                    ctxEl.beginPath();
+                    ctxEl.arc(px.x, px.y, markerRadius, 0, 2 * Math.PI);
+                    ctxEl.fill();
+                });
+            }
+
+            if (showOriginal) {
+                drawPolygon(boundaryPoints, '#9ca3af');
+            }
+
+            if (showTransformed && !compileErr) {
+                const transformed = boundaryPoints.map(p => {
+                    const scope = { X: p.X, Y: p.Y, L, k1, k2 };
+                    let u = 0, v = 0;
+                    try {
+                        u = evalAst(uAst, scope);
+                        v = evalAst(vAst, scope);
+                        if (!isFinite(u)) u = 0;
+                        if (!isFinite(v)) v = 0;
+                    } catch (e) { u = 0; v = 0; }
+                    return { X: p.X + u, Y: p.Y + v };
+                });
+                drawPolygon(transformed, '#f1f5f9');
+            }
+
+            ctxEl.fillStyle = '#eab308';
+            ctxEl.font = '12px sans-serif';
+            ctxEl.textAlign = 'center';
+            const originPx = toPixel(0, 0);
+            ctxEl.fillText('O', originPx.x, originPx.y + 16);
+        }
+
+        // Compile the equations once, then redraw all three canvases (lattice,
+        // square, circle) so they always stay in sync with the same field.
+        const strainBoxes = {
+            exx: document.getElementById('strain-exx'),
+            exy: document.getElementById('strain-exy'),
+            eyx: document.getElementById('strain-eyx'),
+            eyy: document.getElementById('strain-eyy')
+        };
+
+        function updateStrainDisplay(uAst, vAst, compileErr) {
+            if (compileErr) {
+                Object.values(strainBoxes).forEach(el => { el.textContent = '\u2014'; el.title = ''; });
+                return;
+            }
+            try {
+                strainBoxes.exx.textContent = symbolicDerivative(uAst, 'X');
+                strainBoxes.exy.textContent = symbolicDerivative(uAst, 'Y');
+                strainBoxes.eyx.textContent = symbolicDerivative(vAst, 'X');
+                strainBoxes.eyy.textContent = symbolicDerivative(vAst, 'Y');
+                Object.values(strainBoxes).forEach(el => { el.title = ''; });
+            } catch (err) {
+                Object.values(strainBoxes).forEach(el => { el.textContent = 'n/a'; el.title = err.message; });
+            }
+        }
+
+        const prettyUEl = document.getElementById('pretty-u');
+        const prettyVEl = document.getElementById('pretty-v');
+
+        function updatePrettyEquationDisplay(uAst, vAst, compileErr) {
+            if (compileErr) {
+                prettyUEl.textContent = '\u2014';
+                prettyVEl.textContent = '\u2014';
+                return;
+            }
+            try {
+                prettyUEl.innerHTML = prettyStringify(uAst);
+                prettyVEl.innerHTML = prettyStringify(vAst);
+            } catch (err) {
+                prettyUEl.textContent = 'n/a';
+                prettyVEl.textContent = 'n/a';
+            }
+        }
+
+        function redrawAll() {
+            const { uAst, vAst, error } = compileCurrentEquations();
+            updateEquationErrorDisplay(error);
+            updateStrainDisplay(uAst, vAst, error);
+            updatePrettyEquationDisplay(uAst, vAst, error);
+
+            drawLatticeCanvas(uAst, vAst, error);
+
+            const showShapes = showShapesInput.checked;
+            squareShapeBlock.style.display = showShapes ? '' : 'none';
+            circleShapeBlock.style.display = showShapes ? '' : 'none';
+
+            if (showShapes) {
+                const k1 = parseFloat(k1Input.value);
+                const k2 = parseFloat(k2Input.value);
+                const L = DOMAIN_L; // same fixed world domain used by every canvas
+                const n = Math.max(4, parseInt(numBoundaryPointsInput.value) || 32);
+                const size = parseFloat(shapeSizeInput.value) || 100;
+                const showOriginal = showOriginalInput.checked;
+                const showTransformed = showTransformedInput.checked;
+
+                const squarePts = computeSquareBoundary(n, size);
+                const circlePts = computeCircleBoundary(n, size);
+                drawShapeOutline(squareCanvas, squareCtx, squarePts, uAst, vAst, error, k1, k2, L, showOriginal, showTransformed);
+                drawShapeOutline(circleCanvas, circleCtx, circlePts, uAst, vAst, error, k1, k2, L, showOriginal, showTransformed);
+            }
+        }
+
+        pointSizeInput.addEventListener('input', redrawAll);
+        numBoundaryPointsInput.addEventListener('input', redrawAll);
+        shapeSizeInput.addEventListener('input', redrawAll);
+        k1Input.addEventListener('input', () => { updateCoefficientLabels(); redrawAll(); });
+        k2Input.addEventListener('input', () => { updateCoefficientLabels(); redrawAll(); });
+        showOriginalInput.addEventListener('change', redrawAll);
+        showTransformedInput.addEventListener('change', redrawAll);
+        showShapesInput.addEventListener('change', redrawAll);
+        uEquationInput.addEventListener('input', redrawAll);
+        vEquationInput.addEventListener('input', redrawAll);
+
+        const resetButton = document.getElementById('resetButton');
+        resetButton.addEventListener('click', () => {
+            k1Input.value = 0;
+            k2Input.value = 0;
+            updateCoefficientLabels();
+            redrawAll();
+        });
+
+        updateCoefficientLabels();
+        redrawAll();
+  </script>
+</body>
+</html>

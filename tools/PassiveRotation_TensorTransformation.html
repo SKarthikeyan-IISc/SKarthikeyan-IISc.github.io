@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Passive Rotation Matrix and Tensor Transformation | Teaching Tools</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .side { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; width: 100%; }
+    .side .col { flex: 1 1 320px; min-width: 0; }
+    .side .col.wide { flex: 2 1 420px; }
+    .sec-title { font-size: 0.78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 14px 0 6px; }
+    .sec-title:first-child { margin-top: 0; }
+    .dirrow { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 5px 0; font-size: 0.88rem; color: #ccc; }
+    .dirrow .lab { min-width: 62px; }
+    .dirrow input[type=number] { width: 58px; }
+    .dirrow .br { font-size: 1.2rem; color: var(--muted); }
+    .latt input[type=number] { width: 62px; }
+    .latt { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 0.88rem; color: #ccc; }
+    .msg { background: #3a1d1d; border: 1px solid #7f2f2f; color: #fecaca; border-radius: 6px; padding: 8px 12px; font-size: 0.88rem; margin-top: 10px; display: none; }
+    .ok { color: #34d399; }
+    .readout { font-size: 0.88rem; color: #ccc; line-height: 1.7; }
+    .readout b { color: #fff; }
+    table.data td.num { font-family: ui-monospace, Menlo, Consolas, monospace; }
+    .tblock { display: inline-block; vertical-align: top; margin: 0 10px 10px 0; }
+    .tblock .cap { font-size: 0.78rem; color: var(--muted); margin-bottom: 3px; }
+    .tgrid { display: grid; grid-template-columns: repeat(3, max-content); gap: 4px 14px; justify-content: start; }
+    .side.stack .col, .side.stack .col.wide { flex: 1 1 100%; }
+    .panel .readout, #voigtBox { align-self: stretch; text-align: left; }
+    table.tc { border-collapse: collapse; }
+    table.tc td { padding: 2px; }
+    table.tc input[type=number] { width: 66px; padding: 4px 5px; font-size: 0.85rem; }
+    table.tc td.v { width: 66px; padding: 5px 6px; text-align: right; border: 1px solid var(--line); background: var(--page); color: #fff; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.82rem; }
+    canvas#axesCanvas { width: 100%; height: 340px; display: block; background: #000; border-radius: 6px; touch-action: none; cursor: grab; }
+    .rotrow { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 5px 0; font-size: 0.88rem; color: #ccc; }
+    .rotrow input[type=number] { width: 58px; }
+    .rotrow input.deg { width: 70px; }
+    .ctl select { max-width: 100%; min-width: 0; }
+    button.small { padding: 4px 10px; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Passive Rotation Matrix and Tensor Transformation</h1>
+  <p class="subtitle">Find the matrix <i>a</i> that takes components from one coordinate system to another, from crystallographic directions or from axis&ndash;angle rotations, and use it to transform tensors of rank 1, 2, 3 and 4.</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>Lattice:</strong> choose a crystal system, or edit <i>a</i>, <i>b</i>, <i>c</i>, &alpha;, &beta;, &gamma;. Directions are entered as three-index [<i>uvw</i>] in the basis of the lattice vectors. For a cubic crystal this is the same as Cartesian components along the cube edges.</li>
+        <li><strong>Initial coordinate system:</strong> for each axis <i>x</i>, <i>y</i>, <i>z</i>, enter the crystallographic direction that is parallel to it. The three directions must be mutually perpendicular and form a right-handed set; tick <em>complete <i>z</i> from <i>x</i> &times; <i>y</i></em> to have the third axis found for you.</li>
+        <li><strong>Final coordinate system:</strong> choose how it is specified. <em>(a) Crystallographic directions</em>: enter the directions parallel to <i>x&prime;</i>, <i>y&prime;</i>, <i>z&prime;</i>. <em>(b) Axis&ndash;angle rotations</em>: enter one or more rotations, each an axis and an angle in degrees, applied in the order listed. The coordinate system is turned by the angle, counter-clockwise (right-hand rule) when looking from the tip of the axis towards the origin. The axis can be given as a crystal direction [<i>uvw</i>], as components along the initial axes (both fixed in space), or as components along the current, rotating axes.</li>
+        <li><strong>Results:</strong> the passive rotation matrix <i>a</i> (each row is a new axis written in the old axes), checks that it is a proper rotation, the equivalent single rotation, the new axes as crystal directions, and a drawing of the old (blue) and new (orange) axes against the unit cell. Drag the drawing to turn the view.</li>
+        <li><strong>Tensors:</strong> choose the rank, load an example or type the components in the initial system; the components in the new system are computed at once. The norm of the tensor is unchanged by a rotation, which gives a quick check. For a rank-4 tensor the 6&times;6 Voigt form can also be shown.</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="tool">
+
+    <div class="panel wide">
+      <h3>1. Coordinate systems and the rotation matrix</h3>
+      <div class="side">
+        <div class="col">
+          <div class="sec-title">Lattice</div>
+          <div class="latt">
+            <select id="crystalSystem">
+              <option value="cubic">Cubic</option>
+              <option value="tetragonal">Tetragonal</option>
+              <option value="hexagonal">Hexagonal</option>
+              <option value="orthorhombic">Orthorhombic</option>
+              <option value="monoclinic">Monoclinic</option>
+              <option value="triclinic">Triclinic</option>
+            </select>
+            <label><i>a</i> <input type="number" id="la" value="1" step="any" min="0.01"></label>
+            <label><i>b</i> <input type="number" id="lb" value="1" step="any" min="0.01"></label>
+            <label><i>c</i> <input type="number" id="lc" value="1" step="any" min="0.01"></label>
+            <label>&alpha; <input type="number" id="lal" value="90" step="any"></label>
+            <label>&beta; <input type="number" id="lbe" value="90" step="any"></label>
+            <label>&gamma; <input type="number" id="lga" value="90" step="any"></label>
+          </div>
+
+          <div class="sec-title">Initial coordinate system (crystal directions parallel to the axes)</div>
+          <div id="initRows"></div>
+          <label class="toggle-group"><input type="checkbox" id="initComplete"> complete <i>z</i> from <i>x</i> &times; <i>y</i></label>
+
+          <div class="sec-title">Final coordinate system</div>
+          <div class="ctl" style="margin-bottom:8px"><label for="modeSelect">Specify by</label>
+            <select id="modeSelect">
+              <option value="dirs">(a) Crystallographic directions</option>
+              <option value="rots">(b) Axis&ndash;angle rotations</option>
+            </select>
+          </div>
+          <div id="modeA">
+            <div id="finRows"></div>
+            <label class="toggle-group"><input type="checkbox" id="finComplete"> complete <i>z&prime;</i> from <i>x&prime;</i> &times; <i>y&prime;</i></label>
+          </div>
+          <div id="modeB" style="display:none">
+            <div class="ctl" style="margin-bottom:8px"><label for="axisType">Axis given as</label>
+              <select id="axisType">
+                <option value="uvw">crystal direction [uvw]</option>
+                <option value="init">components along the initial axes (fixed)</option>
+                <option value="cur">components along the current (rotating) axes</option>
+              </select>
+            </div>
+            <div id="rotRows"></div>
+            <button type="button" id="addRot" class="secondary small">Add rotation</button>
+          </div>
+          <div class="msg" id="errBox"></div>
+        </div>
+        <div class="col wide">
+          <canvas id="axesCanvas"></canvas>
+          <div style="margin-top:6px"><button type="button" id="resetView" class="secondary small">Reset view</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel wide">
+      <h3>Passive rotation matrix <i>a</i></h3>
+      <div class="side">
+        <div class="col">
+          <table class="data" id="aTable">
+            <thead><tr><th></th><th><i>x</i></th><th><i>y</i></th><th><i>z</i></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="readout" style="margin-top:8px" id="aChecks"></div>
+        </div>
+        <div class="col">
+          <div class="readout" id="aReadout"></div>
+          <table class="data" id="axesTable" style="margin-top:8px">
+            <thead><tr><th>New axis</th><th>Crystal direction</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel wide">
+      <h3>2. Transformation of a tensor</h3>
+      <div class="ctl-grid" style="margin-bottom:12px">
+        <div class="ctl"><label for="rankSelect">Rank</label>
+          <select id="rankSelect">
+            <option value="1">1 (vector)</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </div>
+        <div class="ctl"><label for="presetSelect">Example</label><select id="presetSelect"></select></div>
+        <div class="ctl"><button type="button" id="clearT" class="secondary">Set all to zero</button></div>
+        <div class="ctl" id="voigtCtl"><label class="toggle-group"><input type="checkbox" id="showVoigt" checked> Show 6&times;6 Voigt form (rank 4)</label></div>
+      </div>
+      <div class="readout" id="presetNote" style="margin:-4px 0 10px"></div>
+      <div class="side" id="tside">
+        <div class="col wide">
+          <div class="sec-title">Components in the initial system, <i>T</i></div>
+          <div id="tin"></div>
+        </div>
+        <div class="col wide">
+          <div class="sec-title">Components in the new system, <i>T&prime;</i></div>
+          <div id="tout"></div>
+        </div>
+      </div>
+      <div class="readout" style="margin-top:8px" id="tChecks"></div>
+      <div id="voigtBox" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <details class="note">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <h4>Passive rotation and the matrix <i>a</i></h4>
+      <p>A <em>passive</em> rotation turns the coordinate system and leaves the physical object (a vector, a stress, a crystal) where it is. Only the numbers used to describe it change. If the unit vectors of the new axes are \(\mathbf{e}'_i\) and those of the old axes are \(\mathbf{e}_j\), the matrix of direction cosines</p>
+      <div class="eq">\( a_{ij} = \mathbf{e}'_i \cdot \mathbf{e}_j = \cos\angle(x'_i, x_j) \)</div>
+      <p>carries the components from the old to the new system. Row \(i\) of \(a\) is the new axis \(x'_i\) written in the old axes, and column \(j\) is the old axis \(x_j\) written in the new axes. Because both sets of axes are orthonormal and right-handed, \(a\) is a proper rotation:</p>
+      <div class="eq">\( a\,a^{T} = I, \qquad \det a = +1, \qquad a^{-1} = a^{T} \)</div>
+      <p>An <em>active</em> rotation matrix \(R\), which turns the object by the same angle, is the transpose of the passive one: \(a = R^{T}\). Using the wrong one of the two gives the inverse rotation.</p>
+
+      <h4>From crystallographic directions</h4>
+      <p>A direction \([uvw]\) is the vector \(u\mathbf{a}+v\mathbf{b}+w\mathbf{c}\) in the lattice basis. Writing each direction in a common Cartesian frame fixed to the crystal (here \(\mathbf{a}\parallel X\) and \(\mathbf{b}\) in the \(XY\) plane) and normalising it gives the rows of two matrices: \(E_i\) for the initial axes and \(E_f\) for the final axes. A vector with components \(v\) in the initial system has components \(E_f E_i^{T} v\) in the final one, so</p>
+      <div class="eq">\( a = E_f\,E_i^{T} \)</div>
+      <p>If the initial axes are the cube edges, \(E_i=I\) and the rows of \(a\) are simply the normalised new directions. For example, \(x'\parallel[1\bar{1}0]\), \(y'\parallel[11\bar{2}]\), \(z'\parallel[111]\) gives rows \((1,-1,0)/\sqrt2\), \((1,1,-2)/\sqrt6\) and \((1,1,1)/\sqrt3\). In a non-cubic lattice the directions \([uvw]\) are generally not perpendicular even when the indices look orthogonal, and the tool checks this with the lattice metric. The direction normal to the plane \((hkl)\) equals \([hkl]\) only in a cubic crystal.</p>
+
+      <h4>From axis&ndash;angle rotations</h4>
+      <p>Turning the coordinate system by \(\theta\) about the unit axis \(\mathbf{n}\) (counter-clockwise looking from the tip of \(\mathbf{n}\)) gives the passive matrix</p>
+      <div class="eq">\( a_{ij} = \cos\theta\,\delta_{ij} + (1-\cos\theta)\,n_i n_j + \sin\theta\,\varepsilon_{ijk} n_k \)</div>
+      <p>For a rotation about \(z\) this is \(a=\begin{pmatrix}\cos\theta & \sin\theta & 0\\ -\sin\theta & \cos\theta & 0\\ 0&0&1\end{pmatrix}\). With several rotations the tool follows the axes themselves: each rotation turns the three axes about a fixed physical line, so the matrix of the whole sequence is \(a = E_f E_i^{T}\) with the final axes found after the last step. When all axes are fixed in space, the matrix of a sequence of rotations is \(a = a_1 a_2 \cdots a_n\). When each axis is given in the current, rotating system, it is \(a = a_n \cdots a_2 a_1\). The order matters, because rotations do not commute. Any sequence is equivalent to a single rotation, with \(\cos\theta=(\operatorname{tr}a-1)/2\) and the axis given by the antisymmetric part of \(a\).</p>
+
+      <h4>Transformation of tensors</h4>
+      <p>The same matrix transforms the components of a tensor of any rank, with one factor of \(a\) for each index (the summation convention is used):</p>
+      <div class="eq">\( v'_i = a_{ij}\,v_j \)</div>
+      <div class="eq">\( T'_{ij} = a_{ik}\,a_{jl}\,T_{kl} \)</div>
+      <div class="eq">\( T'_{ijk} = a_{il}\,a_{jm}\,a_{kn}\,T_{lmn} \)</div>
+      <div class="eq">\( T'_{ijkl} = a_{ip}\,a_{jq}\,a_{kr}\,a_{ls}\,T_{pqrs} \)</div>
+      <p>The tensors have \(3\), \(9\), \(27\) and \(81\) components, which symmetry reduces: a symmetric second-rank tensor (stress, strain, conductivity) has 6 independent components, the elastic stiffness \(C_{ijkl}\) has 21 in the general case and 3 in a cubic crystal. Examples are rank 1: force, polarisation; rank 2: stress, strain, thermal conductivity; rank 3: the piezoelectric tensor \(d_{ijk}\); rank 4: the elastic stiffness and compliance. The inverse transformation uses \(a^{T}\) in place of \(a\).</p>
+      <p>Because \(a\) is orthogonal, quantities built by full contraction do not change, for example the trace of a second-rank tensor and the norm \(\sqrt{T_{ij\ldots}T_{ij\ldots}}\) of a tensor of any rank. When a tensor is carried into a coordinate system that is a symmetry operation of the crystal, its components do not change. This is a useful test: the cubic stiffness is unchanged by a turn of 90&deg; about a cube edge, and the piezoelectric tensor of quartz (point group 32) by a turn of 120&deg; about \(z\) and of 180&deg; about \(x\).</p>
+      <p>The Voigt form writes a tensor that is symmetric in \(ij\) and in \(kl\) as a \(6\times6\) matrix, with the index pairs \(11,22,33,23,13,12\) written as \(1,\ldots,6\). It is only a way to display the components: it does not transform by multiplication with \(a\), and the transformation is always done on the full tensor.</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt>Passive rotation</dt><dd>A turn of the coordinate system with the physical object left fixed. Only its components change.</dd>
+        <dt>Active rotation</dt><dd>A turn of the object with the coordinate system left fixed. Its matrix is the transpose of the passive matrix for the same angle.</dd>
+        <dt>Direction cosines</dt><dd>The cosines of the angles between the new and old axes. They are the elements <i>a<sub>ij</sub></i> of the passive rotation matrix.</dd>
+        <dt>Proper rotation</dt><dd>An orthogonal matrix with determinant +1, which keeps the handedness of the axes.</dd>
+        <dt>Axis&ndash;angle pair</dt><dd>A rotation described by a unit vector (the axis) and an angle about it, taken as positive in the right-hand sense.</dd>
+        <dt>Tensor rank</dt><dd>The number of indices, and so of factors of <i>a</i> in the transformation law.</dd>
+        <dt>Voigt notation</dt><dd>A compact 6&times;6 way to write a fourth-rank tensor that is symmetric in its first and in its last pair of indices.</dd>
+        <dt>[<i>uvw</i>]</dt><dd>A crystal direction, written in the basis of the lattice vectors.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /* Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved. */
+    const $ = id => document.getElementById(id);
+    const rad = d => d * Math.PI / 180;
+    const dot = (u, v) => u[0] * v[0] + u[1] * v[1] + u[2] * v[2];
+    const cross = (u, v) => [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+    const norm = v => Math.hypot(v[0], v[1], v[2]);
+    const mv = (A, v) => A.map(r => dot(r, v));
+    const tr = A => A[0].map((_, j) => A.map(r => r[j]));
+    const mm = (A, B) => A.map(r => B[0].map((_, j) => r[0] * B[0][j] + r[1] * B[1][j] + r[2] * B[2][j]));
+    const det3 = A => dot(A[0], cross(A[1], A[2]));
+    function inv3(A) {
+      const d = det3(A);
+      const c0 = cross(A[1], A[2]), c1 = cross(A[2], A[0]), c2 = cross(A[0], A[1]);
+      return tr([c0, c1, c2]).map(r => r.map(v => v / d));   // inverse = adj / det
+    }
+    const ID3 = () => [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+    const clean = v => Math.abs(v) < 5e-11 ? 0 : v;
+    const fmt = v => { v = clean(v); return (+v.toFixed(4)).toString().replace('-', '−'); };
+    const numv = id => { const v = parseFloat($(id).value); return isNaN(v) ? 0 : v; };
+
+    /* ---------- lattice: columns of M are the lattice vectors a, b, c in a Cartesian frame (a || X, b in XY) ---------- */
+    const SYSTEMS = {
+      cubic: [1, 1, 1, 90, 90, 90], tetragonal: [1, 1, 1.5, 90, 90, 90], hexagonal: [1, 1, 1.6, 90, 90, 120],
+      orthorhombic: [1, 1.2, 1.5, 90, 90, 90], monoclinic: [1, 1.2, 1.5, 90, 105, 90], triclinic: [1, 1.2, 1.5, 80, 95, 100]
+    };
+    function latticeMatrix() {
+      const a = numv('la'), b = numv('lb'), c = numv('lc');
+      const ca = Math.cos(rad(numv('lal'))), cb = Math.cos(rad(numv('lbe'))), cg = Math.cos(rad(numv('lga'))), sg = Math.sin(rad(numv('lga')));
+      if (a <= 0 || b <= 0 || c <= 0 || Math.abs(sg) < 1e-6) return null;
+      const cy = (ca - cb * cg) / sg, cz2 = 1 - cb * cb - cy * cy;
+      if (cz2 <= 1e-9) return null;
+      return [[a, b * cg, c * cb], [0, b * sg, c * cy], [0, 0, c * Math.sqrt(cz2)]];
+    }
+
+    /* ---------- direction rows ---------- */
+    function dirRows(container, prefix, labels, defaults) {
+      container.innerHTML = labels.map((lab, i) =>
+        `<div class="dirrow"><span class="lab">${lab} &#8741;</span><span class="br">[</span>` +
+        [0, 1, 2].map(k => `<input type="number" step="any" id="${prefix}${i}${k}" value="${defaults[i][k]}">`).join('') +
+        `<span class="br">]</span></div>`).join('');
+    }
+    dirRows($('initRows'), 'di', ['<i>x</i>', '<i>y</i>', '<i>z</i>'], [[1, 0, 0], [0, 1, 0], [0, 0, 1]]);
+    dirRows($('finRows'), 'df', ['<i>x&prime;</i>', '<i>y&prime;</i>', '<i>z&prime;</i>'], [[1, -1, 0], [1, 1, -2], [1, 1, 1]]);
+
+    const readDirs = prefix => [0, 1, 2].map(i => [0, 1, 2].map(k => numv(prefix + i + k)));
+
+    function toIndices(v) {                       // smallest integer indices, if there are any
+      const m = Math.max(...v.map(Math.abs));
+      if (m < 1e-9) return '[0 0 0]';
+      const u = v.map(x => x / m);
+      for (let k = 1; k <= 24; k++) {
+        const w = u.map(x => x * k);
+        if (w.every(x => Math.abs(x - Math.round(x)) < 2e-3)) return '[' + w.map(x => { const r = Math.round(x); return r < 0 ? '−' + (-r) : '' + r; }).join(' ') + ']';
+      }
+      return '[' + u.map(x => fmt(x)).join(' ') + ']';
+    }
+
+    /* Frame (rows = unit vectors of the axes in the crystal Cartesian frame) from three crystal directions */
+    function frameFrom(dirs, complete, M, label) {
+      const K = dirs.map(d => mv(M, d));
+      if (K[0].some(isNaN)) return { err: label + ': invalid numbers.' };
+      if (norm(K[0]) < 1e-9 || norm(K[1]) < 1e-9) return { err: `${label}: the x and y directions must not be [0 0 0].` };
+      const cs = dot(K[0], K[1]) / (norm(K[0]) * norm(K[1]));
+      if (Math.abs(cs) > 1e-5) return { err: `${label}: the x and y directions are not perpendicular in this lattice (angle ${(Math.acos(cs) * 180 / Math.PI).toFixed(2)}°).` };
+      if (complete) K[2] = cross(K[0], K[1]);
+      else {
+        if (norm(K[2]) < 1e-9) return { err: `${label}: the z direction must not be [0 0 0].` };
+        if (Math.abs(dot(K[0], K[2])) / (norm(K[0]) * norm(K[2])) > 1e-5 || Math.abs(dot(K[1], K[2])) / (norm(K[1]) * norm(K[2])) > 1e-5)
+          return { err: `${label}: the z direction is not perpendicular to x and y.` };
+      }
+      const E = K.map(v => v.map(x => x / norm(v)));
+      if (det3(E) < 0) return { err: `${label}: the three directions form a left-handed set. Reverse one of them (or tick the box to complete z).` };
+      return { E };
+    }
+
+    /* ---------- rotations ---------- */
+    const rots = [{ n: [0, 0, 1], deg: 45 }];
+    function activeR(n, th) {                      // Rodrigues, active rotation matrix
+      const c = Math.cos(th), s = Math.sin(th), t = 1 - c, [x, y, z] = n;
+      return [[c + t * x * x, t * x * y - s * z, t * x * z + s * y],
+              [t * x * y + s * z, c + t * y * y, t * y * z - s * x],
+              [t * x * z - s * y, t * y * z + s * x, c + t * z * z]];
+    }
+    function renderRots() {
+      $('rotRows').innerHTML = rots.map((r, i) =>
+        `<div class="rotrow"><span>${i + 1}.</span><span class="br">axis (</span>` +
+        [0, 1, 2].map(k => `<input type="number" step="any" data-i="${i}" data-k="${k}" class="ax" value="${r.n[k]}">`).join('') +
+        `<span class="br">)</span><span>angle</span><input type="number" step="any" class="deg" data-i="${i}" value="${r.deg}"><span>&deg;</span>` +
+        (rots.length > 1 ? `<button type="button" class="secondary small rm" data-i="${i}">Remove</button>` : '') + `</div>`).join('');
+    }
+    $('rotRows').addEventListener('input', e => {
+      const t = e.target, i = +t.dataset.i;
+      if (t.classList.contains('ax')) rots[i].n[+t.dataset.k] = parseFloat(t.value) || 0;
+      else if (t.classList.contains('deg')) rots[i].deg = parseFloat(t.value) || 0;
+      update();
+    });
+    $('rotRows').addEventListener('click', e => { if (e.target.classList.contains('rm')) { rots.splice(+e.target.dataset.i, 1); renderRots(); update(); } });
+    $('addRot').addEventListener('click', () => { if (rots.length < 6) { rots.push({ n: [0, 0, 1], deg: 90 }); renderRots(); update(); } });
+    renderRots();
+
+    function axisAngle(a) {
+      const th = Math.acos(Math.max(-1, Math.min(1, (a[0][0] + a[1][1] + a[2][2] - 1) / 2)));
+      if (th < 1e-7) return { th: 0, n: null };
+      let n;
+      if (Math.PI - th < 1e-6) {                    // 180 degrees: a = 2 n n^T - I
+        const d = [(a[0][0] + 1) / 2, (a[1][1] + 1) / 2, (a[2][2] + 1) / 2], m = d.indexOf(Math.max(...d));
+        n = [0, 0, 0]; n[m] = Math.sqrt(d[m]);
+        for (let k = 0; k < 3; k++) if (k !== m) n[k] = a[m][k] / (2 * n[m]);
+      } else {
+        const s = 2 * Math.sin(th);
+        n = [(a[1][2] - a[2][1]) / s, (a[2][0] - a[0][2]) / s, (a[0][1] - a[1][0]) / s];
+      }
+      return { th, n };
+    }
+
+    /* ---------- main computation of the matrix ---------- */
+    let state = null;       // { a, Ei, Ef, M, nK }
+    function computeMatrix() {
+      const M = latticeMatrix();
+      if (!M) return { err: 'The lattice parameters do not describe a valid cell.' };
+      const ini = frameFrom(readDirs('di'), $('initComplete').checked, M, 'Initial system');
+      if (ini.err) return ini;
+      const Ei = ini.E;
+      let Ef, nK = null;
+      if ($('modeSelect').value === 'dirs') {
+        const fin = frameFrom(readDirs('df'), $('finComplete').checked, M, 'Final system');
+        if (fin.err) return fin;
+        Ef = fin.E;
+      } else {
+        let E = Ei.map(r => r.slice());
+        const type = $('axisType').value;
+        for (let i = 0; i < rots.length; i++) {
+          const r = rots[i];
+          if (norm(r.n) < 1e-9) return { err: `Rotation ${i + 1}: the axis must not be zero.` };
+          let nk;
+          if (type === 'uvw') nk = mv(M, r.n);
+          else if (type === 'init') nk = mv(tr(Ei), r.n);
+          else nk = mv(tr(E), r.n);
+          nk = nk.map(x => x / norm(nk));
+          if (i === 0) nK = nk;
+          const R = activeR(nk, rad(r.deg));
+          E = mm(E, tr(R));                          // the axes (rows) are turned by R: E' = E R^T
+        }
+        Ef = E;
+      }
+      const a = mm(Ef, tr(Ei));
+      return { a, Ei, Ef, M, nK };
+    }
+
+    function renderMatrix(s) {
+      const body = $('aTable').querySelector('tbody');
+      if (!s) { body.innerHTML = '<tr><td colspan="4">&ndash;</td></tr>'; $('aChecks').innerHTML = ''; $('aReadout').innerHTML = ''; $('axesTable').querySelector('tbody').innerHTML = ''; return; }
+      const names = ['<i>x&prime;</i>', '<i>y&prime;</i>', '<i>z&prime;</i>'];
+      body.innerHTML = s.a.map((r, i) => `<tr><td>${names[i]}</td>${r.map(v => `<td class="num">${fmt(v)}</td>`).join('')}</tr>`).join('');
+      const aat = mm(s.a, tr(s.a)); let dev = 0;
+      for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) dev = Math.max(dev, Math.abs(aat[i][j] - (i === j ? 1 : 0)));
+      $('aChecks').innerHTML = `det <i>a</i> = <b>${fmt(det3(s.a))}</b> &nbsp;&middot;&nbsp; max |<i>a a<sup>T</sup></i> &minus; <i>I</i>| = <b>${dev.toExponential(1)}</b> <span class="ok">${dev < 1e-9 && Math.abs(det3(s.a) - 1) < 1e-9 ? '&#10003; proper rotation' : ''}</span><br>Row <i>i</i> is the new axis <i>x&prime;<sub>i</sub></i> written in the old axes; <i>a<sub>ij</sub></i> = cos(angle between <i>x&prime;<sub>i</sub></i> and <i>x<sub>j</sub></i>).`;
+      const aa = axisAngle(s.a);
+      let txt;
+      if (!aa.n) txt = 'Equivalent single rotation: <b>none</b> (the two systems coincide).';
+      else {
+        const nK = mv(tr(s.Ei), aa.n);
+        const uvw = mv(inv3(s.M), nK);
+        txt = `Equivalent single rotation of the axes: <b>${(aa.th * 180 / Math.PI).toFixed(3)}&deg;</b> about the axis <b>(${aa.n.map(fmt).join(', ')})</b> in the initial axes, which is <b>${toIndices(uvw)}</b> as a crystal direction. The axis has the same components in the old and the new system.`;
+      }
+      $('aReadout').innerHTML = txt;
+      const Minv = inv3(s.M);
+      $('axesTable').querySelector('tbody').innerHTML = s.Ef.map((v, i) => `<tr><td>${names[i]}</td><td>${toIndices(mv(Minv, v))}</td></tr>`).join('');
+    }
+
+    /* ---------- drawing ---------- */
+    const view = { yaw: rad(-35), pitch: rad(22) };
+    const DEF_VIEW = { yaw: view.yaw, pitch: view.pitch };
+    function proj(v) {
+      const cy = Math.cos(view.yaw), sy = Math.sin(view.yaw), cp = Math.cos(view.pitch), sp = Math.sin(view.pitch);
+      const x1 = cy * v[0] - sy * v[1], y1 = sy * v[0] + cy * v[1], z1 = v[2];
+      return { x: x1, y: sp * y1 + cp * z1, d: cp * y1 - sp * z1 };
+    }
+    function drawScene() {
+      const cv = $('axesCanvas'), dpr = window.devicePixelRatio || 1;
+      const r = cv.getBoundingClientRect();
+      if (r.width < 10) return;
+      cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+      const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const W = r.width, H = r.height; g.clearRect(0, 0, W, H);
+      const S = 0.34 * Math.min(W, H), cx = W / 2, cy = H * 0.54;
+      const P = v => { const p = proj(v); return [cx + S * p.x, cy - S * p.y]; };
+      const C = TOOL.c, ember = '#ff9a5c';
+      g.font = '13px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      const line = (a, b, col, w, dash) => { g.beginPath(); g.setLineDash(dash || []); g.strokeStyle = col; g.lineWidth = w; const p = P(a), q = P(b); g.moveTo(p[0], p[1]); g.lineTo(q[0], q[1]); g.stroke(); g.setLineDash([]); };
+      const arrow = (v, col, w, label) => {
+        line([0, 0, 0], v, col, w);
+        const p0 = P([0, 0, 0]), p1 = P(v), ang = Math.atan2(p1[1] - p0[1], p1[0] - p0[0]);
+        g.fillStyle = col; g.beginPath(); g.moveTo(p1[0], p1[1]);
+        g.lineTo(p1[0] - 10 * Math.cos(ang - 0.35), p1[1] - 10 * Math.sin(ang - 0.35));
+        g.lineTo(p1[0] - 10 * Math.cos(ang + 0.35), p1[1] - 10 * Math.sin(ang + 0.35)); g.closePath(); g.fill();
+        g.fillText(label, p1[0] + 14 * Math.cos(ang), p1[1] + 14 * Math.sin(ang));
+      };
+      g.fillStyle = C.muted; g.textAlign = 'left';
+      g.fillText('blue: initial x, y, z    orange: new x′, y′, z′    grey: unit cell    green: rotation axis', 10, 16);
+      g.textAlign = 'center';
+      if (!state) { g.fillStyle = C.muted; g.fillText('Fix the input to see the axes.', W / 2, H / 2); return; }
+      // unit cell, scaled to fit
+      const M = state.M, cols = [0, 1, 2].map(j => [M[0][j], M[1][j], M[2][j]]), sc = 0.95 / Math.max(...cols.map(norm));
+      const corner = (i, j, k) => [0, 1, 2].map(m => sc * (i * cols[0][m] + j * cols[1][m] + k * cols[2][m]));
+      for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) {
+        line(corner(i, j, 0), corner(i, j, 1), '#4b5563', 1, [4, 4]);
+        line(corner(i, 0, j), corner(i, 1, j), '#4b5563', 1, [4, 4]);
+        line(corner(0, i, j), corner(1, i, j), '#4b5563', 1, [4, 4]);
+      }
+      // rotation axis
+      const aa = axisAngle(state.a);
+      const nAx = state.nK || (aa.n ? mv(tr(state.Ei), aa.n) : null);
+      if (nAx) line(nAx.map(x => -1.15 * x), nAx.map(x => 1.15 * x), C.green, 1.5, [6, 4]);
+      // frames, drawn back to front by depth of the tips
+      const items = [];
+      ['x', 'y', 'z'].forEach((n, i) => items.push({ v: state.Ei[i], col: C.blue, w: 2, lab: n, d: proj(state.Ei[i]).d }));
+      ['x′', 'y′', 'z′'].forEach((n, i) => items.push({ v: state.Ef[i], col: ember, w: 3, lab: n, d: proj(state.Ef[i]).d }));
+      items.sort((p, q) => q.d - p.d).forEach(it => arrow(it.v.map(x => x * 1.0), it.col, it.w, it.lab));
+    }
+    (function () {
+      const cv = $('axesCanvas'); let drag = null;
+      cv.addEventListener('pointerdown', e => { drag = [e.clientX, e.clientY]; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; });
+      cv.addEventListener('pointermove', e => {
+        if (!drag) return;
+        view.yaw += (e.clientX - drag[0]) * 0.01; view.pitch = Math.max(-1.5, Math.min(1.5, view.pitch + (e.clientY - drag[1]) * 0.01));
+        drag = [e.clientX, e.clientY]; drawScene();
+      });
+      const end = () => { drag = null; cv.style.cursor = 'grab'; };
+      cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+      $('resetView').addEventListener('click', () => { view.yaw = DEF_VIEW.yaw; view.pitch = DEF_VIEW.pitch; drawScene(); });
+      window.addEventListener('resize', drawScene);
+    })();
+
+    /* ---------- tensors ---------- */
+    const delta = (i, j) => i === j ? 1 : 0;
+    function build(rank, f) { const n = Math.pow(3, rank), T = new Array(n); for (let idx = 0; idx < n; idx++) { const ix = []; let r = idx; for (let k = 0; k < rank; k++) { ix.unshift(r % 3); r = Math.floor(r / 3); } T[idx] = f(...ix); } return T; }
+    const PRESETS = {
+      1: [['Along x: (1, 0, 0)', () => build(1, i => i === 0 ? 1 : 0)], ['Example: (1, 2, 3)', () => build(1, i => i + 1)]],
+      2: [['Uniaxial stress, σ₁₁ = 100', () => build(2, (i, j) => i === 0 && j === 0 ? 100 : 0)],
+          ['Pure shear, σ₁₂ = σ₂₁ = 50', () => build(2, (i, j) => (i === 0 && j === 1) || (i === 1 && j === 0) ? 50 : 0)],
+          ['Diagonal, e.g. conductivity (1, 2, 3)', () => build(2, (i, j) => i === j ? i + 1 : 0)],
+          ['Labelled components, Tᵢⱼ = 10i + j', () => build(2, (i, j) => 10 * (i + 1) + (j + 1))]],
+      3: [['Quartz piezoelectric dᵢⱼₖ', () => { const d11 = 2.31, d14 = -0.67, T = build(3, () => 0), s = (i, j, k, v) => { T[(i * 3 + j) * 3 + k] = v; };
+            s(0, 0, 0, d11); s(0, 1, 1, -d11); s(1, 0, 1, -d11); s(1, 1, 0, -d11); s(0, 1, 2, d14 / 2); s(0, 2, 1, d14 / 2); s(1, 0, 2, -d14 / 2); s(1, 2, 0, -d14 / 2); return T; }, 'Units pC/N: d₁₁ = 2.31, d₁₄ = −0.67, with the twofold axis along x and the threefold axis along z.'],
+          ['Labelled components, Tᵢⱼₖ = 100i + 10j + k', () => build(3, (i, j, k) => 100 * (i + 1) + 10 * (j + 1) + (k + 1))]],
+      4: [['Cubic stiffness, Cu', () => { const c11 = 168.4, c12 = 121.4, c44 = 75.4;
+            return build(4, (i, j, k, l) => c12 * delta(i, j) * delta(k, l) + c44 * (delta(i, k) * delta(j, l) + delta(i, l) * delta(j, k)) + (c11 - c12 - 2 * c44) * (i === j && j === k && k === l ? 1 : 0)); }, 'Units GPa: C₁₁ = 168.4, C₁₂ = 121.4, C₄₄ = 75.4, with the cube edges along x, y, z.'],
+          ['Isotropic stiffness', () => { const lam = 121.2, mu = 80.8;
+            return build(4, (i, j, k, l) => lam * delta(i, j) * delta(k, l) + mu * (delta(i, k) * delta(j, l) + delta(i, l) * delta(j, k))); }, 'Units GPa: λ = 121.2, μ = 80.8 (about E = 210 GPa, ν = 0.3). It is unchanged by every rotation.'],
+          ['Labelled components, Tᵢⱼₖₗ = 1000i + 100j + 10k + l', () => build(4, (i, j, k, l) => 1000 * (i + 1) + 100 * (j + 1) + 10 * (k + 1) + (l + 1))]]
+    };
+    let rank = 2, T = PRESETS[2][0][1]();
+
+    function transformTensor(T, rank, a) {
+      let cur = T.slice(); const n = cur.length;
+      for (let ax = 0; ax < rank; ax++) {
+        const stride = Math.pow(3, rank - 1 - ax), out = new Array(n);
+        for (let idx = 0; idx < n; idx++) {
+          const i = Math.floor(idx / stride) % 3, base = idx - i * stride;
+          out[idx] = a[i][0] * cur[base] + a[i][1] * cur[base + stride] + a[i][2] * cur[base + 2 * stride];
+        }
+        cur = out;
+      }
+      return cur;
+    }
+
+    /* A tensor shown as blocks of 3x3 tables: rank 1 a row, rank 2 one block, rank 3 three blocks, rank 4 nine blocks */
+    function gridHTML(rank, vals, editable) {
+      const cell = idx => editable ? `<td><input type="number" step="any" data-idx="${idx}" value="${clean(vals[idx])}"></td>` : `<td class="v">${fmt(vals[idx])}</td>`;
+      const block = (base, cap) => `<div class="tblock">${cap ? `<div class="cap">${cap}</div>` : ''}<table class="tc">` +
+        [0, 1, 2].map(r => '<tr>' + [0, 1, 2].map(c => cell(base + r * 3 + c)).join('') + '</tr>').join('') + '</table></div>';
+      if (rank === 1) return `<div class="tblock"><table class="tc"><tr>${[0, 1, 2].map(cell).join('')}</tr></table></div>`;
+      if (rank === 2) return block(0, '');
+      if (rank === 3) return '<div class="tgrid">' + [0, 1, 2].map(i => block(i * 9, `<i>T<sub>${i + 1}jk</sub></i>`)).join('') + '</div>';
+      let h = '<div class="tgrid">';
+      for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) h += block((i * 3 + j) * 9, `<i>T<sub>${i + 1}${j + 1}kl</sub></i>`);
+      return h + '</div>';
+    }
+    function renderInput() { $('tside').classList.toggle('stack', rank >= 3); $('tin').innerHTML = gridHTML(rank, T, true); }
+    $('tin').addEventListener('input', e => { const i = e.target.dataset.idx; if (i !== undefined) { T[+i] = parseFloat(e.target.value) || 0; renderTensorOut(); } });
+
+    const VP = [[0, 0], [1, 1], [2, 2], [1, 2], [0, 2], [0, 1]];
+    function renderTensorOut() {
+      if (!state) { $('tout').innerHTML = '<div class="readout">&ndash;</div>'; $('tChecks').innerHTML = ''; $('voigtBox').innerHTML = ''; return; }
+      const Tp = transformTensor(T, rank, state.a);
+      $('tout').innerHTML = gridHTML(rank, Tp, false);
+      const nrm = v => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
+      let txt = `Norm of <i>T</i> = <b>${fmt(nrm(T))}</b> &nbsp;&middot;&nbsp; norm of <i>T&prime;</i> = <b>${fmt(nrm(Tp))}</b> (unchanged by a rotation)`;
+      if (rank === 2) txt += ` &nbsp;&middot;&nbsp; trace <i>T</i> = <b>${fmt(T[0] + T[4] + T[8])}</b>, trace <i>T&prime;</i> = <b>${fmt(Tp[0] + Tp[4] + Tp[8])}</b>`;
+      const same = T.every((v, i) => Math.abs(v - Tp[i]) < 1e-9 * (1 + Math.abs(v)));
+      if (same && nrm(T) > 0) txt += '<br><span class="ok">The components are unchanged: this rotation is a symmetry operation of this tensor.</span>';
+      $('tChecks').innerHTML = txt;
+      const vb = $('voigtBox');
+      if (rank === 4 && $('showVoigt').checked) {
+        const V = Tp.length ? VP.map(([i, j]) => VP.map(([k, l]) => Tp[((i * 3 + j) * 3 + k) * 3 + l])) : [];
+        let asym = 0, sc = Math.max(1e-12, ...Tp.map(Math.abs));
+        for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) for (let k = 0; k < 3; k++) for (let l = 0; l < 3; l++) {
+          const v = Tp[((i * 3 + j) * 3 + k) * 3 + l];
+          asym = Math.max(asym, Math.abs(v - Tp[((j * 3 + i) * 3 + k) * 3 + l]), Math.abs(v - Tp[((i * 3 + j) * 3 + l) * 3 + k]));
+        }
+        vb.innerHTML = `<div class="sec-title"><i>T&prime;</i> in Voigt form (index pairs 11, 22, 33, 23, 13, 12 = 1 to 6)</div><div style="overflow-x:auto"><table class="data"><tbody>` +
+          V.map(r => '<tr>' + r.map(v => `<td class="num">${fmt(v)}</td>`).join('') + '</tr>').join('') + '</tbody></table></div>' +
+          (asym > 1e-6 * sc ? '<div class="readout">This tensor is not symmetric in <i>ij</i> and <i>kl</i>, so the Voigt form shows only the first of each pair of components.</div>' : '');
+      } else vb.innerHTML = '';
+    }
+
+    function showNote() { $('presetNote').textContent = PRESETS[rank][+$('presetSelect').value || 0][2] || ''; }
+    function fillPresetMenu() {
+      $('presetSelect').innerHTML = PRESETS[rank].map((p, i) => `<option value="${i}">${p[0]}</option>`).join('');
+      showNote();
+    }
+    $('rankSelect').addEventListener('change', () => { rank = +$('rankSelect').value; fillPresetMenu(); T = PRESETS[rank][0][1](); $('voigtCtl').style.visibility = rank === 4 ? 'visible' : 'hidden'; renderInput(); renderTensorOut(); });
+    $('presetSelect').addEventListener('change', () => { T = PRESETS[rank][+$('presetSelect').value][1](); showNote(); renderInput(); renderTensorOut(); });
+    $('clearT').addEventListener('click', () => { T = new Array(Math.pow(3, rank)).fill(0); renderInput(); renderTensorOut(); });
+    $('showVoigt').addEventListener('change', renderTensorOut);
+
+    /* ---------- wiring ---------- */
+    function update() {
+      const res = computeMatrix(), box = $('errBox');
+      if (res.err) { box.textContent = res.err; box.style.display = 'block'; state = null; }
+      else { box.style.display = 'none'; state = res; }
+      renderMatrix(state); drawScene(); renderTensorOut();
+    }
+    ['initRows', 'finRows'].forEach(id => $(id).addEventListener('input', update));
+    ['initComplete', 'finComplete', 'axisType'].forEach(id => $(id).addEventListener('change', update));
+    $('modeSelect').addEventListener('change', () => { const b = $('modeSelect').value === 'rots'; $('modeA').style.display = b ? 'none' : ''; $('modeB').style.display = b ? '' : 'none'; update(); });
+    ['la', 'lb', 'lc', 'lal', 'lbe', 'lga'].forEach(id => $(id).addEventListener('input', update));
+    $('crystalSystem').addEventListener('change', () => {
+      const v = SYSTEMS[$('crystalSystem').value];
+      ['la', 'lb', 'lc', 'lal', 'lbe', 'lga'].forEach((id, i) => $(id).value = v[i]);
+      update();
+    });
+
+    fillPresetMenu(); renderInput(); $('voigtCtl').style.visibility = 'hidden';
+    update();
+  </script>
+</body>
+</html>

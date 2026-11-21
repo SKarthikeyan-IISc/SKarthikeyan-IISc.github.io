@@ -1,0 +1,113 @@
+<!doctype html>
+<!--
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="favicon.ico" sizes="48x48"><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Teaching Tools | S. Karthikeyan</title>
+<meta name="description" content="Interactive simulations of problems in materials science, by S. Karthikeyan, IISc Materials Engineering.">
+<meta name="theme-color" content="#1b1612">
+<script>document.documentElement.className+=' js'</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.area-note{margin:.2rem 0 0;color:var(--muted)}
+.sub{margin-top:2rem}
+.courses{display:block;margin-top:.8rem;font-size:.82rem;color:var(--muted)}
+.courses em{font-style:normal;margin-right:.3rem}
+.tag{display:inline-block;border:1px solid var(--rule);border-radius:999px;padding:.05rem .55rem;margin:.15rem .25rem 0 0;color:var(--ink);background:var(--bg,transparent)}
+.key{margin:0 0 1.6rem;color:var(--muted);font-size:.95rem;max-width:46rem}
+.card .go{margin-top:.5rem}
+.sub h3{font-size:1.15rem;margin:0}
+.searchbar{margin:0 0 2rem}
+.searchbar input{width:100%;max-width:34rem;box-sizing:border-box;font:inherit;padding:.7rem .95rem;border:1px solid var(--rule);border-radius:var(--radius);background:var(--card);color:var(--ink)}
+.searchbar input:focus{outline:2px solid var(--accent);outline-offset:1px}
+#empty{display:none;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="band">
+<header class="topbar"><div class="wrap"><a class="brand" href="index.html">S. Karthikeyan<small>Department of Materials Engineering, IISc</small></a><nav aria-label="Main"><ul><li><a href="index.html">Profile</a></li><li><a href="dmmg/index.html">Research</a></li><li><a href="teaching.html" aria-current="page">Teaching</a></li></ul></nav></div></header>
+<div class="pagehead"><div class="wrap"><h1>Teaching tools</h1><p class="lede">Interactive simulations of problems in materials science. Each tool is named after the problem it simulates, and has the same layout: instructions for use, the tool, the physics of the problem, and a glossary. They run in any web browser, on a computer, tablet or phone.</p></div></div>
+</div>
+<main><div class="wrap">
+
+<p class="key">Each tool is tagged with the courses it is most relevant to: <strong>UMT 205</strong> Mechanical Properties of Materials, <strong>UMT 312T</strong> Mechanical Testing and Failure of Materials, <strong>MT 204</strong> Structure and Properties of Materials, <strong>MT 209</strong> Defects in Materials. Searching for a course code also finds its tools.</p>
+
+<div class="searchbar"><input type="search" id="filter" placeholder="Search the tools, for example: vacancy, dislocation, slip, lattice" aria-label="Search the tools"></div>
+
+<section class="block area" id="deform">
+<h2>Deformation and strain</h2>
+<p class="area-note">How displacement fields change the shape of a lattice.</p>
+<div class="cards"><a class="card" href="tools/latticedeformation.html"><h3>Homogeneous Deformation of a 2D Square Lattice</h3><p>The displacement gradient matrix, and its split into stretch, shear and rotation.</p><span class="courses"><em>Relevant to</em> <span class="tag">UMT 205</span><span class="tag">MT 204</span></span><span class="go">Open the tool &rarr;</span></a><a class="card" href="tools/Affine-nonaffine_deformation.html"><h3>Affine and Non-Affine Deformation of a 2D Lattice</h3><p>Type any displacement field (u, v) and see a lattice, a square and a circle deform; compare linear and non-linear fields.</p><span class="courses"><em>Relevant to</em> <span class="tag">UMT 205</span><span class="tag">MT 204</span></span><span class="go">Open the tool &rarr;</span></a><a class="card" href="tools/PassiveRotation_TensorTransformation.html"><h3>Passive Rotation Matrix and Tensor Transformation</h3><p>The rotation matrix between two coordinate systems, from crystallographic directions or axis&ndash;angle rotations, and its use to transform tensors of rank 1 to 4.</p><span class="courses"><em>Relevant to</em> <span class="tag">UMT 205</span><span class="tag">MT 204</span></span><span class="go">Open the tool &rarr;</span></a><a class="card" href="tools/MisfitStress_EshelbyInclusion.html"><h3>Misfit Stress around a Spherical Precipitate</h3><p>Eshelby's equivalent inclusion for a misfitting sphere: the stress field of a precipitate, a solute atom or a pore, with an applied stress and different elastic constants.</p><span class="courses"><em>Relevant to</em> <span class="tag">UMT 205</span><span class="tag">MT 204</span></span><span class="go">Open the tool &rarr;</span></a><a class="card" href="tools/TopologicalConstraints_2D_Rigidity.html"><h3>Topological Constraints and Rigidity in 2D</h3><p>Why a square lattice with nearest-neighbour bonds alone is elastically unstable, by Maxwell counting of constraints, and how the same counting applies to amorphous networks.</p><span class="courses"><em>Relevant to</em> <span class="tag">UMT 205</span><span class="tag">MT 204</span></span><span class="go">Open the tool &rarr;</span></a><a class="card" href="tools/ShearModulus_CubicCrystalPlanes.html"><h3>Shear Modulus of a Cubic Crystal on (001), (011) and (111) Planes</h3><p>How the shear modulus varies with plane and direction in a cubic single crystal, from C11, C12 and C44, with the Zener ratio and the Voigt average.</p><span class="courses"><em>Relevant to</em> <span class="tag">UMT 205</span><span class="tag">MT 204</span></span><span class="go">Open the tool &rarr;</span></a></div>
+</section>
+
+<section class="block area" id="plasticity">
+<h2>Plasticity and stress-strain curves</h2>
+<p class="area-note">Hardening laws, slip, orientation and single-crystal behaviour.</p>
+<div class="cards"><a class="card" href="tools/Constitutive_equation_and_stress-strain_curves.html"><h3>Constitutive Equations: True and Engineering Stress-Strain Curves</h3><p>Hollomon, Ludwik and Voce hardening laws, and their conversion to engineering stress and strain in tension and compression.</p><span class="courses"><em>Relevant to</em> <span class="tag">UMT 205</span><span class="tag">UMT 312T</span></span><span class="go">Open the tool &rarr;</span></a><a class="card" href="tools/Schmid_Factor_in_BCC_crystals.html"><h3>Schmid Factor and Slip Systems in BCC Crystals</h3><p>Resolved shear stress on the 24 {110}&lt;111&gt; and {112}&lt;111&gt; systems for any tensile axis, compared with the CRSS.</p><span class="courses"><em>Relevant to</em> <span class="tag">UMT 205</span><span class="tag">MT 209</span></span><span class="go">Open the tool &rarr;</span></a><a class="card" href="tools/FCC_single_crystal_stress_strain_curves.html"><h3>Stress-Strain Curves of FCC Single Crystals</h3><p>Anisotropic elasticity, easy glide with lattice rotation, and the change to multiple slip, for different tensile axes.</p><span class="courses"><em>Relevant to</em> <span class="tag">UMT 205</span><span class="tag">UMT 312T</span><span class="tag">MT 209</span></span><span class="go">Open the tool &rarr;</span></a></div>
+</section>
+
+<section class="block area" id="atomic">
+<h2>Atomic structure</h2>
+<p class="area-note">Interatomic forces, the energy of crystals, packing in glasses, and the orientation of crystals.</p>
+<div class="cards"><a class="card" href="tools/Lennard-Jones_Potential_Explorer.html"><h3>Lennard-Jones Potential Explorer</h3><p>How the pair potential depends on &epsilon; and &sigma;, and how a parabola fitted at the minimum gives the bond stiffness.</p><span class="courses"><em>Relevant to</em> <span class="tag">MT 204</span></span><span class="go">Open the tool &rarr;</span></a><a class="card" href="tools/Cohesiveenergy.html"><h3>Cohesive Energy of a Lennard-Jones Crystal</h3><p>Energy per atom against lattice parameter for FCC, BCC, simple cubic and diamond crystals, with the neighbour shells marked.</p><span class="courses"><em>Relevant to</em> <span class="tag">MT 204</span></span><span class="go">Open the tool &rarr;</span></a><a class="card" href="tools/Amorphous.html"><h3>Free Volume in Amorphous and Crystalline Packings</h3><p>Voronoi cells and the free volume per atom of a random packing, compared with square and hexagonal crystals.</p><span class="courses"><em>Relevant to</em> <span class="tag">MT 204</span></span><span class="go">Open the tool &rarr;</span></a><a class="card" href="tools/radius_ratio_coordination_crystallographic.html"><h3>Radius Ratio and Coordination Number: Discs Packed around a Central Atom</h3><p>How many neighbours of one radius can touch a central atom of another, the critical radius ratios, and the crystallographic restriction to 2, 3, 4 and 6.</p><span class="courses"><em>Relevant to</em> <span class="tag">MT 204</span></span><span class="go">Open the tool &rarr;</span></a><a class="card" href="tools/Stereographic_Projection.html"><h3>Stereographic Projection of a Cubic Crystal</h3><p>Rotate a cubic crystal in 3D, and see the poles of the &lt;001&gt;, &lt;011&gt; and &lt;111&gt; families on the projection and the Wulff net.</p><span class="courses"><em>Relevant to</em> <span class="tag">MT 204</span><span class="tag">MT 209</span></span><span class="go">Open the tool &rarr;</span></a><a class="card" href="tools/CoupledOscillators_NormalModes.html"><h3>Coupled Oscillators and Normal Modes</h3><p>A line of masses and springs, with optional alternating masses or springs, and periodic, fixed or free ends: the normal modes, the acoustic and optical branches of the dispersion curve, the density of states, and the sinusoids that add up to the motion of one mass.</p><span class="courses"><em>Relevant to</em> <span class="tag">MT 204</span></span><span class="go">Open the tool &rarr;</span></a></div>
+</section>
+
+<section class="block area" id="defects">
+<h2>Defects</h2>
+<p class="area-note">Imperfections of a crystal, grouped by type.</p>
+<div class="sub" id="vacancies">
+<h3>Vacancies (point defects)</h3>
+<p class="area-note">Entropy, equilibrium concentration, and the motion of vacancies.</p>
+<div class="cards"><a class="card" href="tools/StirlingApprox.html"><h3>Stirling Approximation and Entropy of Mixing</h3><p>The accuracy of Stirling's approximation for ln(<i>x</i>!), and the configurational entropy of mixing atoms and vacancies.</p><span class="courses"><em>Relevant to</em> <span class="tag">MT 209</span><span class="tag">MT 204</span></span><span class="go">Open the tool &rarr;</span></a><a class="card" href="tools/FreeenergyversusvacancyConcentration.html"><h3>Free Energy versus Vacancy Concentration</h3><p>Enthalpy, entropy and free energy of a crystal containing vacancies, and the minimum that sets the equilibrium concentration.</p><span class="courses"><em>Relevant to</em> <span class="tag">MT 209</span><span class="tag">MT 204</span></span><span class="go">Open the tool &rarr;</span></a><a class="card" href="tools/VacancyEquilibrium.html"><h3>Equilibrium Vacancy Concentration</h3><p>The free-energy minimum at one temperature, and the Arrhenius plot of the equilibrium vacancy fraction against 1/T.</p><span class="courses"><em>Relevant to</em> <span class="tag">MT 209</span><span class="tag">MT 204</span></span><span class="go">Open the tool &rarr;</span></a><a class="card" href="tools/ActivationEnergybias.html"><h3>Vacancy Hopping under a Driving Force: Biased Diffusion</h3><p>A periodic energy landscape tilted by a field, as in ionic transport: forward and backward barriers, rate ratio and drift velocity.</p><span class="courses"><em>Relevant to</em> <span class="tag">MT 209</span><span class="tag">MT 204</span></span><span class="go">Open the tool &rarr;</span></a></div>
+</div>
+<div class="sub" id="dislocations">
+<h3>Dislocations</h3>
+<p class="area-note">Nucleation of dislocations, and how stress lowers the barrier to glide.</p>
+<div class="cards"><a class="card" href="tools/Dslocationloopfreeenergy.html"><h3>Free Energy of a Dislocation Loop: Nucleation under Stress</h3><p>Line energy against work done by the stress, the critical loop radius and the nucleation barrier.</p><span class="courses"><em>Relevant to</em> <span class="tag">MT 209</span><span class="tag">UMT 205</span></span><span class="go">Open the tool &rarr;</span></a><a class="card" href="tools/BarriertoThermallyActivatedGlide.html"><h3>Barrier to Thermally Activated Glide Past Obstacles</h3><p>How the barrier for a dislocation to pass a short-range or a long-range obstacle falls with stress, for Gaussian, sinusoidal, hyperbolic, triangular and parabolic obstacles, with a fit of the Kocks&ndash;Argon&ndash;Ashby equation.</p><span class="courses"><em>Relevant to</em> <span class="tag">MT 209</span><span class="tag">UMT 205</span></span><span class="go">Open the tool &rarr;</span></a><a class="card" href="tools/DynamicRecovery_Bucket_Analogy.html"><h3>Dynamic Recovery: Dislocation Density as Water in a Leaking Bucket</h3><p>A bucket filled at a fixed rate with a hole in its bottom, as an analogy for dislocation production and dynamic recovery: level against time and the steady level.</p><span class="courses"><em>Relevant to</em> <span class="tag">MT 209</span><span class="tag">UMT 205</span></span><span class="go">Open the tool &rarr;</span></a></div>
+</div>
+<div class="sub" id="surfaces">
+<h3>Surfaces</h3>
+<p class="area-note">Surface energy and the shapes that minimise it.</p>
+<div class="cards"><a class="card" href="tools/Rayleigh-Plateau.html"><h3>Rayleigh-Plateau Instability: Cylinder Breaking into Spheres</h3><p>The surface area of a cylinder compared with that of equal spheres of the same volume, for three aspect ratios.</p><span class="courses"><em>Relevant to</em> <span class="tag">MT 204</span><span class="tag">MT 209</span></span><span class="go">Open the tool &rarr;</span></a></div>
+</div>
+<div class="sub" id="gb">
+<h3>Grain boundaries</h3>
+<p class="area-note">The geometry of the interface between two crystals.</p>
+<div class="cards"><a class="card" href="tools/CSL.html"><h3>Coincidence Site Lattice and Grain Boundary Construction</h3><p>Rotate one lattice against another, find the coincidence sites (&Sigma;3, &Sigma;9, &Sigma;11) and cut a grain boundary through them.</p><span class="courses"><em>Relevant to</em> <span class="tag">MT 209</span><span class="tag">MT 204</span></span><span class="go">Open the tool &rarr;</span></a></div>
+</div>
+</section>
+
+<p id="empty">No tool matches your search.</p>
+
+</div></main>
+<footer class="site"><div class="wrap"><span class="brand2">S. Karthikeyan</span><p>All the tools were designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc. The code and its content are protected by copyright, and may not be copied, redistributed or modified without written permission.</p><p>Department of Materials Engineering, Indian Institute of Science, Bengaluru 560012, India</p><p><a href="mailto:karthik@iisc.ac.in">karthik@iisc.ac.in</a> &middot; &copy; 2026 Prof. S. Karthikeyan. All Rights Reserved.</p></div></footer>
+<script>
+(function () {
+  var input = document.getElementById('filter'), areas = document.querySelectorAll('.area'), empty = document.getElementById('empty');
+  input.addEventListener('input', function () {
+    var q = input.value.trim().toLowerCase(), any = false;
+    areas.forEach(function (a) {
+      var total = 0, areaHit = a.querySelector('h2').textContent.toLowerCase().indexOf(q) !== -1;
+      var groups = a.querySelectorAll('.sub'); if (!groups.length) groups = [a];
+      groups.forEach(function (g) {
+        var shown = 0, hit = areaHit || (g !== a && g.querySelector('h3').textContent.toLowerCase().indexOf(q) !== -1);
+        g.querySelectorAll('a.card').forEach(function (c) {
+          var ok = !q || hit || c.textContent.toLowerCase().indexOf(q) !== -1;
+          c.style.display = ok ? '' : 'none'; if (ok) shown++;
+        });
+        if (g !== a) g.style.display = shown ? '' : 'none';
+        total += shown;
+      });
+      a.style.display = total ? '' : 'none'; if (total) any = true;
+    });
+    empty.style.display = any ? 'none' : 'block';
+  });
+})();
+</script>
+</body>
+</html>

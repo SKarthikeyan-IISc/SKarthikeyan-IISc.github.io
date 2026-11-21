@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<!-- 
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of 
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification 
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+    <title>Stereographic Projection of a Cubic Crystal | Teaching Tools</title>
+    <!-- External Shared Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    <style>canvas { max-width: 100%; height: auto; }</style>
+</head>
+<body>
+
+    <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+    <h1>Stereographic Projection of a Cubic Crystal</h1>
+    <p class="subtitle">How the directions and plane normals of a cubic crystal are mapped from a sphere onto a flat circle, and how the pattern changes as the crystal is rotated.</p>
+
+    <details class="note" open>
+        <summary>Instructions for use</summary>
+        <div class="note-body">
+            <ul>
+                <li><strong>Rotate the crystal:</strong> click and drag inside the 3D Crystal View to turn the unit cell in real time. The projection on the right updates as you drag.</li>
+                <li><strong>Orient the centre:</strong> type a direction <code>[u v w]</code> (for example <code>1 1 1</code>) and press <em>Orient Center</em> to bring that direction to the middle of the projection.</li>
+                <li><strong>Plot a pole:</strong> type Miller indices <code>[h k l]</code> (for example <code>1 2 3</code>), press <em>Plot Pole</em>, and tick <em>Custom</em> to show it in orange.</li>
+                <li><strong>Pole families:</strong> the check boxes under the 3D view switch the &lt;001&gt; (red), &lt;011&gt; (green) and &lt;111&gt; (blue) families, and the custom pole, on and off in both views. Tick at least one to see poles.</li>
+                <li><strong>Display options:</strong> show the Wulff net, show the Miller-index labels, and include the southern hemisphere (open circles).</li>
+            </ul>
+        </div>
+    </details>
+
+    <div class="container tool" style="margin-bottom:20px">
+        <!-- Left Panel: 3D Crystal View -->
+        <div class="panel">
+            <h3>3D Crystal View</h3>
+            <canvas id="cubeCanvas" width="380" height="380"></canvas>
+            
+            <!-- Interactive Legend Filter Switches -->
+            <div class="legend-toggles">
+                <label class="legend-toggle-item">
+                    <input type="checkbox" id="show001">
+                    <span class="dot" style="background: red;"></span> &lt;001&gt;
+                </label>
+                <label class="legend-toggle-item">
+                    <input type="checkbox" id="show011">
+                    <span class="dot" style="background: green;"></span> &lt;011&gt;
+                </label>
+                <label class="legend-toggle-item">
+                    <input type="checkbox" id="show111">
+                    <span class="dot" style="background: blue;"></span> &lt;111&gt;
+                </label>
+                <label class="legend-toggle-item">
+                    <input type="checkbox" id="showCustom">
+                    <span class="dot" style="background: orange;"></span> Custom
+                </label>
+            </div>
+        </div>
+
+        <!-- Right Panel: Stereographic Projection -->
+        <div class="panel">
+            <h3>Stereographic Projection (Full Wulff Net)</h3>
+            <canvas id="stereoCanvas" width="380" height="380"></canvas>
+            
+            <div class="controls">
+                <!-- Control 1: Center Direction Input -->
+                <div class="control-group">
+                    <label for="centerInput">Center Vector [u v w]:</label>
+                    <div class="input-inline">
+                        <input type="text" id="centerInput" placeholder="e.g. 1 1 1" value="0 0 1">
+                        <button id="setCenterBtn">Orient Center</button>
+                    </div>
+                </div>
+
+                <!-- Control 2: Custom Pole Input -->
+                <div class="control-group">
+                    <label for="poleInput">Specific Pole [h k l]:</label>
+                    <div class="input-inline">
+                        <input type="text" id="poleInput" placeholder="e.g. 1 2 3">
+                        <button id="setPoleBtn">Plot Pole</button>
+                    </div>
+                </div>
+
+                <!-- Control 3: Toggles -->
+                <div class="control-group">
+                    <label class="toggle-group">
+                        <input type="checkbox" id="wulffToggle"> Show Wulff Net
+                    </label>
+                    <label class="toggle-group">
+                        <input type="checkbox" id="labelToggle"> Show Labels
+                    </label>
+                    <label class="toggle-group">
+                        <input type="checkbox" id="southToggle"> Include S. Hem. (◯)
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <details class="note">
+        <summary>Physics of the problem</summary>
+        <div class="note-body">
+            <p>The orientation of a crystal is described by the directions of its crystallographic axes, planes and directions relative to the sample. A direction (or the normal to a plane) is a point on the surface of a sphere that surrounds the crystal, the <em>pole</em>. A stereographic projection draws that sphere on a flat circle: a line is drawn from a pole on the upper hemisphere to the south pole of the sphere, and the point where it cuts the equatorial plane is the projection. For a unit vector \((x, y, z)\) with \(z\ge 0\):</p>
+            <div class="eq">\( X = \dfrac{x}{1+z}, \qquad Y = \dfrac{y}{1+z} \)</div>
+            <p>Poles in the lower hemisphere are projected from the north pole instead, and are drawn as open circles so that they can be told apart. The projection preserves angles: a circle on the sphere is a circle on the projection. The angle between two poles can therefore be measured along a great circle with the Wulff net, a grid of the projected meridians and parallels of the sphere, spaced at 10&deg;.</p>
+            <p>For a cubic crystal, the angle \(\phi\) between two directions \([h_1k_1l_1]\) and \([h_2k_2l_2]\) is given by the dot product, which is also the angle between the plane normals with the same indices:</p>
+            <div class="eq">\( \cos\phi = \dfrac{h_1h_2 + k_1k_2 + l_1l_2}{\sqrt{h_1^2+k_1^2+l_1^2}\,\sqrt{h_2^2+k_2^2+l_2^2}} \)</div>
+            <p>With [001] at the centre, the first quadrant of the projection is the standard triangle bounded by [001], [011] and [111]. Because of the cubic symmetry, every orientation can be brought into this triangle, so it is the area used for inverse pole figures. The angles between its corners are 45&deg; ([001] to [011]), 54.74&deg; ([001] to [111]) and 35.26&deg; ([011] to [111]). The &lt;001&gt;, &lt;011&gt; and &lt;111&gt; families have 6, 12 and 8 poles respectively (counting both signs).</p>
+            <p>Stereographic projections are used to represent the orientation of crystals and the texture of polycrystals, to find the slip systems that are active in a given loading direction, and to index diffraction patterns.</p>
+        </div>
+    </details>
+
+    <details class="note">
+        <summary>Glossary</summary>
+        <div class="note-body">
+            <dl>
+                <dt>Pole</dt><dd>The point where a crystal direction, or the normal to a crystal plane, meets the reference sphere.</dd>
+                <dt>Miller indices [<i>hkl</i>]</dt><dd>Integers that denote a direction (or the normal to the plane (<i>hkl</i>)) in a cubic crystal.</dd>
+                <dt>&lt;<i>hkl</i>&gt; family</dt><dd>All directions that are equivalent by the symmetry of the crystal.</dd>
+                <dt>Stereographic projection</dt><dd>An angle-preserving map of the sphere onto a plane.</dd>
+                <dt>Wulff net</dt><dd>A stereographic projection of the meridians and parallels of a sphere, used to measure angles.</dd>
+                <dt>Primitive circle</dt><dd>The outer circle of the projection, which is the equator of the sphere.</dd>
+                <dt>Southern hemisphere</dt><dd>Poles pointing into the lower half of the sphere, drawn as open circles.</dd>
+            </dl>
+        </div>
+    </details>
+
+    <footer>
+        <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+        &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+    </footer>
+
+    <script>
+        /**
+         * ==========================================================================
+         * Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+         * All Rights Reserved.
+         * 
+         * This script and its underlying algorithms are owned solely by 
+         * Prof. S. Karthikeyan. Any unauthorized reproduction or distribution
+         * of this code without explicit written consent is strictly forbidden.
+         * ==========================================================================
+         */
+
+        const cubeCanvas = document.getElementById('cubeCanvas');
+        const cubeCtx = cubeCanvas.getContext('2d');
+        const stereoCanvas = document.getElementById('stereoCanvas');
+        const stereoCtx = stereoCanvas.getContext('2d');
+
+        const poleInput = document.getElementById('poleInput');
+        const setPoleBtn = document.getElementById('setPoleBtn');
+        const centerInput = document.getElementById('centerInput');
+        const setCenterBtn = document.getElementById('setCenterBtn');
+        const southToggle = document.getElementById('southToggle');
+        const wulffToggle = document.getElementById('wulffToggle');
+        const labelToggle = document.getElementById('labelToggle');
+
+        // Legend Pole Family Filter Checkboxes
+        const show001 = document.getElementById('show001');
+        const show011 = document.getElementById('show011');
+        const show111 = document.getElementById('show111');
+        const showCustom = document.getElementById('showCustom');
+
+        // Orientation Matrix (3x3 row-major)
+        let R = [
+            1, 0, 0,
+            0, 1, 0,
+            0, 0, 1
+        ];
+
+        let isDragging = false;
+        let lastMouseX = 0, lastMouseY = 0;
+
+        // Custom Pole tracking
+        let customPole = null;
+
+        // Offscreen canvas for cached Wulff Net rendering
+        let wulffCanvas = document.createElement('canvas');
+        wulffCanvas.width = 380;
+        wulffCanvas.height = 380;
+
+        // Define Cube Vertices (-0.5 to 0.5)
+        const vertices = [];
+        for (let x = -0.5; x <= 0.5; x += 1) {
+            for (let y = -0.5; y <= 0.5; y += 1) {
+                for (let z = -0.5; z <= 0.5; z += 1) {
+                    vertices.push({x, y, z});
+                }
+            }
+        }
+
+        // Cube Edges
+        const edges = [];
+        for (let i = 0; i < vertices.length; i++) {
+            for (let j = i + 1; j < vertices.length; j++) {
+                let dx = Math.abs(vertices[i].x - vertices[j].x);
+                let dy = Math.abs(vertices[i].y - vertices[j].y);
+                let dz = Math.abs(vertices[i].z - vertices[j].z);
+                if ((dx + dy + dz) === 1) edges.push([i, j]);
+            }
+        }
+
+        // Helper to format negative Miller indices (e.g., -1 -> 1̄)
+        function formatIndex(val) {
+            return val < 0 ? `${Math.abs(val)}̄` : `${val}`;
+        }
+
+        // Base Family Poles with explicit family tagging
+        const rawPoles = [
+            // <001> Red
+            { raw: [1,0,0], color: 'red', family: '001' }, { raw: [-1,0,0], color: 'red', family: '001' },
+            { raw: [0,1,0], color: 'red', family: '001' }, { raw: [0,-1,0], color: 'red', family: '001' },
+            { raw: [0,0,1], color: 'red', family: '001' }, { raw: [0,0,-1], color: 'red', family: '001' },
+            
+            // <011> Green
+            { raw: [1,1,0], color: 'green', family: '011' }, { raw: [-1,1,0], color: 'green', family: '011' },
+            { raw: [1,-1,0], color: 'green', family: '011' }, { raw: [-1,-1,0], color: 'green', family: '011' },
+            { raw: [1,0,1], color: 'green', family: '011' }, { raw: [-1,0,1], color: 'green', family: '011' },
+            { raw: [1,0,-1], color: 'green', family: '011' }, { raw: [-1,0,-1], color: 'green', family: '011' },
+            { raw: [0,1,1], color: 'green', family: '011' }, { raw: [0,-1,1], color: 'green', family: '011' },
+            { raw: [0,1,-1], color: 'green', family: '011' }, { raw: [0,-1,-1], color: 'green', family: '011' },
+
+            // <111> Blue
+            { raw: [1,1,1], color: 'blue', family: '111' }, { raw: [-1,1,1], color: 'blue', family: '111' },
+            { raw: [1,-1,1], color: 'blue', family: '111' }, { raw: [1,1,-1], color: 'blue', family: '111' },
+            { raw: [-1,-1,1], color: 'blue', family: '111' }, { raw: [-1,1,-1], color: 'blue', family: '111' },
+            { raw: [1,-1,-1], color: 'blue', family: '111' }, { raw: [-1,-1,-1], color: 'blue', family: '111' }
+        ];
+
+        const basePoles = rawPoles.map(p => {
+            let len = Math.hypot(...p.raw);
+            return {
+                raw: p.raw,
+                label: `${formatIndex(p.raw[0])}${formatIndex(p.raw[1])}${formatIndex(p.raw[2])}`,
+                v: p.raw.map(c => c / len),
+                color: p.color,
+                family: p.family
+            };
+        });
+
+        // Matrix Helpers
+        function multiplyMatrixVector(m, v) {
+            return [
+                m[0]*v[0] + m[1]*v[1] + m[2]*v[2],
+                m[3]*v[0] + m[4]*v[1] + m[5]*v[2],
+                m[6]*v[0] + m[7]*v[1] + m[8]*v[2]
+            ];
+        }
+
+        function multiplyMatrices(a, b) {
+            const out = new Array(9);
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    out[i*3 + j] = 
+                        a[i*3 + 0] * b[0*3 + j] +
+                        a[i*3 + 1] * b[1*3 + j] +
+                        a[i*3 + 2] * b[2*3 + j];
+                }
+            }
+            return out;
+        }
+
+        // Draw Complete Wulff Net
+        function createWulffNet(canvas, radius) {
+            const ctx = canvas.getContext('2d');
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+            ctx.clip();
+
+            ctx.lineWidth = 0.5;
+
+            function drawNetGrid(isVertical) {
+                for (let deg = -80; deg <= 80; deg += 10) {
+                    if (deg === 0) continue;
+                    let phi = (deg * Math.PI) / 180;
+                    
+                    let r_great = Math.abs(radius / Math.sin(phi));
+                    let d_great = radius / Math.tan(phi);
+
+                    let r_small = radius * Math.tan(Math.abs(phi));
+                    let d_small = radius / Math.cos(phi);
+
+                    ctx.strokeStyle = (deg % 30 === 0) ? '#226622' : '#143814';
+
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    if (!isVertical) ctx.rotate(Math.PI / 2);
+
+                    ctx.beginPath();
+                    ctx.arc(d_great, 0, r_great, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.arc(0, (deg > 0 ? -1 : 1) * d_small, r_small, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    ctx.restore();
+                }
+            }
+
+            drawNetGrid(true);
+            drawNetGrid(false);
+
+            ctx.restore();
+        }
+
+        // Mouse Drag (Incremental Trackball-style Rotation)
+        cubeCanvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+        });
+
+        window.addEventListener('mouseup', () => isDragging = false);
+
+        cubeCanvas.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            let dx = (e.clientX - lastMouseX) * 0.01;
+            let dy = (e.clientY - lastMouseY) * 0.01;
+
+            const cy = Math.cos(dx), sy = Math.sin(dx);
+            const dR_y = [
+                cy, 0, sy,
+                0,  1, 0,
+                -sy, 0, cy
+            ];
+
+            const cx = Math.cos(dy), sx = Math.sin(dy);
+            const dR_x = [
+                1, 0,  0,
+                0, cx, -sx,
+                0, sx, cx
+            ];
+
+            const dR = multiplyMatrices(dR_x, dR_y);
+            R = multiplyMatrices(dR, R);
+
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+            draw();
+        });
+
+        // Event listeners for display toggles
+        southToggle.addEventListener('change', draw);
+        wulffToggle.addEventListener('change', draw);
+        labelToggle.addEventListener('change', draw);
+
+        // Event listeners for pole family filter checkboxes
+        show001.addEventListener('change', draw);
+        show011.addEventListener('change', draw);
+        show111.addEventListener('change', draw);
+        showCustom.addEventListener('change', draw);
+
+        // Input 1: Set Custom Pole
+        setPoleBtn.addEventListener('click', () => {
+            const parts = poleInput.value.trim().split(/\s+/).map(Number);
+            if (parts.length === 3 && !parts.some(isNaN)) {
+                const len = Math.hypot(...parts);
+                if (len > 0) {
+                    customPole = {
+                        raw: parts,
+                        label: `${formatIndex(parts[0])}${formatIndex(parts[1])}${formatIndex(parts[2])}`,
+                        v: parts.map(c => c / len),
+                        color: 'orange',
+                        isCustom: true,
+                        family: 'custom'
+                    };
+                    draw();
+                }
+            } else {
+                alert('Enter 3 numbers separated by spaces (e.g. 1 2 3)');
+            }
+        });
+
+        // Input 2: Re-orient Crystal Center Vector strictly along Z [0, 0, 1]
+        setCenterBtn.addEventListener('click', () => {
+            const parts = centerInput.value.trim().split(/\s+/).map(Number);
+            if (parts.length === 3 && !parts.some(isNaN)) {
+                const [u, v, w] = parts;
+                const len = Math.hypot(u, v, w);
+                if (len === 0) return;
+
+                const z_c = [u/len, v/len, w/len];
+
+                let x_c = [0, 1, 0];
+                if (Math.abs(z_c[1]) > 0.9) {
+                    x_c = [1, 0, 0];
+                }
+
+                const dot = x_c[0]*z_c[0] + x_c[1]*z_c[1] + x_c[2]*z_c[2];
+                x_c = [x_c[0] - dot*z_c[0], x_c[1] - dot*z_c[1], x_c[2] - dot*z_c[2]];
+                const x_len = Math.hypot(...x_c);
+                x_c = x_c.map(c => c / x_len);
+
+                const y_c = [
+                    z_c[1]*x_c[2] - z_c[2]*x_c[1],
+                    z_c[2]*x_c[0] - z_c[0]*x_c[2],
+                    z_c[0]*x_c[1] - z_c[1]*x_c[0]
+                ];
+
+                R = [
+                    x_c[0], x_c[1], x_c[2],
+                    y_c[0], y_c[1], y_c[2],
+                    z_c[0], z_c[1], z_c[2]
+                ];
+
+                draw();
+            } else {
+                alert('Enter 3 numbers for center direction (e.g. 1 1 1)');
+            }
+        });
+
+        function draw() {
+            // Clear Canvases with pure black fill
+            cubeCtx.fillStyle = '#000000';
+            cubeCtx.fillRect(0, 0, cubeCanvas.width, cubeCanvas.height);
+            stereoCtx.fillStyle = '#000000';
+            stereoCtx.fillRect(0, 0, stereoCanvas.width, stereoCanvas.height);
+
+            const cx = cubeCanvas.width / 2;
+            const cy = cubeCanvas.height / 2;
+            const scale = 180;
+
+            // --- 1. Draw 3D Cube ---
+            const rotVertices = vertices.map(v => {
+                const res = multiplyMatrixVector(R, [v.x, v.y, v.z]);
+                return { x: res[0], y: res[1], z: res[2] };
+            });
+
+            cubeCtx.strokeStyle = '#444';
+            cubeCtx.lineWidth = 1.5;
+            edges.forEach(edge => {
+                const p1 = rotVertices[edge[0]];
+                const p2 = rotVertices[edge[1]];
+                cubeCtx.beginPath();
+                cubeCtx.moveTo(cx + p1.x * scale, cy + p1.y * scale);
+                cubeCtx.lineTo(cx + p2.x * scale, cy + p2.y * scale);
+                cubeCtx.stroke();
+            });
+
+            // Filter poles according to legend toggle selections
+            const allPoles = basePoles.filter(p => {
+                if (p.family === '001') return show001.checked;
+                if (p.family === '011') return show011.checked;
+                if (p.family === '111') return show111.checked;
+                return true;
+            });
+
+            if (customPole && showCustom.checked) {
+                allPoles.push(customPole);
+            }
+
+            // Draw Active Poles in 3D
+            allPoles.forEach(pole => {
+                const rv = multiplyMatrixVector(R, pole.v);
+                const px = cx + rv[0] * scale;
+                const py = cy + rv[1] * scale;
+                
+                cubeCtx.fillStyle = pole.color;
+                cubeCtx.beginPath();
+                cubeCtx.arc(px, py, pole.isCustom ? 6 : (rv[2] > 0 ? 4 : 2.5), 0, Math.PI * 2);
+                cubeCtx.fill();
+                if (rv[2] > 0) {
+                    cubeCtx.strokeStyle = '#fff';
+                    cubeCtx.lineWidth = 1;
+                    cubeCtx.stroke();
+                }
+            });
+
+            // --- 2. Draw Stereographic Projection ---
+            const scx = stereoCanvas.width / 2;
+            const scy = stereoCanvas.height / 2;
+            const radius = 150;
+            const showSouth = southToggle.checked;
+            const showLabels = labelToggle.checked;
+
+            // Render Wulff Net grid overlay if enabled
+            if (wulffToggle.checked) {
+                stereoCtx.drawImage(wulffCanvas, 0, 0);
+            }
+
+            // Primitive Circle boundary
+            stereoCtx.strokeStyle = '#888';
+            stereoCtx.lineWidth = 2;
+            stereoCtx.beginPath();
+            stereoCtx.arc(scx, scy, radius, 0, Math.PI * 2);
+            stereoCtx.stroke();
+
+            // Crosshairs
+            stereoCtx.strokeStyle = '#444';
+            stereoCtx.lineWidth = 1;
+            stereoCtx.beginPath();
+            stereoCtx.moveTo(scx - radius, scy); stereoCtx.lineTo(scx + radius, scy);
+            stereoCtx.moveTo(scx, scy - radius); stereoCtx.lineTo(scx, scy + radius);
+            stereoCtx.stroke();
+
+            // Plot Active Stereographic Poles
+            allPoles.forEach(pole => {
+                const rv = multiplyMatrixVector(R, pole.v);
+                const isNorth = rv[2] >= 0;
+
+                if (!isNorth && !showSouth) return;
+
+                const denom = isNorth ? (1 + rv[2]) : (1 - rv[2]);
+                const projX = scx + (rv[0] / denom) * radius;
+                const projY = scy + (rv[1] / denom) * radius;
+
+                stereoCtx.beginPath();
+                const pointRadius = pole.isCustom ? 6 : 4;
+                
+                if (isNorth) {
+                    stereoCtx.arc(projX, projY, pointRadius, 0, Math.PI * 2);
+                    stereoCtx.fillStyle = pole.color;
+                    stereoCtx.fill();
+                    stereoCtx.strokeStyle = '#000';
+                    stereoCtx.lineWidth = 1;
+                    stereoCtx.stroke();
+                } else if (showSouth) {
+                    stereoCtx.arc(projX, projY, pointRadius, 0, Math.PI * 2);
+                    stereoCtx.strokeStyle = pole.color;
+                    stereoCtx.lineWidth = 2;
+                    stereoCtx.stroke();
+                }
+
+                if (showLabels) {
+                    stereoCtx.fillStyle = pole.color;
+                    stereoCtx.font = '10px sans-serif';
+                    stereoCtx.fillText(pole.label, projX + 6, projY - 4);
+                }
+            });
+        }
+
+        // Initialize Wulff Net and Render initial view
+        createWulffNet(wulffCanvas, 150);
+        draw();
+    </script>
+</body>
+</html>

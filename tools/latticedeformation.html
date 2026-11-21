@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Homogeneous Deformation of a 2D Square Lattice | Teaching Tools</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    canvas#latticeCanvas { cursor: default; max-width: 100%; height: auto; }
+    .layout { display: grid; grid-template-columns: minmax(280px, 340px) 1fr; gap: 16px; width: 100%; align-items: start; }
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+    .fld { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+    .fld > label { font-size: 0.8rem; color: var(--muted); }
+    .fld select, .fld input[type=number] { width: 100%; box-sizing: border-box; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+    .ctl .val { min-width: 4.2em; }
+    .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Homogeneous Deformation of a 2D Square Lattice</h1>
+  <p class="subtitle">How a displacement gradient matrix moves every point of a lattice, and how it splits into stretch, shear and rotation.</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>Sliders e11, e12, e21, e22:</strong> the four components of the displacement gradient matrix, each from &minus;1 to 1. The black lattice is the deformed lattice; the grey lattice is the original.</li>
+        <li><strong>Presets:</strong> load a simple stretch, a shear or a rotation, then change a slider to see what each component does on its own.</li>
+        <li><strong>Points per side, point size:</strong> change the number of lattice points and the size of the dots.</li>
+        <li><strong>Show original, show deformed:</strong> switch either lattice on or off.</li>
+        <li><strong>Reset sliders</strong> returns the lattice to its original shape.</li>
+        <li>The panel on the right gives the strain and rotation calculated from the four numbers.</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="tool">
+    <div class="layout">
+      <div class="panel plain" style="gap:12px">
+        <h3>Deformation</h3>
+        <div class="two">
+          <div class="fld"><label for="pointsPerSide">Points per side</label>
+            <select id="pointsPerSide"><option value="5">5</option><option value="7" selected>7</option><option value="9">9</option></select></div>
+          <div class="fld"><label for="pointSize">Point size</label><input type="number" id="pointSize" value="9" min="1" step="0.5"></div>
+        </div>
+        <div class="fld"><label for="presetValues">Preset</label>
+          <select id="presetValues">
+            <option value="none">None</option>
+            <option value="stretchXY">Stretch X and Y</option>
+            <option value="stretchX">Stretch X</option>
+            <option value="stretchY">Stretch Y</option>
+            <option value="shearX">Shear X</option>
+            <option value="shearY">Shear Y</option>
+            <option value="shearXY">Shear X and Y</option>
+            <option value="rotate">Rotate</option>
+          </select></div>
+        <div class="ctl"><label for="e11">e<sub>11</sub></label><input type="range" id="e11" min="-1" max="1" value="0" step="0.001"><span id="value-e11" class="val">0.000</span></div>
+        <div class="ctl"><label for="e12">e<sub>12</sub></label><input type="range" id="e12" min="-1" max="1" value="0" step="0.001"><span id="value-e12" class="val">0.000</span></div>
+        <div class="ctl"><label for="e21">e<sub>21</sub></label><input type="range" id="e21" min="-1" max="1" value="0" step="0.001"><span id="value-e21" class="val">0.000</span></div>
+        <div class="ctl"><label for="e22">e<sub>22</sub></label><input type="range" id="e22" min="-1" max="1" value="0" step="0.001"><span id="value-e22" class="val">0.000</span></div>
+        <label class="toggle-group"><input type="checkbox" id="showOriginal" checked><span class="swatch" style="background:#9ca3af"></span> Show original</label>
+        <label class="toggle-group"><input type="checkbox" id="showTransformed" checked><span class="swatch" style="background:#f1f5f9"></span> Show deformed</label>
+        <button type="button" id="resetButton">Reset sliders</button>
+        <div class="metrics" style="margin-top:6px">
+          <div class="ctl-title">Calculated from e</div>
+          <div class="metric"><span>Strain &epsilon;<sub>11</sub> = e<sub>11</sub></span><b id="m-exx">0.000</b></div>
+          <div class="metric"><span>Strain &epsilon;<sub>22</sub> = e<sub>22</sub></span><b id="m-eyy">0.000</b></div>
+          <div class="metric"><span>Shear &epsilon;<sub>12</sub> = &frac12;(e<sub>12</sub>+e<sub>21</sub>)</span><b id="m-exy">0.000</b></div>
+          <div class="metric"><span>Rotation &omega; = &frac12;(e<sub>21</sub>&minus;e<sub>12</sub>)</span><b id="m-rot">0.000 rad</b></div>
+          <div class="metric"><span>Area ratio, det(I+e)</span><b id="m-det">1.000</b></div>
+        </div>
+      </div>
+      <div class="panel plain" style="align-items:center"><canvas id="latticeCanvas" width="500" height="500"></canvas></div>
+    </div>
+  </div>
+
+  <details class="note">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <p>In a homogeneous deformation every point of a body is displaced by an amount that is a linear function of its position. A point at position \(\mathbf{X}\) moves to \(\mathbf{x}\):</p>
+      <div class="eq">\( \begin{pmatrix} x\\ y \end{pmatrix} = \begin{pmatrix} X\\ Y \end{pmatrix} + \begin{pmatrix} e_{11} & e_{12}\\ e_{21} & e_{22} \end{pmatrix}\begin{pmatrix} X\\ Y \end{pmatrix} \)</div>
+      <p>The matrix \(e_{ij}=\partial u_i/\partial X_j\) is the displacement gradient. Straight lines stay straight and parallel lines stay parallel, so a lattice remains a lattice. This is the case in the elastic deformation of a single crystal, and is the starting point of the idea of affine deformation of a solid, in which the atoms follow the macroscopic deformation.</p>
+      <p>Any displacement gradient is the sum of a symmetric part and an antisymmetric part:</p>
+      <div class="eq">\( e_{ij} = \varepsilon_{ij} + \omega_{ij},\qquad \varepsilon_{ij}=\tfrac12\,(e_{ij}+e_{ji}),\quad \omega_{ij}=\tfrac12\,(e_{ij}-e_{ji}) \)</div>
+      <p>The symmetric part \(\varepsilon_{ij}\) is the strain: its diagonal terms stretch or compress the lattice and its off-diagonal terms shear it, changing the lengths of lattice vectors and the angles between them. The antisymmetric part is a rigid rotation through an angle \(\omega = \tfrac12(e_{21}-e_{12})\) and changes no lengths. The two can be seen in the presets: "Shear X" and "Shear Y" each contain half a pure shear and half a rotation, whereas "Shear X and Y" (\(e_{12}=e_{21}\)) is a pure shear, and "Rotate" (\(e_{12}=-e_{21}\)) is a pure rotation.</p>
+      <p>The decomposition is exact only for small displacement gradients. For a large \(e\), such as the rotation here with a value of 0.2 or more, the lattice also grows slightly, because a finite rotation is not the same as \(I+e\) with an antisymmetric \(e\); the change in area, \(\det(I+e)\), shows this effect. This is the reason for using the finite-strain measures in a large deformation.</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt>Displacement gradient, <i>e</i><sub><i>ij</i></sub></dt><dd>The derivative of the displacement of a point with respect to its position.</dd>
+        <dt>Strain, &epsilon;<sub><i>ij</i></sub></dt><dd>The symmetric part of the displacement gradient: stretch and shear.</dd>
+        <dt>Rotation, &omega;</dt><dd>The antisymmetric part: a rigid rotation of the lattice.</dd>
+        <dt>Homogeneous deformation</dt><dd>A deformation in which the displacement gradient is the same everywhere.</dd>
+        <dt>Pure shear</dt><dd>A shear strain without rotation.</dd>
+        <dt>Simple shear</dt><dd>A shear that is the sum of a pure shear and a rotation.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /* Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved. */
+    const canvas = document.getElementById('latticeCanvas');
+    const ctx = canvas.getContext('2d');
+    const $ = id => document.getElementById(id);
+    const inp = { e11: $('e11'), e12: $('e12'), e21: $('e21'), e22: $('e22') };
+
+    const presets = {
+      none:      { e11: 0,   e12: 0,   e21: 0,    e22: 0 },
+      stretchXY: { e11: 0.2, e12: 0,   e21: 0,    e22: 0.2 },
+      stretchX:  { e11: 0.2, e12: 0,   e21: 0,    e22: 0 },
+      stretchY:  { e11: 0,   e12: 0,   e21: 0,    e22: 0.2 },
+      shearX:    { e11: 0,   e12: 0.2, e21: 0,    e22: 0 },
+      shearY:    { e11: 0,   e12: 0,   e21: 0.2,  e22: 0 },
+      shearXY:   { e11: 0,   e12: 0.2, e21: 0.2,  e22: 0 },
+      rotate:    { e11: 0,   e12: 0.2, e21: -0.2, e22: 0 }
+    };
+
+    function updateLabels() {
+      const e11 = +inp.e11.value, e12 = +inp.e12.value, e21 = +inp.e21.value, e22 = +inp.e22.value;
+      ['e11', 'e12', 'e21', 'e22'].forEach(k => { $('value-' + k).textContent = (+inp[k].value).toFixed(3); });
+      $('m-exx').textContent = e11.toFixed(3);
+      $('m-eyy').textContent = e22.toFixed(3);
+      $('m-exy').textContent = (0.5 * (e12 + e21)).toFixed(3);
+      $('m-rot').textContent = (0.5 * (e21 - e12)).toFixed(3) + ' rad';
+      $('m-det').textContent = ((1 + e11) * (1 + e22) - e12 * e21).toFixed(3);
+    }
+
+    function grid(points, n, color, size, fill) {
+      ctx.strokeStyle = color; ctx.lineWidth = 1;
+      for (let i = 0; i < n; i++) for (let j = 0; j < n - 1; j++) {
+        const a = points[i * n + j], b = points[i * n + j + 1];
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      }
+      for (let i = 0; i < n - 1; i++) for (let j = 0; j < n; j++) {
+        const a = points[i * n + j], b = points[(i + 1) * n + j];
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      }
+      ctx.fillStyle = fill;
+      points.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, size, 0, 2 * Math.PI); ctx.fill(); });
+    }
+
+    function drawLattice() {
+      const n = parseInt($('pointsPerSide').value, 10);
+      const size = parseFloat($('pointSize').value) || 9;
+      const e11 = +inp.e11.value, e12 = +inp.e12.value, e21 = +inp.e21.value, e22 = +inp.e22.value;
+      const cx = canvas.width / 2, cy = canvas.height / 2;
+      const sx = canvas.width / (n - 1), sy = canvas.height / (n - 1);
+
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const orig = [], def = [];
+      for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+        const X = j * sx - cx, Y = cy - i * sy;            // maths convention, Y up
+        orig.push({ x: X + cx, y: cy - Y });
+        const mx = X + (e11 * X + e12 * Y), my = Y + (e21 * X + e22 * Y);
+        def.push({ x: mx + cx, y: cy - my });
+      }
+      if ($('showOriginal').checked) grid(orig, n, '#6b7280', size, '#9ca3af');
+      if ($('showTransformed').checked) grid(def, n, '#e5e7eb', size, '#f1f5f9');
+
+      ctx.fillStyle = '#eab308'; ctx.font = '14px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('O', cx, cy + 22);
+    }
+
+    function redraw() { updateLabels(); drawLattice(); }
+    Object.values(inp).forEach(el => el.addEventListener('input', redraw));
+    $('pointsPerSide').addEventListener('change', drawLattice);
+    $('pointSize').addEventListener('input', drawLattice);
+    $('showOriginal').addEventListener('change', drawLattice);
+    $('showTransformed').addEventListener('change', drawLattice);
+    $('presetValues').addEventListener('change', e => {
+      const p = presets[e.target.value];
+      Object.keys(p).forEach(k => { inp[k].value = p[k]; });
+      redraw();
+    });
+    $('resetButton').addEventListener('click', () => {
+      Object.values(inp).forEach(el => { el.value = 0; });
+      $('presetValues').value = 'none';
+      redraw();
+    });
+    redraw();
+  </script>
+</body>
+</html>

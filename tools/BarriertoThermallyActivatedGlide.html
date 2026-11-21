@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<!--
+  ==========================================================================
+  Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc.
+  All Rights Reserved.
+  This software and code are the proprietary intellectual property of
+  Prof. S. Karthikeyan. Unauthorized copying, redistribution, or modification
+  is strictly prohibited.
+  ==========================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Barrier to Thermally Activated Glide Past Obstacles | Teaching Tools</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .side { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; width: 100%; }
+    .side .plot { flex: 2 1 460px; min-width: 0; }
+    .side .tbl { flex: 1 1 300px; min-width: 230px; overflow-x: auto; }
+    .tbl-cap { font-size: 0.85rem; color: #ccc; margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav"><a href="../teachingtools.html">&larr; All teaching tools from Prof. S. Karthikeyan</a></nav>
+  <h1>Barrier to Thermally Activated Glide Past Obstacles</h1>
+  <p class="subtitle">How the energy barrier that a dislocation must overcome falls as the applied stress rises, for five obstacle shapes and for a short-range or a long-range obstacle, with a fit of the Kocks&ndash;Argon&ndash;Ashby barrier equation.</p>
+
+  <details class="note" open>
+    <summary>Instructions for use</summary>
+    <div class="note-body">
+      <ul>
+        <li><strong>Obstacle shape:</strong> choose Gaussian, sinusoidal, hyperbolic, triangular or parabolic. Changing the shape clears the lower plot and refits the equation.</li>
+        <li><strong>&tau; slider:</strong> sets the applied stress (dimensionless, 0 to 1). The top plot shows the free energy of the dislocation as a function of its position <i>x</i> for the two obstacles; the dots mark the local minimum and the local maximum, the light dotted lines show the energy profile at &tau; = 0 for reference, and the table beside it gives their positions and the barrier &Delta;<i>G</i>.</li>
+        <li><strong>Start / Pause:</strong> steps &tau; automatically from 0 to 1 and then restarts. <strong>Clear points</strong> erases the lower plot. <strong>Plot whole curve</strong> fills in the barrier for every &tau; from 0 to 1 at once.</li>
+        <li><strong>Lower plot:</strong> every time &tau; changes, the barrier &Delta;<i>G</i> (the free-energy difference between the maximum and the minimum) is added as a point. Tick <em>Show Kocks fit</em> (off by default) to draw the fitted Kocks&ndash;Argon&ndash;Ashby equation as a dashed line and compare it with the points.</li>
+        <li><strong>Fit table</strong> (beside the lower plot) gives the fitted &Delta;<i>G</i><sub>0</sub>, <i>p</i> and <i>q</i> for each obstacle, and how well the equation reproduces the exact barrier.</li>
+        <li><strong>Blue:</strong> short-range and weak obstacle (SRW). <strong>Red:</strong> long-range and small-force obstacle (LRS). Both have the same shape; the SRW obstacle is 0.2 times the LRS obstacle in height and in width.</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="tool">
+    <div class="panel wide"><h3>Free energy against position</h3>
+      <div class="side">
+        <div class="plot"><div class="plotbox" style="height:300px"><canvas id="chartCanvas"></canvas></div></div>
+        <div class="tbl">
+          <div class="ctl-stack" style="margin-bottom:12px">
+            <div class="ctl"><label for="shapeSelect">Obstacle shape</label>
+              <select id="shapeSelect">
+                <option value="gaussian">Gaussian</option>
+                <option value="sinusoidal">Sinusoidal</option>
+                <option value="hyperbolic">Hyperbolic</option>
+                <option value="triangular">Triangular</option>
+                <option value="parabolic">Parabolic</option>
+              </select>
+            </div>
+            <div class="ctl"><label for="tauSlider">&tau;</label><input type="range" id="tauSlider" min="0" max="1" value="0" step="0.01"><span id="tauValue" class="val">0.00</span></div>
+            <div class="ctl"><button type="button" id="startButton">Start</button><button type="button" id="pauseButton" class="secondary">Pause</button><button type="button" id="clearButton" class="secondary">Clear points</button><button type="button" id="sweepButton" class="secondary">Plot whole curve</button></div>
+          </div>
+          <table class="data" id="extremaTable">
+          <thead><tr><th>At the current &tau;</th><th style="color:var(--blue-soft)">SRW</th><th style="color:#f87171">LRS</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+    </div>
+    <div class="panel wide"><h3>Force against position</h3>
+      <div class="side">
+        <div class="plot"><div class="plotbox" style="height:240px"><canvas id="forceCanvas"></canvas></div></div>
+        <div class="tbl"><table class="data" id="forceTable">
+          <thead><tr><th>Force readout</th><th>Value</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+    </div>
+    <div class="panel wide"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;width:100%"><h3 style="margin:0">Barrier against applied stress</h3><div class="ctl" style="padding:4px 10px"><label><input type="checkbox" id="showFit"> Show Kocks fit</label></div></div>
+      <div class="side" style="margin-top:10px">
+        <div class="plot"><div class="plotbox" style="height:280px"><canvas id="diffCanvas"></canvas></div></div>
+        <div class="tbl"><div class="tbl-cap">&Delta;<i>G</i> = &Delta;<i>G</i><sub>0</sub> [1 &minus; (&tau;/&tau;&#770;)<sup><i>p</i></sup>]<sup><i>q</i></sup></div>
+          <table class="data" id="fitTable">
+            <thead><tr><th>Fit</th><th style="color:var(--blue-soft)">SRW</th><th style="color:#f87171">LRS</th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="note">
+    <summary>Physics of the problem</summary>
+    <div class="note-body">
+      <p>A dislocation gliding through a crystal meets obstacles (solute atoms, precipitates, other dislocations). Its free energy as a function of position is the energy of the obstacle plus the work done by the applied stress as the dislocation advances through a distance \(x\):</p>
+      <div class="eq">\( G(x) = G_0(x) - \tau\,x \)</div>
+      <p>Here \(G_0(x)\) is the energy hill of the obstacle, of height \(A\) and half-width \(w\). At \(\tau = 0\) the dislocation must climb the full height of the hill, \(\Delta G = A\). As \(\tau\) rises, the tilt \(-\tau x\) creates a minimum in front of the obstacle and a maximum close to its top, and the barrier</p>
+      <div class="eq">\( \Delta G(\tau) = G(x_\text{max}) - G(x_\text{min}) \)</div>
+      <p>shrinks. The extrema are the roots of \(dG/dx = 0\), that is of \(G_0'(x) = \tau\). The minimum lies on the rising front of the hill, where \(G_0'' \gt 0\), and the maximum on the concave part near the top. The barrier vanishes at the stress at which the two roots merge, the athermal (mechanical-threshold) stress \(\tau_c = \max\,|G_0'|\).</p>
+
+      <h4>The five obstacle shapes</h4>
+      <p>An obstacle can be described by its energy&ndash;displacement curve \(G_0(x)\) or by its force&ndash;displacement curve \(F(x)=G_0'(x)\), the two being related by integration; the literature uses both. The tool shows both: the free-energy plot at the top and the force plot below it, in which the applied stress \(\tau\) is a horizontal line and the extrema of \(G\) are where that line cuts the force curve. The names below are those of the <em>energy</em> hill, with the force profile in brackets.</p>
+      <ul>
+        <li><strong>Gaussian:</strong> \(G_0 = A\,e^{-(x/w)^2}\). Smooth, with long tails (force: a smooth bump with long tails).</li>
+        <li><strong>Sinusoidal:</strong> \(G_0 = \tfrac{A}{2}\,[1+\cos(\pi x/w)]\) for \(|x| \lt w\), and zero outside. Smooth, with finite range (force: a half-sine arch). It has a closed-form barrier, with \(s=\tau/\tau_c\):
+          <div class="eq">\( \Delta G = A\left[\sqrt{1-s^2} - s\,\arccos s\right] \)</div></li>
+        <li><strong>Hyperbolic:</strong> \(G_0 = A\,\operatorname{sech}^2(x/w)\). The profile of a soliton, with exponential tails, between the Gaussian and the sinusoid in sharpness (force: sech&sup2; tanh).</li>
+        <li><strong>Triangular (rectangular force profile):</strong> Kocks, Argon and Ashby describe an obstacle by its force&ndash;displacement profile, and the rectangular profile is a constant resisting force \(F=A/w\) acting over the distance \(w\) in front of the obstacle. Integrating the force gives an energy hill that is a triangle, \(G_0 = A\,(1-|x|/w)\), and the barrier is exactly linear, \(\Delta G = A\,(1-\tau/\tau_c)\), with \(\tau_c = A/w\). (A rectangular <em>energy</em> profile, a box of height \(A\), would give \(\Delta G=A\) at every stress below the box force and has no extrema to find.)</li>
+        <li><strong>Parabolic (triangular force profile):</strong> the resisting force rises linearly from zero to its peak \(\hat F = 2A/w\) at \(x=-w/2\) and falls linearly to zero at the centre of the obstacle, and the same on the far side. Integrating gives an energy hill made of parabolic arcs: \(G_0 = 2A\,(1+x/w)^2\) for \(-w \lt x \lt -w/2\) and \(G_0 = A\,(1-2x^2/w^2)\) for \(-w/2 \lt x \lt 0\), mirrored for \(x \gt 0\). The force has a sharp (cusp-like) peak, so the two extrema merge linearly rather than as a fold, and the barrier is exactly \(\Delta G = A\,(1-\tau/\tau_c)^2\), with \(\tau_c = 2A/w\). This is \(p=1\), \(q=2\).</li>
+      </ul>
+      <p>The widths are scaled as \(w = \kappa A/\tau_c^{*}\), with \(\tau_c^{*}=\sqrt{2}\,e^{-1/2}\approx 0.858\) and \(\kappa = \sqrt{2}\,e^{-1/2}\), \(\pi/2\), \(4/(3\sqrt{3})\), 1 and 2 for the five shapes. With this choice the Gaussian is the same as before (\(w=0.2\) and \(w=1\)) and all shapes have the same athermal stress, so the shapes are compared at equal \(\tau_c\).</p>
+
+      <h4>Short-range and long-range obstacles</h4>
+      <p>The short-range weak obstacle has \(A=0.2\) and the long-range one \(A=1\), with the widths scaled in the same ratio. The two hills therefore have the same shape, and \(G_\text{SRW}(x,\tau) = 0.2\,G_\text{LRS}(x/0.2,\tau)\). It follows that \(\Delta G_\text{SRW}(\tau)=0.2\,\Delta G_\text{LRS}(\tau)\) exactly: the two obstacles have the same \(\tau_c\), and the same normalised curve \(\Delta G/A\). They differ in the energy scale and in the distance over which the dislocation moves, and hence in the activation volume \(V^*=-\partial \Delta G/\partial\tau\), which is five times larger for the LRS obstacle.</p>
+
+      <h4>The Kocks&ndash;Argon&ndash;Ashby equation</h4>
+      <p>The barrier is commonly represented by</p>
+      <div class="eq">\( \Delta G = \Delta G_0\left[1-\left(\frac{\tau}{\hat\tau}\right)^{p}\right]^{q} \)</div>
+      <p>with \(\Delta G_0\) the barrier at zero stress, \(\hat\tau\) the athermal stress, and the exponents bounded by \(0 \lt p\le 1\) and \(1\le q\le 2\) for physically reasonable obstacles. The tool fits \(\Delta G_0\), \(p\) and \(q\) to the exact barrier at 200 stresses between 0 and \(0.999\,\tau_c\) by least squares (Nelder&ndash;Mead, from several starting values), with \(\hat\tau=\tau_c\) held fixed. Two checks are useful. For the triangular obstacle (rectangular force profile) the fit returns \(p=q=1\) with no error, and for the parabolic obstacle (triangular force profile) it returns \(p=1\), \(q=2\) with no error; these two bracket the range of \(q\). For any smooth hill, the two extrema merge as a fold, so that \(\Delta G\propto(1-\tau/\tau_c)^{3/2}\) close to \(\tau_c\), and a free fit tends to a value of \(q\) near 3/2 for the Gaussian, sinusoidal and hyperbolic shapes. A cusp-like force peak gives \(q=2\), and a force that is constant (a rectangle) gives \(q=1\). Because the fit is least squares over the whole range, \(p\) and \(q\) are correlated, and different pairs can describe the curve almost equally well.</p>
+      <p>At a finite temperature the dislocation can pass the obstacle before \(\tau_c\) is reached with the help of thermal activation, at a rate proportional to \(\exp(-\Delta G/kT)\). The shape of \(\Delta G(\tau)\) therefore determines the temperature and strain-rate sensitivity of the flow stress, and the activation volume.</p>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary>Glossary</summary>
+    <div class="note-body">
+      <dl>
+        <dt>&tau;</dt><dd>Applied shear stress, dimensionless.</dd>
+        <dt>&Delta;G</dt><dd>Activation free energy, the barrier between the local minimum and the local maximum of <i>G</i>(<i>x</i>).</dd>
+        <dt>SRW</dt><dd>Short-range, weak obstacle: narrow and low.</dd>
+        <dt>LRS</dt><dd>Long-range obstacle: wide and tall.</dd>
+        <dt>Athermal stress, &tau;<sub>c</sub></dt><dd>The stress at which the barrier vanishes and no thermal help is needed (written &tau;&#770; in the fitted equation).</dd>
+        <dt>&Delta;G<sub>0</sub></dt><dd>The fitted barrier at zero stress. For a good fit it is close to the height <i>A</i> of the obstacle.</dd>
+        <dt><i>p</i>, <i>q</i></dt><dd>Exponents of the Kocks&ndash;Argon&ndash;Ashby equation, which set the shape of the &Delta;G&ndash;&tau; curve. <i>p</i> = <i>q</i> = 1 is a straight line.</dd>
+        <dt>Rectangular force profile</dt><dd>An obstacle that exerts a constant force over a fixed distance; its energy hill is a triangle, which is why the shape is called triangular here.</dd>
+        <dt>Force&ndash;displacement curve</dt><dd>The resisting force of the obstacle, \(F=dG_0/dx\), against position; the energy curve is its integral.</dd>
+        <dt>Activation volume</dt><dd>The (negative) slope of the barrier with respect to stress.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <footer>
+    <p class="author-tag">Designed and authored by Prof. S. Karthikeyan, Materials Engineering, IISc (2026)</p>
+    &copy; 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved.
+  </footer>
+
+  <script src="tools.js"></script>
+  <script>
+    /* Copyright (c) 2026 Prof. S. Karthikeyan, Materials Engineering, IISc. All Rights Reserved. */
+    const c = TOOL.c;
+    const tauSlider = document.getElementById('tauSlider');
+    const tauValueDisplay = document.getElementById('tauValue');
+    const startButton = document.getElementById('startButton');
+    const pauseButton = document.getElementById('pauseButton');
+    const clearButton = document.getElementById('clearButton');
+    const sweepButton = document.getElementById('sweepButton');
+    const shapeSelect = document.getElementById('shapeSelect');
+    const showFit = document.getElementById('showFit');
+
+    /* ---------- obstacle shapes ----------
+       Every shape has height A and a width w = kappa*A/TAUC0, so that all shapes share the athermal stress TAUC0
+       (the maximum slope of the Gaussian hill, as in the original tool). xs(w) is where |G0'| is largest, on the front (x<0). */
+    const TAUC0 = Math.SQRT2 * Math.exp(-0.5);          // 0.85776
+    const SHAPES = {
+      gaussian: { name: 'Gaussian', kappa: TAUC0,
+        G0:  (A, w, x) => A * Math.exp(-(x / w) * (x / w)),
+        dG0: (A, w, x) => -2 * A * x / (w * w) * Math.exp(-(x / w) * (x / w)),
+        xs:  w => -w / Math.SQRT2, breaks: w => [] },
+      sinusoidal: { name: 'Sinusoidal', kappa: Math.PI / 2,
+        G0:  (A, w, x) => Math.abs(x) < w ? 0.5 * A * (1 + Math.cos(Math.PI * x / w)) : 0,
+        dG0: (A, w, x) => Math.abs(x) < w ? -0.5 * A * Math.PI / w * Math.sin(Math.PI * x / w) : 0,
+        xs:  w => -w / 2, breaks: w => [-w, w] },
+      hyperbolic: { name: 'Hyperbolic', kappa: 4 / (3 * Math.sqrt(3)),
+        G0:  (A, w, x) => { const s = 1 / Math.cosh(x / w); return A * s * s; },
+        dG0: (A, w, x) => { const s = 1 / Math.cosh(x / w); return -2 * A / w * s * s * Math.tanh(x / w); },
+        xs:  w => -w * Math.atanh(1 / Math.sqrt(3)), breaks: w => [] },
+      parabolic: { name: 'Parabolic', kappa: 2,
+        G0:  (A, w, x) => { const u = Math.abs(x); return u >= w ? 0 : u >= w / 2 ? 2 * A * (1 - u / w) * (1 - u / w) : A * (1 - 2 * u * u / (w * w)); },
+        dG0: (A, w, x) => { const u = Math.abs(x), sg = x < 0 ? 1 : -1;
+                            return u >= w ? 0 : u >= w / 2 ? sg * 4 * A * (w - u) / (w * w) : sg * 4 * A * u / (w * w); },
+        xs:  w => -w / 2, breaks: w => [-w, -w / 2, 0, w / 2, w] },
+      triangular: { name: 'Triangular', kappa: 1,
+        G0:  (A, w, x) => Math.abs(x) < w ? A * (1 - Math.abs(x) / w) : 0,
+        dG0: (A, w, x) => (x > -w && x < 0) ? A / w : (x > 0 && x < w) ? -A / w : 0,
+        xs:  w => -w / 2, breaks: w => [-w, 0, w] }
+    };
+    const OBST = [
+      { name: 'Short range and weak (SRW)', short: 'SRW', A: 0.2, color: c.blue },
+      { name: 'Long range and small force (LRS)', short: 'LRS', A: 1.0, color: c.red }
+    ];
+    let shapeKey = 'gaussian';
+    const widthOf = (sh, A) => sh.kappa * A / TAUC0;
+
+    /* ---------- exact extrema of G(x) = G0(x) - tau*x ---------- */
+    function bisect(f, a, b) {                 // f(a) and f(b) of opposite sign
+      let fa = f(a);
+      for (let i = 0; i < 200 && Math.abs(b - a) > 1e-14; i++) {
+        const m = 0.5 * (a + b), fm = f(m);
+        if ((fm > 0) === (fa > 0)) { a = m; fa = fm; } else { b = m; }
+      }
+      return 0.5 * (a + b);
+    }
+    // returns { xmin, xmax, ymin, ymax, dG }; xmin/ymin are null when there is no separate minimum
+    function extrema(sh, A, tau) {
+      const w = widthOf(sh, A);
+      const G = x => sh.G0(A, w, x) - tau * x;
+      if (tau <= 0) return { xmin: null, xmax: 0, ymin: null, ymax: A, dG: A };
+      if (tau >= TAUC0 - 1e-12) return { xmin: null, xmax: null, ymin: null, ymax: null, dG: 0 };
+      let xmin, xmax;
+      if (sh === SHAPES.sinusoidal) {
+        const a = Math.asin(tau / TAUC0);
+        xmax = -(w / Math.PI) * a; xmin = -w + (w / Math.PI) * a;
+      } else if (sh === SHAPES.parabolic) {
+        const s = tau / TAUC0;
+        xmin = -w + s * w / 2; xmax = -s * w / 2;
+      } else if (sh === SHAPES.triangular) {
+        xmin = -w; xmax = 0;
+      } else {
+        const f = x => sh.dG0(A, w, x) - tau;
+        const xs = sh.xs(w);
+        let L = 3 * w;
+        while (sh.dG0(A, w, -L) >= tau && L < 60 * w) L += w;   // go far enough out on the tail
+        xmin = bisect(f, -L, xs);
+        xmax = bisect(f, xs, 0);
+      }
+      const ymin = G(xmin), ymax = G(xmax);
+      return { xmin, xmax, ymin, ymax, dG: Math.max(0, ymax - ymin) };
+    }
+
+    /* ---------- Kocks-Argon-Ashby fit ---------- */
+    const kocks = (f, tau) => { const s = tau / TAUC0; return s >= 1 ? 0 : f.dG0 * Math.pow(1 - Math.pow(s, f.p), f.q); };
+
+    function nelderMead(fn, x0, step, maxIter, tol) {
+      const n = x0.length;
+      let S = [x0.slice()];
+      for (let i = 0; i < n; i++) { const x = x0.slice(); x[i] += step[i]; S.push(x); }
+      let F = S.map(fn);
+      for (let it = 0; it < maxIter; it++) {
+        const idx = F.map((_, i) => i).sort((a, b) => F[a] - F[b]);
+        S = idx.map(i => S[i]); F = idx.map(i => F[i]);
+        if (Math.abs(F[n] - F[0]) < tol && it > 50) break;
+        const cen = new Array(n).fill(0);
+        for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) cen[j] += S[i][j] / n;
+        const pt = t => cen.map((v, j) => v + t * (S[n][j] - v));
+        const xr = pt(-1), fr = fn(xr);
+        if (fr < F[0]) {
+          const xe = pt(-2), fe = fn(xe);
+          if (fe < fr) { S[n] = xe; F[n] = fe; } else { S[n] = xr; F[n] = fr; }
+        } else if (fr < F[n - 1]) { S[n] = xr; F[n] = fr; }
+        else {
+          const xc = fr < F[n] ? pt(-0.5) : pt(0.5), fc = fn(xc);
+          if (fc < Math.min(fr, F[n])) { S[n] = xc; F[n] = fc; }
+          else { for (let i = 1; i <= n; i++) { S[i] = S[i].map((v, j) => S[0][j] + 0.5 * (v - S[0][j])); F[i] = fn(S[i]); } }
+        }
+      }
+      let b = 0; for (let i = 1; i <= n; i++) if (F[i] < F[b]) b = i;
+      return { x: S[b], f: F[b] };
+    }
+
+    function fitKocks(sh, A) {
+      const N = 200, taus = [], ys = [];
+      for (let i = 0; i < N; i++) { const t = 0.999 * TAUC0 * i / (N - 1); taus.push(t); ys.push(extrema(sh, A, t).dG / A); }
+      const model = (th, t) => { const s = t / TAUC0; return th[0] * Math.pow(1 - Math.pow(s, Math.exp(th[1])), Math.exp(th[2])); };
+      const cost = th => {
+        if (Math.abs(th[1]) > 6 || Math.abs(th[2]) > 6) return 1e9;
+        let sum = 0;
+        for (let i = 0; i < N; i++) { const d = model(th, taus[i]) - ys[i]; sum += d * d; }
+        return sum / N;
+      };
+      const starts = [[1, 0, 0], [1, Math.log(0.5), Math.log(1.5)], [1, Math.log(2), Math.log(2)], [1, 0, Math.log(1.5)], [1, Math.log(0.7), Math.log(2.5)], [1, Math.log(1.5), 0]];
+      let best = null;
+      starts.forEach(s => { const r = nelderMead(cost, s, [0.1, 0.3, 0.3], 4000, 1e-20); if (!best || r.f < best.f) best = r; });
+      for (let k = 0; k < 3; k++) best = nelderMead(cost, best.x, [0.02, 0.05, 0.05], 4000, 1e-24);
+      let mx = 0; for (let i = 0; i < N; i++) mx = Math.max(mx, Math.abs(model(best.x, taus[i]) - ys[i]));
+      return { dG0: best.x[0] * A, p: Math.exp(best.x[1]), q: Math.exp(best.x[2]), rms: 100 * Math.sqrt(best.f), max: 100 * mx };
+    }
+
+    let fits = null;            // [fitSRW, fitLRS] for the current shape
+    function refit() { const sh = SHAPES[shapeKey]; fits = OBST.map(o => fitKocks(sh, o.A)); }
+
+    /* ---------- charts ---------- */
+    const barrier = [new Map(), new Map()];   // keyed by tau.toFixed(2): a repeated sweep overwrites instead of piling up
+
+    function xGrid(sh, A) {
+      const w = widthOf(sh, A), xs = [];
+      for (let i = 0; i <= 400; i++) xs.push(-4 + i * 0.02);
+      sh.breaks(w).forEach(b => { xs.push(b - 1e-9, b, b + 1e-9); });
+      xs.sort((a, b) => a - b);
+      return xs.filter(x => x >= -4 && x <= 4);
+    }
+
+    function withAlpha(hex, a) {
+      const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
+      return m ? `rgba(${parseInt(m[1], 16)},${parseInt(m[2], 16)},${parseInt(m[3], 16)},${a})` : hex;
+    }
+
+    const chart = new Chart(document.getElementById('chartCanvas'), {
+      type: 'line',
+      data: { datasets: [
+        { label: OBST[0].name, data: [], borderColor: c.blue, pointRadius: 0, borderWidth: 2 },
+        { label: OBST[1].name, data: [], borderColor: c.red, pointRadius: 0, borderWidth: 2 },
+        { label: 'Extrema, SRW', data: [], borderColor: c.blue, backgroundColor: c.blue, pointRadius: 5, showLine: false },
+        { label: 'Extrema, LRS', data: [], borderColor: c.red, backgroundColor: c.red, pointRadius: 5, showLine: false },
+        { label: 'SRW at τ = 0', data: [], borderColor: withAlpha(c.blue, 0.65), pointRadius: 0, borderWidth: 3, borderDash: [3, 4] },
+        { label: 'LRS at τ = 0', data: [], borderColor: withAlpha(c.red, 0.65), pointRadius: 0, borderWidth: 3, borderDash: [3, 4] }
+      ] },
+      options: {
+        animation: false, parsing: false, responsive: true, maintainAspectRatio: false,
+        scales: {
+          x: { type: 'linear', min: -4, max: 4, title: { display: true, text: 'Position, x' } },
+          y: { type: 'linear', min: -2, max: 2, title: { display: true, text: 'Free energy, G' } }
+        }
+      }
+    });
+
+    const forceChart = new Chart(document.getElementById('forceCanvas'), {
+      type: 'line',
+      data: { datasets: [
+        { label: 'Force, SRW', data: [], borderColor: c.blue, pointRadius: 0, borderWidth: 2 },
+        { label: 'Force, LRS', data: [], borderColor: c.red, pointRadius: 0, borderWidth: 2 },
+        { label: 'Applied stress, τ', data: [], borderColor: c.amber, pointRadius: 0, borderWidth: 1.5, borderDash: [6, 4] }
+      ] },
+      options: {
+        animation: false, parsing: false, responsive: true, maintainAspectRatio: false,
+        scales: {
+          x: { type: 'linear', min: -4, max: 4, title: { display: true, text: 'Position, x' } },
+          y: { type: 'linear', min: -1, max: 1, title: { display: true, text: 'Force, dG₀/dx' } }
+        }
+      }
+    });
+
+    const diffChart = new Chart(document.getElementById('diffCanvas'), {
+      type: 'scatter',
+      data: { datasets: [
+        { label: 'SRW', data: [], borderColor: c.blue, backgroundColor: c.blue },
+        { label: 'LRS', data: [], borderColor: c.red, backgroundColor: c.red },
+        { label: 'Kocks fit, SRW', data: [], borderColor: c.blue, backgroundColor: c.blue, showLine: true, pointRadius: 0, borderWidth: 1.5, borderDash: [6, 4] },
+        { label: 'Kocks fit, LRS', data: [], borderColor: c.red, backgroundColor: c.red, showLine: true, pointRadius: 0, borderWidth: 1.5, borderDash: [6, 4] }
+      ] },
+      options: {
+        animation: false, parsing: false, responsive: true, maintainAspectRatio: false,
+        scales: {
+          x: { type: 'linear', min: 0, max: 1, title: { display: true, text: 'τ' } },
+          y: { type: 'linear', min: 0, max: 1, title: { display: true, text: 'ΔG' } }
+        }
+      }
+    });
+
+    const fmt = (v, d = 3) => (v === null || v === undefined || isNaN(v)) ? '&ndash;' : v.toFixed(d).replace('-', '&minus;');
+
+    function fitCurve(f) {
+      const pts = [];
+      for (let i = 0; i <= 100; i++) { const t = TAUC0 * i / 100; pts.push({ x: t, y: kocks(f, t) }); }
+      pts.push({ x: 1, y: 0 });
+      return pts;
+    }
+
+    function renderFitTable() {
+      const cell = fn => OBST.map((o, i) => `<td>${fn(o, fits[i])}</td>`).join('');
+      const row = (label, fn) => `<tr><td>${label}</td>${cell(fn)}</tr>`;
+      document.querySelector('#fitTable tbody').innerHTML =
+        row('&Delta;<i>G</i>(0) = <i>A</i>', (o, f) => fmt(o.A, 3)) +
+        row('Fitted &Delta;<i>G</i><sub>0</sub>', (o, f) => fmt(f.dG0, 4)) +
+        row('<i>p</i>', (o, f) => fmt(f.p, 3)) +
+        row('<i>q</i>', (o, f) => fmt(f.q, 3)) +
+        row('&tau;&#770; (= &tau;<sub>c</sub>)', (o, f) => fmt(TAUC0, 4)) +
+        row('RMS error (% of <i>A</i>)', (o, f) => fmt(f.rms, 3)) +
+        row('Max error (% of <i>A</i>)', (o, f) => fmt(f.max, 3));
+    }
+
+    function renderFitLines() {
+      OBST.forEach((o, i) => { diffChart.data.datasets[2 + i].data = showFit.checked ? fitCurve(fits[i]) : []; });
+    }
+
+    function plotFunction() {
+      const tau = parseFloat(tauSlider.value);
+      tauValueDisplay.textContent = tau.toFixed(2);
+      const sh = SHAPES[shapeKey];
+      const ext = [];
+      OBST.forEach((o, i) => {
+        const w = widthOf(sh, o.A);
+        const xg = xGrid(sh, o.A);
+        chart.data.datasets[i].data = xg.map(x => ({ x, y: sh.G0(o.A, w, x) - tau * x }));
+        chart.data.datasets[4 + i].data = xg.map(x => ({ x, y: sh.G0(o.A, w, x) }));   // energy profile at zero stress
+        forceChart.data.datasets[i].data = xGrid(sh, o.A).map(x => ({ x, y: sh.dG0(o.A, w, x) }));
+        const e = extrema(sh, o.A, tau);
+        const dots = [];
+        if (e.xmin !== null) dots.push({ x: e.xmin, y: e.ymin });
+        if (e.xmax !== null) dots.push({ x: e.xmax, y: e.ymax });
+        chart.data.datasets[2 + i].data = dots;
+        barrier[i].set(tau.toFixed(2), { x: tau, y: e.dG });
+        diffChart.data.datasets[i].data = Array.from(barrier[i].values());
+        ext.push({ e, k: kocks(fits[i], tau) });
+      });
+      const xr = (v) => tau <= 0 ? '&minus;&infin;' : fmt(v, 3);
+      document.querySelector('#extremaTable tbody').innerHTML =
+        `<tr><td><i>x</i><sub>min</sub></td>${ext.map(r => `<td>${xr(r.e.xmin)}</td>`).join('')}</tr>` +
+        `<tr><td><i>x</i><sub>max</sub></td>${ext.map(r => `<td>${fmt(r.e.xmax, 3)}</td>`).join('')}</tr>` +
+        `<tr><td>&Delta;<i>G</i> (exact)</td>${ext.map(r => `<td>${fmt(r.e.dG, 4)}</td>`).join('')}</tr>` +
+        `<tr><td>&Delta;<i>G</i> (fit)</td>${ext.map(r => `<td>${fmt(r.k, 4)}</td>`).join('')}</tr>`;
+      document.querySelector('#forceTable tbody').innerHTML =
+        `<tr><td>Peak force, &tau;<sub>c</sub></td><td>${fmt(TAUC0, 4)}</td></tr>` +
+        `<tr><td>Applied stress, &tau;</td><td>${fmt(tau, 3)}</td></tr>` +
+        `<tr><td>&tau; / &tau;<sub>c</sub></td><td>${fmt(tau / TAUC0, 3)}</td></tr>` +
+        `<tr><td>Barrier present</td><td>${tau < TAUC0 ? 'yes' : 'no'}</td></tr>`;
+      forceChart.data.datasets[2].data = [{ x: -4, y: tau }, { x: 4, y: tau }];
+      renderFitLines();
+      chart.update();
+      forceChart.update();
+      diffChart.update();
+    }
+
+    let timer = null;
+    function stopTimer() { clearInterval(timer); timer = null; }
+    function step() {
+      let tau = parseFloat(tauSlider.value) + 0.05;
+      if (tau > parseFloat(tauSlider.max) + 1e-9) tau = parseFloat(tauSlider.min);
+      tauSlider.value = tau;
+      plotFunction();
+    }
+    startButton.addEventListener('click', () => { if (!timer) timer = setInterval(step, 400); });
+    pauseButton.addEventListener('click', stopTimer);
+    clearButton.addEventListener('click', () => { barrier.forEach(m => m.clear()); plotFunction(); });
+    sweepButton.addEventListener('click', () => {
+      stopTimer();
+      const sh = SHAPES[shapeKey];
+      for (let k = 0; k <= 100; k++) {
+        const t = k / 100;
+        OBST.forEach((o, i) => barrier[i].set(t.toFixed(2), { x: t, y: extrema(sh, o.A, t).dG }));
+      }
+      plotFunction();
+    });
+    tauSlider.addEventListener('input', () => { stopTimer(); plotFunction(); });
+    showFit.addEventListener('change', () => { renderFitLines(); diffChart.update(); });
+    shapeSelect.addEventListener('change', () => {
+      shapeKey = shapeSelect.value;
+      barrier.forEach(m => m.clear());
+      refit(); renderFitTable(); plotFunction();
+    });
+
+    refit(); renderFitTable(); plotFunction();
+  </script>
+</body>
+</html>
